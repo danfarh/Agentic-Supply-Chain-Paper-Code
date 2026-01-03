@@ -1,9 +1,60 @@
+from __future__ import annotations
+
+from typing import Optional, List, Tuple
 import pandas as pd
-from typing import Optional
 from langchain_core.tools import tool
 from sklearn.linear_model import LinearRegression
 
 from src.data_loader import get_global_context
+
+
+def _normalize_text(x: str) -> str:
+    return str(x or "").strip().lower()
+
+
+def _pick_company_rows(
+    scoring: pd.DataFrame,
+    company_keyword: str,
+    *,
+    allow_multiple: bool = True,
+) -> Tuple[pd.DataFrame, str]:
+    """
+    Returns (matches_df, note).
+    - Prefer exact match (case-insensitive).
+    - Else fallback to contains match.
+    - If multiple matches and allow_multiple=False -> return empty with note.
+    """
+    if "Company" not in scoring.columns:
+        return pd.DataFrame(), "ERROR: Company column not found."
+
+    kw = _normalize_text(company_keyword)
+    if not kw:
+        return pd.DataFrame(), ""
+
+    companies = scoring["Company"].astype(str)
+
+    # 1) Exact match (case-insensitive)
+    exact_mask = companies.map(_normalize_text) == kw
+    exact_df = scoring.loc[exact_mask].copy()
+    if not exact_df.empty:
+        return exact_df, "Matched by exact company name (case-insensitive)."
+
+    # 2) Contains match (case-insensitive)
+    contains_mask = companies.str.contains(company_keyword, case=False, na=False)
+    contains_df = scoring.loc[contains_mask].copy()
+
+    if contains_df.empty:
+        return pd.DataFrame(), f"No company found matching '{company_keyword}'."
+
+    if (not allow_multiple) and (len(contains_df) > 1):
+        sample = ", ".join(contains_df["Company"].astype(str).head(5).tolist())
+        return (
+            pd.DataFrame(),
+            f"ERROR: '{company_keyword}' matches {len(contains_df)} companies "
+            f"(e.g., {sample}). Please provide a more specific keyword or full name."
+        )
+
+    return contains_df, "Matched by substring (case-insensitive)."
 
 
 @tool
@@ -156,68 +207,138 @@ def model_improvement_impact(
 
 
 @tool
-def regression_indicator_impact(indicator_name: str, company_keyword: str = "") -> str:
+def regression_indicator_impact(
+    indicator_name: str,
+    company_keyword: str = "",
+    drop_zero_total: bool = True,
+    drop_zero_indicator: bool = False,
+    fit_intercept: bool = True,
+    delta_points: float = 10.0,
+    allow_multiple_company_matches: bool = True,
+) -> str:
     """
-    PREDICTION AGENT (GENERALIZED):
-    Fit a simple linear regression Total_Benchmark ~ <indicator_name> on all companies
-    and optionally report the current indicator value for a company whose name contains
-    company_keyword (if provided).
+    PREDICTION TOOL (Regression Analysis):
+    Fits a simple linear regression: Total_Benchmark ~ <indicator_name> on the dataset
+    and (optionally) shows company-specific illustration(s).
+
+    Why this tool is useful:
+    - Coefficients can change depending on how you clean the data (e.g., dropping 0-score rows).
+      This tool makes those choices explicit via parameters.
 
     Parameters:
-    - indicator_name: e.g. "Traceability_Risk", "Purchasing_Practices", "Remedy"
-    - company_keyword: e.g. "Apple", "Samsung", "Amazon" (optional)
+    - indicator_name: Exact column name (e.g., 'Traceability_Risk', 'Purchasing_Practices', 'Remedy').
+    - company_keyword: Optional company name/substring to show current values and an illustrative delta.
+    - drop_zero_total: If True, exclude rows where Total_Benchmark <= 0.
+    - drop_zero_indicator: If True, exclude rows where indicator <= 0.
+    - fit_intercept: If True, fit an intercept (default True).
+    - delta_points: The hypothetical improvement amount for the indicator (default 10.0).
+    - allow_multiple_company_matches: If True, show all matches; if False, error on ambiguity.
+
+    Returns:
+    - A readable summary including n, R², intercept, coefficient, and optional company illustration(s).
     """
+    # 1) Load data
     ctx = get_global_context()
     scoring = ctx.scoring
     if scoring is None:
         return "ERROR: Scoring sheet is not loaded."
 
+    # 2) Validate columns
     if indicator_name not in scoring.columns:
         return f"ERROR: Indicator column '{indicator_name}' not found."
-
     if "Total_Benchmark" not in scoring.columns:
         return "ERROR: Total_Benchmark column not found."
+    if "Company" not in scoring.columns:
+        return "ERROR: Company column not found."
 
-    df_reg = scoring[[indicator_name, "Total_Benchmark"]].apply(pd.to_numeric, errors="coerce").dropna()
-    if len(df_reg) < 5:
+    # 3) Build regression dataset with controlled cleaning
+    df_reg = scoring[[indicator_name, "Total_Benchmark"]].copy()
+    df_reg[indicator_name] = pd.to_numeric(df_reg[indicator_name], errors="coerce")
+    df_reg["Total_Benchmark"] = pd.to_numeric(df_reg["Total_Benchmark"], errors="coerce")
+    df_reg = df_reg.dropna(subset=[indicator_name, "Total_Benchmark"])
+
+    if drop_zero_total:
+        df_reg = df_reg[df_reg["Total_Benchmark"] > 0]
+    if drop_zero_indicator:
+        df_reg = df_reg[df_reg[indicator_name] > 0]
+
+    n = len(df_reg)
+    if n < 5:
         return (
-            f"ERROR: Not enough data to fit regression between '{indicator_name}' and Total_Benchmark "
-            f"(only {len(df_reg)} usable rows)."
+            f"ERROR: Not enough usable rows for regression (n={n}). "
+            f"Try changing drop_zero_total/drop_zero_indicator."
         )
 
+    # 4) Fit regression
     X = df_reg[[indicator_name]].values
     y = df_reg["Total_Benchmark"].values
-    reg = LinearRegression()
+
+    reg = LinearRegression(fit_intercept=fit_intercept)
     reg.fit(X, y)
+
     coef = float(reg.coef_[0])
+    intercept = float(reg.intercept_) if fit_intercept else 0.0
+    r2 = float(reg.score(X, y))
 
-    lines = [
-        f"The regression coefficient linking '{indicator_name}' to Total_Benchmark is about {coef:.3f} "
-        f"(per one-point change in {indicator_name})."
-    ]
+    # 5) Build output
+    lines: List[str] = []
+    lines.append(f"Regression Analysis: Total_Benchmark ~ {indicator_name}")
+    lines.append(
+        f"- Settings: drop_zero_total={drop_zero_total}, "
+        f"drop_zero_indicator={drop_zero_indicator}, fit_intercept={fit_intercept}"
+    )
+    lines.append(f"- Stats: n={n}, R²={r2:.3f}, intercept={intercept:.3f}")
+    lines.append(f"- Coefficient (slope): {coef:.3f}")
+    lines.append(
+        f"- Interpretation: +1 point in '{indicator_name}' correlates with "
+        f"+{coef:.3f} points in Total_Benchmark (correlational, not causal)."
+    )
 
-    if company_keyword and "Company" in scoring.columns:
-        comp_mask = scoring["Company"].astype(str).str.contains(company_keyword, case=False, na=False)
-        comp_df = scoring[comp_mask]
+    # 6) Optional company-specific illustration
+    company_keyword = (company_keyword or "").strip()
+    if company_keyword:
+        comp_df, note = _pick_company_rows(
+            scoring,
+            company_keyword,
+            allow_multiple=allow_multiple_company_matches,
+        )
+
+        if note.startswith("ERROR:"):
+            lines.append("")
+            lines.append(note)
+            return "\n".join(lines)
+
+        lines.append("")
+        if note:
+            lines.append(note)
+
         if comp_df.empty:
-            lines.append(
-                f"No company with name containing '{company_keyword}' was found to illustrate this impact."
-            )
-        else:
-            val = pd.to_numeric(comp_df[indicator_name], errors="coerce").iloc[0]
-            if pd.isna(val):
+            lines.append(f"No company found matching '{company_keyword}'.")
+            return "\n".join(lines)
+
+        # Ensure numeric conversion for display/illustration
+        comp_df = comp_df[["Company", indicator_name, "Total_Benchmark"]].copy()
+        comp_df[indicator_name] = pd.to_numeric(comp_df[indicator_name], errors="coerce")
+        comp_df["Total_Benchmark"] = pd.to_numeric(comp_df["Total_Benchmark"], errors="coerce")
+
+        lines.append(f"Company match(es) for '{company_keyword}': {len(comp_df)} row(s)")
+
+        for _, r in comp_df.iterrows():
+            cname = str(r["Company"])
+            cur_ind = r[indicator_name]
+            cur_tot = r["Total_Benchmark"]
+
+            lines.append(f"- {cname}: {indicator_name}={cur_ind}, Total_Benchmark={cur_tot}")
+
+            if pd.notna(cur_ind) and pd.notna(cur_tot):
+                est_change = coef * float(delta_points)
+                new_total = float(cur_tot) + est_change
                 lines.append(
-                    f"A company matching '{company_keyword}' was found, but its '{indicator_name}' value is missing."
+                    f"  -> If '{indicator_name}' improves by {delta_points:g} points, "
+                    f"estimated Total_Benchmark change ≈ {est_change:+.2f} "
+                    f"(new total ≈ {new_total:.2f})."
                 )
             else:
-                lines.append(
-                    f"A company matching '{company_keyword}' has '{indicator_name}' ≈ {float(val):.2f}. "
-                    "If this company improves its indicator score by Δ, its Total_Benchmark is expected to change "
-                    f"by approximately {coef:.3f} × Δ, according to this simple linear model."
-                )
-
-    lines.append(
-        "This regression is purely correlational and should not be interpreted as causal without further evidence."
-    )
+                lines.append("  -> Cannot illustrate change (missing numeric values).")
 
     return "\n".join(lines)

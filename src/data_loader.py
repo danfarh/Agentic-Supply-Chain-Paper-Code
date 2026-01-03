@@ -82,20 +82,24 @@ def _normalize_scoring_columns(df_raw: pd.DataFrame) -> pd.DataFrame:
 
 
 def _normalize_non_scored_columns(df_raw: pd.DataFrame) -> pd.DataFrame:
-    """Normalize the KTC 2025 Non-scored research sheet."""
+    """Normalize the KTC 2025 Non-scored research sheet (robust to merged headers)."""
     df = df_raw.copy()
     if df.shape[0] < 3:
         return df
 
-    row0 = df.iloc[0]
-    row1 = df.iloc[1]
+    row0 = df.iloc[0].copy().ffill()
+    row1 = df.iloc[1].copy()
+
     new_cols: List[str] = []
 
-    for i, orig in enumerate(df.columns):
+    for i in range(len(df.columns)):
         top = str(row0.iloc[i]).strip() if pd.notna(row0.iloc[i]) else ""
         sub = str(row1.iloc[i]).strip() if pd.notna(row1.iloc[i]) else ""
+        low = sub.lower()
+
         name = None
 
+        # First 5 columns: stable company metadata
         if i == 0:
             name = "Company"
         elif i == 1:
@@ -106,8 +110,9 @@ def _normalize_non_scored_columns(df_raw: pd.DataFrame) -> pd.DataFrame:
             name = "Region"
         elif i == 4:
             name = "Market_Cap"
+
+        # UK MSA
         elif "UK Modern Slavery Act" in top:
-            low = sub.lower()
             if "required to report" in low:
                 name = "UK_MSA_required"
             elif "has published a statement" in low:
@@ -116,8 +121,9 @@ def _normalize_non_scored_columns(df_raw: pd.DataFrame) -> pd.DataFrame:
                 name = "UK_MSA_comment"
             elif "source" in low:
                 name = "UK_MSA_source"
+
+        # CA TSCA
         elif "California Transparency" in top:
-            low = sub.lower()
             if "required to report" in low:
                 name = "CA_TSCA_required"
             elif "has published a statement" in low:
@@ -126,8 +132,9 @@ def _normalize_non_scored_columns(df_raw: pd.DataFrame) -> pd.DataFrame:
                 name = "CA_TSCA_comment"
             elif "source" in low:
                 name = "CA_TSCA_source"
+
+        # AU MSA
         elif "Australia Modern Slavery Act" in top:
-            low = sub.lower()
             if "required to report" in low:
                 name = "AU_MSA_required"
             elif "has published a statement" in low:
@@ -136,33 +143,46 @@ def _normalize_non_scored_columns(df_raw: pd.DataFrame) -> pd.DataFrame:
                 name = "AU_MSA_comment"
             elif "source" in low:
                 name = "AU_MSA_source"
+
+        # High-risk sourcing
         elif "Sourcing from High-Risk Countries" in top:
-            low = sub.lower()
             if low == "china":
                 name = "China"
             elif low == "malaysia":
                 name = "Malaysia"
-            elif low == "source":
+            elif "source" in low:
                 name = "HighRisk_Source"
 
         if not name:
             name = sub if sub else (top if top else f"col_{i}")
+
         new_cols.append(name)
 
     df2 = df.copy()
     df2.columns = new_cols
     df2 = df2.iloc[2:].copy()
 
+    # Drop empty company rows
     if "Company" in df2.columns:
         df2 = df2[df2["Company"].notna()].copy()
+
+    # Parse numeric fields
     if "Market_Cap" in df2.columns:
         df2["Market_Cap"] = pd.to_numeric(df2["Market_Cap"], errors="coerce")
+    if "Year_of_inclusion" in df2.columns:
+        df2["Year_of_inclusion"] = pd.to_numeric(df2["Year_of_inclusion"], errors="coerce")
 
-    bool_like_cols = [c for c in df2.columns if isinstance(c, str) and (
-                c.startswith("UK_MSA_") or c.startswith("CA_TSCA_") or c.startswith("AU_MSA_") or c in ["China",
-                                                                                                        "Malaysia"])]
-    for col in bool_like_cols:
-        df2[col] = df2[col].astype(str).str.strip().str.lower().isin(["yes", "y", "true", "1"])
+    bool_cols = {
+        "UK_MSA_required", "UK_MSA_statement",
+        "CA_TSCA_required", "CA_TSCA_statement",
+        "AU_MSA_required", "AU_MSA_statement",
+        "China", "Malaysia",
+    }
+    for col in (bool_cols & set(df2.columns)):
+        df2[col] = (
+            df2[col].astype(str).str.strip().str.lower()
+            .isin(["yes", "yes*", "y", "true", "1"])
+        )
 
     df2.reset_index(drop=True, inplace=True)
     return df2
