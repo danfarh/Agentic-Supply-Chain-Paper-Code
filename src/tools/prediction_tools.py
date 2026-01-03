@@ -1,4 +1,5 @@
 import pandas as pd
+from typing import Optional
 from langchain_core.tools import tool
 from sklearn.linear_model import LinearRegression
 
@@ -18,7 +19,7 @@ def project_total_benchmark(
 
     Parameters:
     - target_year: e.g. 2027
-    - current_year: base year for current data (default 2025)
+    - current_year: base year for current data (default 2025 for KTC 2025 dataset)
     - annual_growth: e.g. 0.05 for 5% annual growth
     """
     ctx = get_global_context()
@@ -34,39 +35,56 @@ def project_total_benchmark(
         return "ERROR: No Total_Benchmark values available."
 
     cur_mean = float(vals.mean())
-    n_years = max(0, target_year - current_year)
+    
+    n_years = target_year - current_year
+    if n_years < 0:
+        return f"ERROR: Target year {target_year} is before current year {current_year}."
+
     future = cur_mean * ((1 + annual_growth) ** n_years)
 
     return (
-        f"The current average Total Benchmark Score (year {current_year}) is {cur_mean:.2f}. "
+        f"The current average Total Benchmark Score (based on {current_year} data) is {cur_mean:.2f}. "
         f"If it grows by {annual_growth * 100:.1f}% per year for {n_years} years, "
         f"the projected average for {target_year} is about {future:.2f}."
     )
 
 
 @tool
-def model_improvement_impact(region_name: str, indicator_name: str, target_score: float) -> str:
+def model_improvement_impact(
+    region_name: str, 
+    indicator_name: str, 
+    target_score: Optional[float] = None, 
+    target_region: Optional[str] = None
+) -> str:
     """
     PREDICTION AGENT (GENERALIZED):
     Calculate how much a specific Region would need to improve a specific indicator
-    to reach a target_score, and optionally estimate the impact on Total_Benchmark via
-    a simple linear regression if data is available.
+    to reach a target.
+
+    You must provide EITHER:
+    1. target_score: A specific numeric score (e.g., 50.0).
+    2. target_region: A region name (e.g., "North America") to match its average.
 
     Parameters:
-    - region_name: e.g. "Asia", "Europe", "North America"
-    - indicator_name: e.g. "Purchasing_Practices", "Recruitment", "Remedy"
-    - target_score: desired average score for that indicator in that region, e.g. 45.0
+    - region_name: e.g. "Asia", "Europe" (the region improving its score).
+    - indicator_name: e.g. "Purchasing_Practices", "Recruitment".
+    - target_score: (Optional) specific target number.
+    - target_region: (Optional) name of region whose average should be the target.
     """
     ctx = get_global_context()
     scoring = ctx.scoring
     if scoring is None:
         return "ERROR: Scoring sheet is not loaded."
 
+    # Validation
     if "Region" not in scoring.columns:
-        return "ERROR: Region column missing; cannot model regional improvement."
+        return "ERROR: Region column missing."
     if indicator_name not in scoring.columns:
-        return f"ERROR: Indicator column '{indicator_name}' not found; cannot model improvement."
+        return f"ERROR: Indicator column '{indicator_name}' not found."
+    if target_score is None and target_region is None:
+        return "ERROR: You must provide either 'target_score' or 'target_region'."
 
+    # 1. Get stats for the Subject Region
     region_mask = scoring["Region"].astype(str).str.contains(region_name, case=False, na=False)
     region_df = scoring[region_mask]
     if region_df.empty:
@@ -75,13 +93,38 @@ def model_improvement_impact(region_name: str, indicator_name: str, target_score
     indicator_vals = pd.to_numeric(region_df[indicator_name], errors="coerce").dropna()
     if indicator_vals.empty:
         return f"No numeric data for indicator '{indicator_name}' in region '{region_name}'."
-
+    
     current_mean = float(indicator_vals.mean())
-    delta = target_score - current_mean
 
+    # 2. Determine the Target Score
+    final_target = 0.0
+    target_desc = ""
+
+    if target_score is not None:
+        final_target = target_score
+        target_desc = f"fixed target of {target_score}"
+    else:
+        # Calculate average of the target_region
+        target_mask = scoring["Region"].astype(str).str.contains(target_region, case=False, na=False)
+        target_df = scoring[target_mask]
+        if target_df.empty:
+            return f"ERROR: Target region '{target_region}' not found in data."
+        
+        target_vals = pd.to_numeric(target_df[indicator_name], errors="coerce").dropna()
+        if target_vals.empty:
+            return f"ERROR: No data for '{indicator_name}' in target region '{target_region}'."
+        
+        final_target = float(target_vals.mean())
+        target_desc = f"average of '{target_region}' ({final_target:.2f})"
+
+    # 3. Calculate Delta
+    delta = final_target - current_mean
+
+    # 4. Regression for Total Benchmark Impact
     predicted_delta_total = None
     coef_str = ""
     if "Total_Benchmark" in scoring.columns:
+        # Run regression on the WHOLE dataset, not just the region
         df_reg = scoring[[indicator_name, "Total_Benchmark"]].apply(pd.to_numeric, errors="coerce").dropna()
         if len(df_reg) >= 5:
             X = df_reg[[indicator_name]].values
@@ -91,28 +134,23 @@ def model_improvement_impact(region_name: str, indicator_name: str, target_score
             coef = float(reg.coef_[0])
             predicted_delta_total = coef * delta
             coef_str = (
-                f"The regression coefficient linking '{indicator_name}' to Total_Benchmark "
-                f"is about {coef:.3f} (per one-point change in {indicator_name})."
+                f"Regression coef: {coef:.3f} (impact on Total Benchmark per 1 point in {indicator_name})."
             )
 
     lines = [
-        f"In region '{region_name}', the current average for indicator '{indicator_name}' is {current_mean:.2f}.",
-        f"To reach the target of {target_score:.2f}, the average would need to increase by {delta:.2f} points."
+        f"Modeling improvement for Region: '{region_name}' on '{indicator_name}'.",
+        f"- Current Average: {current_mean:.2f}",
+        f"- Target: {target_desc}",
+        f"- Required Improvement (Delta): {delta:+.2f} points"
     ]
 
     if predicted_delta_total is not None:
         lines.append(
-            f"Based on a simple linear regression, this could translate into an approximate "
-            f"change of {predicted_delta_total:.2f} points in the Total Benchmark on average "
-            "(with all caveats about model simplicity)."
+            f"Estimated impact on Total Benchmark: {predicted_delta_total:+.2f} points."
         )
-        if coef_str:
-            lines.append(coef_str)
+        lines.append(f"({coef_str})")
     else:
-        lines.append(
-            "A reliable regression linking this indicator to Total_Benchmark could not be established, "
-            "so the impact on Total_Benchmark is not quantified."
-        )
+        lines.append("Could not calculate regression impact due to insufficient data.")
 
     return "\n".join(lines)
 
