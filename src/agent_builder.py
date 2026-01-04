@@ -1,8 +1,7 @@
 from langchain_classic.agents import create_openai_tools_agent, AgentExecutor
+from langchain_classic.memory import ConversationBufferWindowMemory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
-from langchain_classic.memory import ConversationBufferMemory
-
 
 from src.config.config import OPENAI_API_KEY, OPENAI_MODEL_NAME
 from src.tools.analysis_tools import *
@@ -15,7 +14,7 @@ from src.tools.research_tools import *
 
 def build_ktc_react_agent() -> AgentExecutor:
     # Memory
-    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=5)
 
     # Aggregating tools
     tools = [
@@ -137,4 +136,8 @@ def build_ktc_react_agent() -> AgentExecutor:
     ])
 
     agent = create_openai_tools_agent(llm, tools, prompt)
-    return AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True, memory=memory)
+    return AgentExecutor(agent=agent,
+                         tools=tools,
+                         verbose=True,
+                         handle_parsing_errors=True,
+                         memory=memory)
