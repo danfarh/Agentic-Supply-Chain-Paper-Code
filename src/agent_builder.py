@@ -14,7 +14,7 @@ from src.tools.research_tools import *
 
 def build_ktc_react_agent() -> AgentExecutor:
     # Memory
-    memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=5)
+    memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=5, output_key="output")
 
     # Aggregating tools
     tools = [
@@ -140,4 +140,8 @@ def build_ktc_react_agent() -> AgentExecutor:
                          tools=tools,
                          verbose=True,
                          handle_parsing_errors=True,
-                         memory=memory)
+                         memory=memory,
+                         max_iterations=15,
+                         return_intermediate_steps=True,
+                         max_execution_time=300.0,
+                         early_stopping_method="force")
