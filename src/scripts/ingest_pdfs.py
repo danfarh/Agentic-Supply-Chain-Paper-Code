@@ -8,15 +8,12 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 
 try:
-    # Preferred modern import
     from langchain_chroma import Chroma
 except ImportError:
-    # Fallback to community vectorstore if needed
-    from langchain_community.vectorstores import Chroma  # type: ignore
+    from langchain_community.vectorstores import Chroma
 
 load_dotenv()
 
-# === Paths (keep consistent with main agent file) ===
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 PDF_DIR = os.path.join(PROJECT_ROOT, "data", "pdfs")
@@ -45,8 +42,6 @@ def guess_company_name(filename: str) -> str:
             base = parts[1]
             break
 
-    # If you know your pattern better, you can tweak here
-    # For now we just return the cleaned base
     return base.strip()
 
 
@@ -79,7 +74,6 @@ def ingest_data():
             print(f"❌ Error loading {fname}: {e}")
             continue
 
-        # Attach metadata so we can filter by company later
         for d in docs:
             d.metadata["company"] = company_name
             d.metadata["source"] = fname
