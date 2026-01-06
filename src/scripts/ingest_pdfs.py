@@ -14,7 +14,7 @@ except ImportError:
 load_dotenv()
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 PDF_DIR = os.path.join(PROJECT_ROOT, "data", "pdfs")
 CHROMA_DB_DIR = os.path.join(PROJECT_ROOT, "data", "chroma_db")
 
@@ -107,7 +107,6 @@ def ingest_data():
         embedding=embeddings,
         persist_directory=CHROMA_DB_DIR,
     )
-    vector_store.persist()
 
     print(f"🎉 Ingestion complete. Chroma DB saved to: {CHROMA_DB_DIR}")
 
