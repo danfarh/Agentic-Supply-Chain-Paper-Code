@@ -1,8 +1,11 @@
 import os
 from typing import List
 
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import FAISS
 from langchain_core.tools import tool
 from langchain_openai import OpenAIEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from src.config.config import CHROMA_DB_DIR
 
@@ -58,23 +61,6 @@ def semantic_pdf_search(path: str, question: str, k: int = 5, max_pages: int = 5
     """
     if not os.path.exists(path):
         return f"ERROR: PDF file not found at path: {path}"
-
-    try:
-        # Try modern LangChain imports
-        try:
-            from langchain_community.document_loaders import PyPDFLoader
-            from langchain_text_splitters import RecursiveCharacterTextSplitter
-            from langchain_community.vectorstores import FAISS
-        except ImportError:
-            # Fallback to older monolithic LangChain if available
-            from langchain.document_loaders import PyPDFLoader  # type: ignore
-            from langchain.text_splitter import RecursiveCharacterTextSplitter  # type: ignore
-            from langchain.vectorstores import FAISS  # type: ignore
-    except ImportError:
-        return (
-            "ERROR: Required LangChain PDF/vectorstore packages are not installed. "
-            "Install them via 'pip install langchain-community langchain-text-splitters faiss-cpu'."
-        )
 
     try:
         loader = PyPDFLoader(path)
@@ -137,12 +123,11 @@ def company_pdf_rag(company_name: str, question: str, k: int = 5) -> str:
             "Run the PDF ingestion script (ingest_pdfs.py) first to build it."
         )
 
-    # Import Chroma lazily to avoid hard dependency if user doesn't use PDF-RAG
     try:
         try:
             from langchain_chroma import Chroma
         except ImportError:
-            from langchain_community.vectorstores import Chroma  # type: ignore
+            from langchain_community.vectorstores import Chroma
     except ImportError:
         return (
             "ERROR: Could not import Chroma vector store. "
@@ -156,8 +141,6 @@ def company_pdf_rag(company_name: str, question: str, k: int = 5) -> str:
             persist_directory=CHROMA_DB_DIR,
             embedding_function=embeddings,
         )
-
-        # First, try to filter by exact 'company' metadata
         try:
             results = vector_db.similarity_search(
                 question,
@@ -165,12 +148,9 @@ def company_pdf_rag(company_name: str, question: str, k: int = 5) -> str:
                 filter={"company": company_name}
             )
         except TypeError:
-            # Older versions may not accept 'filter'; fall back to unfiltered
             results = vector_db.similarity_search(question, k=k)
 
-        # If filtered search returns nothing, try again without filter
         if not results:
-            # Enrich question with company name to bias retrieval
             enriched_query = f"{company_name}: {question}"
             results = vector_db.similarity_search(enriched_query, k=k)
 

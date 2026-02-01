@@ -154,7 +154,7 @@ def server(input, output, session):
 
         fig, ax = plt.subplots(figsize=(8, 5))
 
-        # Plot with Seaborn (Fixes palette/hue warning)
+        # Plot with Seaborn
         sns.boxplot(
             data=df_melt,
             x="Theme",

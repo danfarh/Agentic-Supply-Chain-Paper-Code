@@ -99,7 +99,6 @@ def _normalize_non_scored_columns(df_raw: pd.DataFrame) -> pd.DataFrame:
 
         name = None
 
-        # First 5 columns: stable company metadata
         if i == 0:
             name = "Company"
         elif i == 1:

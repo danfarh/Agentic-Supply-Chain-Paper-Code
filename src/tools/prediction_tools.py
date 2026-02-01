@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional, List, Tuple
+
 import pandas as pd
 from langchain_core.tools import tool
 from sklearn.linear_model import LinearRegression
@@ -13,10 +14,10 @@ def _normalize_text(x: str) -> str:
 
 
 def _pick_company_rows(
-    scoring: pd.DataFrame,
-    company_keyword: str,
-    *,
-    allow_multiple: bool = True,
+        scoring: pd.DataFrame,
+        company_keyword: str,
+        *,
+        allow_multiple: bool = True,
 ) -> Tuple[pd.DataFrame, str]:
     """
     Returns (matches_df, note).
@@ -86,7 +87,7 @@ def project_total_benchmark(
         return "ERROR: No Total_Benchmark values available."
 
     cur_mean = float(vals.mean())
-    
+
     n_years = target_year - current_year
     if n_years < 0:
         return f"ERROR: Target year {target_year} is before current year {current_year}."
@@ -102,10 +103,10 @@ def project_total_benchmark(
 
 @tool
 def model_improvement_impact(
-    region_name: str, 
-    indicator_name: str, 
-    target_score: Optional[float] = None, 
-    target_region: Optional[str] = None
+        region_name: str,
+        indicator_name: str,
+        target_score: Optional[float] = None,
+        target_region: Optional[str] = None
 ) -> str:
     """
     PREDICTION AGENT (GENERALIZED):
@@ -144,7 +145,7 @@ def model_improvement_impact(
     indicator_vals = pd.to_numeric(region_df[indicator_name], errors="coerce").dropna()
     if indicator_vals.empty:
         return f"No numeric data for indicator '{indicator_name}' in region '{region_name}'."
-    
+
     current_mean = float(indicator_vals.mean())
 
     # 2. Determine the Target Score
@@ -160,11 +161,11 @@ def model_improvement_impact(
         target_df = scoring[target_mask]
         if target_df.empty:
             return f"ERROR: Target region '{target_region}' not found in data."
-        
+
         target_vals = pd.to_numeric(target_df[indicator_name], errors="coerce").dropna()
         if target_vals.empty:
             return f"ERROR: No data for '{indicator_name}' in target region '{target_region}'."
-        
+
         final_target = float(target_vals.mean())
         target_desc = f"average of '{target_region}' ({final_target:.2f})"
 
@@ -175,7 +176,6 @@ def model_improvement_impact(
     predicted_delta_total = None
     coef_str = ""
     if "Total_Benchmark" in scoring.columns:
-        # Run regression on the WHOLE dataset, not just the region
         df_reg = scoring[[indicator_name, "Total_Benchmark"]].apply(pd.to_numeric, errors="coerce").dropna()
         if len(df_reg) >= 5:
             X = df_reg[[indicator_name]].values
@@ -208,13 +208,13 @@ def model_improvement_impact(
 
 @tool
 def regression_indicator_impact(
-    indicator_name: str,
-    company_keyword: str = "",
-    drop_zero_total: bool = True,
-    drop_zero_indicator: bool = False,
-    fit_intercept: bool = True,
-    delta_points: float = 10.0,
-    allow_multiple_company_matches: bool = True,
+        indicator_name: str,
+        company_keyword: str = "",
+        drop_zero_total: bool = True,
+        drop_zero_indicator: bool = False,
+        fit_intercept: bool = True,
+        delta_points: float = 10.0,
+        allow_multiple_company_matches: bool = True,
 ) -> str:
     """
     PREDICTION TOOL (Regression Analysis):
