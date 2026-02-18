@@ -25,9 +25,9 @@
     2. Activate venv through source venv/bin/activate.
     3. You must copy a sample of env-example in .env file.
     4. install all of the requirements package via command pip install -r requirements.txt.
-    5. Run the following command to get the database ready to go:
+    5. Run the following command to run the app:
 
-        shiny run app.py
+        python main.py
 ```
 
-*Now you can run the project with **shiny run app.py** and this site will be available on http://127.0.0.1:8000*
+*Now you can run the project with **python main.py** and this site will be available on http://127.0.0.1:8000*
