@@ -57,7 +57,7 @@ app_ui = ui.page_fillable(
         ui.navset_card_underline(
             # Tab 1: AI Chat Interface (Policy Strategy)
             ui.nav_panel(
-                "💬 AI Strategy Assistant",
+                "💬 AI Assistant",
                 ui.layout_columns(
                     ui.card(ui.chat_ui("chat"), full_screen=True),
                     ui.card(
