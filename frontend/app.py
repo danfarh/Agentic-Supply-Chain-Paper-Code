@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -114,15 +115,55 @@ app_ui = ui.page_fillable(
 def server(input, output, session):
     chat = ui.Chat(id="chat", messages=[])
 
+    @reactive.Effect
+    async def welcome_message():
+        await chat.append_message({
+            "role": "assistant",
+            "content": "👋 **Welcome to the Supply Chain Decision Support System!**\n\nI am your multi-agent coordinator. You can ask me to analyze benchmarks, predict trends, or query external reports."
+        })
+
     @chat.on_user_submit
-    async def _():
+    async def process_message():
         user_input = chat.user_input()
-        await chat.append_message(f"Coordinating agents for policy query: {user_input}...")
-        try:
-            response = await asyncio.to_thread(agent_executor.invoke, {"input": user_input, "chat_history": []})
-            await chat.append_message(response.get("output", "No response generated."))
-        except Exception as e:
-            await chat.append_message(f"Error: {str(e)}")
+
+        async def generate_response():
+            # 1. Start the collapsible block with Custom CSS styling
+            yield """<details style="margin-bottom: 15px; border: 1px solid #dee2e6; padding: 12px; border-radius: 8px; background-color: #f8f9fa;">
+<summary style="cursor: pointer; font-weight: bold; color: #0d6efd;">🧠 View Agent Execution Logs</summary>\n\n"""
+
+            try:
+                # 2. Run the Legacy ReAct Agent (Synchronous execution in a background thread)
+                response = await asyncio.to_thread(
+                    agent_executor.invoke,
+                    {"input": user_input, "chat_history": []}
+                )
+
+                # 3. Extract and display intermediate steps (Tool Calls & Results)
+                if "intermediate_steps" in response:
+                    for action, observation in response["intermediate_steps"]:
+                        # Try to format the JSON arguments nicely, fallback to string if it fails
+                        try:
+                            tool_input_str = json.dumps(action.tool_input, indent=2)
+                        except:
+                            tool_input_str = str(action.tool_input)
+
+                        yield f"**Invoking:** `{action.tool}` with:\n```json\n{tool_input_str}\n```\n\n"
+                        yield f"**Result:**\n```text\n{str(observation)}\n```\n\n"
+
+                # 4. Close the HTML details tag
+                yield "</details>\n\n"
+
+                # 5. Yield the final conclusion outside the collapsible box
+                yield response.get("output", "No response generated.")
+
+            except Exception as e:
+                # Error Handling
+                yield f"**System Error:**\n```text\n{str(e)}\n```\n\n"
+                yield "</details>\n\n"
+                yield "I encountered an error while coordinating the agents for your query."
+
+        # Stream the generated response (logs + final answer) to the UI
+        await chat.append_message_stream(generate_response())
 
     # Reactive logic for Sidebar/Dashboard
     @reactive.calc
