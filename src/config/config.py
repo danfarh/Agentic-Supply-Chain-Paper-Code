@@ -1,12 +1,11 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Base Directory
-BASE_DIR = os.getcwd()
-
-# Data Paths
+CONFIG_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(CONFIG_DIR))
 EXCEL_PATH = os.path.join(BASE_DIR, "data", "KTC-2025-ICT-benchmark-data.xlsx")
 SCORING_SHEET = "1) Scoring"
 DETAILED_SHEET = "2) Detailed scoring & research"
