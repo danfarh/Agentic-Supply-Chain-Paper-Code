@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 import matplotlib.pyplot as plt
@@ -72,7 +71,7 @@ app_ui = ui.page_fillable(
                             * **🔮 Prediction Agent:** Forecast 2027 ranks and improvement impacts.
                             * **⚖️ Ethics Agent:** Analyze regional bias and UK MSA compliance.
                             * **📄 Document Agent:** Semantic search (RAG) through company PDFs.
-                            * **🌐 Research Agent:** Fetch real-time ILO data and news via DuckDuckGo.
+                            * **🌐 Research Agent:** Fetch real-time ILO data and news via the Internet.
                             """
                         ),
                         ui.hr(),
@@ -127,34 +126,35 @@ def server(input, output, session):
         user_input = chat.user_input()
 
         async def generate_response():
-            # 1. Start the collapsible block with Custom CSS styling
+            # 1. Start the collapsible block
             yield """<details style="margin-bottom: 15px; border: 1px solid #dee2e6; padding: 12px; border-radius: 8px; background-color: #f8f9fa;">
 <summary style="cursor: pointer; font-weight: bold; color: #0d6efd;">🧠 View Agent Execution Logs</summary>\n\n"""
 
             try:
-                # 2. Run the Legacy ReAct Agent (Synchronous execution in a background thread)
-                response = await asyncio.to_thread(
-                    agent_executor.invoke,
-                    {"input": user_input, "chat_history": []}
-                )
+                # 2. Use astream() to stream the intermediate steps live
+                async for chunk in agent_executor.astream({"input": user_input, "chat_history": []}):
 
-                # 3. Extract and display intermediate steps (Tool Calls & Results)
-                if "intermediate_steps" in response:
-                    for action, observation in response["intermediate_steps"]:
-                        # Try to format the JSON arguments nicely, fallback to string if it fails
-                        try:
-                            tool_input_str = json.dumps(action.tool_input, indent=2)
-                        except:
-                            tool_input_str = str(action.tool_input)
+                    # Agent decided to use a tool
+                    if "actions" in chunk:
+                        for action in chunk["actions"]:
+                            try:
+                                tool_input_str = json.dumps(action.tool_input, indent=2)
+                            except:
+                                tool_input_str = str(action.tool_input)
 
-                        yield f"**Invoking:** `{action.tool}` with:\n```json\n{tool_input_str}\n```\n\n"
-                        yield f"**Result:**\n```text\n{str(observation)}\n```\n\n"
+                            yield f"**Invoking:** `{action.tool}` with:\n```json\n{tool_input_str}\n```\n\n"
 
-                # 4. Close the HTML details tag
-                yield "</details>\n\n"
+                    # Tool finished executing and returned a result
+                    elif "steps" in chunk:
+                        for step in chunk["steps"]:
+                            yield f"**Result:**\n```text\n{str(step.observation)}\n```\n\n"
 
-                # 5. Yield the final conclusion outside the collapsible box
-                yield response.get("output", "No response generated.")
+                    # Agent synthesized the final answer
+                    elif "output" in chunk:
+                        # Close the logs block first
+                        yield "</details>\n\n"
+                        # Then yield the final answer outside the block
+                        yield chunk["output"]
 
             except Exception as e:
                 # Error Handling
@@ -162,7 +162,7 @@ def server(input, output, session):
                 yield "</details>\n\n"
                 yield "I encountered an error while coordinating the agents for your query."
 
-        # Stream the generated response (logs + final answer) to the UI
+        # Stream the generated response (logs + final answer) to the UI dynamically
         await chat.append_message_stream(generate_response())
 
     # Reactive logic for Sidebar/Dashboard
