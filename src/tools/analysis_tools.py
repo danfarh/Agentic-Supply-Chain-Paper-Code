@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 
 import pandas as pd
 from langchain_core.tools import tool
@@ -7,37 +7,6 @@ from sklearn.preprocessing import StandardScaler
 from textblob import TextBlob
 
 from src.data_loader import get_global_context
-
-
-def compute_correlation_marketcap_total(scoring: pd.DataFrame) -> Optional[Dict[str, Any]]:
-    """
-    Compute Pearson correlation between Market_Cap and Total_Benchmark if possible.
-    """
-    if "Market_Cap" not in scoring.columns or "Total_Benchmark" not in scoring.columns:
-        return None
-
-    df = scoring[["Market_Cap", "Total_Benchmark"]].dropna()
-    if len(df) < 3:
-        return None
-
-    x = df["Market_Cap"].astype(float).values
-    y = df["Total_Benchmark"].astype(float).values
-    n = len(x)
-    x_mean = x.mean()
-    y_mean = y.mean()
-    cov = ((x - x_mean) * (y - y_mean)).sum() / (n - 1)
-    sx = x.std(ddof=1)
-    sy = y.std(ddof=1)
-    if sx == 0 or sy == 0:
-        r = 0.0
-    else:
-        r = cov / (sx * sy)
-
-    return {
-        "n": int(n),
-        "r": float(r),
-        "p": None
-    }
 
 
 @tool
@@ -72,42 +41,35 @@ def get_column_stats(column_name: str) -> str:
 
 
 @tool
-def marketcap_total_correlation() -> str:
+def calculate_correlation(column_x: str, column_y: str) -> str:
     """
     ANALYSIS AGENT:
-    Compute the Pearson correlation between Market Cap and Total Benchmark Score.
+    Compute the Pearson correlation between ANY two numeric columns in the Scoring sheet.
+
+    Parameters:
+    - column_x: Exact name of the first column (e.g., 'Market_Cap', 'Total_Benchmark')
+    - column_y: Exact name of the second column
     """
     ctx = get_global_context()
     scoring = ctx.scoring
     if scoring is None:
         return "ERROR: Scoring sheet is not loaded."
 
-    cor = compute_correlation_marketcap_total(scoring)
-    if cor is None:
-        return "ERROR: Could not compute correlation: not enough data or missing Market_Cap / Total_Benchmark columns."
+    if column_x not in scoring.columns or column_y not in scoring.columns:
+        return f"ERROR: Both '{column_x}' and '{column_y}' must exist in the Scoring sheet."
 
-    r = cor["r"]
-    n = cor["n"]
+    # Convert to numeric and drop NA values
+    df = scoring[[column_x, column_y]].apply(pd.to_numeric, errors="coerce").dropna()
+    if len(df) < 3:
+        return f"ERROR: Not enough valid numeric data to compute correlation between {column_x} and {column_y}."
+
+    r = df[column_x].corr(df[column_y])
+    n = len(df)
+
     return (
-        f"The Pearson correlation between Market Cap and Total Benchmark Score is r = {r:.3f} "
-        f"with sample size n = {n}. "
-        "A positive r suggests that higher market cap tends to coincide with higher benchmark scores, "
-        "but this does not prove causality."
+        f"Pearson correlation (r) between '{column_x}' and '{column_y}' is {r:.3f} (sample size n={n}).\n"
+        "Remember: Correlation does not imply causality."
     )
-
-
-# @tool
-# def marketcap_total_correlation() -> str:
-#     """ANALYSIS AGENT: Compute Pearson correlation between Market Cap and Total Benchmark."""
-#     ctx = get_global_context()
-#     scoring = ctx.scoring
-#     if scoring is None: return "ERROR: Data not loaded."
-#
-#     df = scoring[["Market_Cap", "Total_Benchmark"]].dropna()
-#     if len(df) < 3: return "Not enough data."
-#
-#     r = df["Market_Cap"].corr(df["Total_Benchmark"])
-#     return f"Pearson correlation (r) = {r:.3f} (n={len(df)})."
 
 
 @tool

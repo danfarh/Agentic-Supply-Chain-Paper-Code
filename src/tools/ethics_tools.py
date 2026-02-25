@@ -3,12 +3,6 @@ from langchain_core.tools import tool
 from src.data_loader import get_global_context
 
 
-def _find_uk_msa_column(df):
-    for c in df.columns:
-        if "msa" in str(c).lower() or "modern slavery" in str(c).lower(): return c
-    return None
-
-
 @tool
 def remedy_region_means() -> str:
     """
@@ -38,66 +32,49 @@ def remedy_region_means() -> str:
 
 
 @tool
-def uk_msa_region_bias() -> str:
+def get_categorical_distribution(target_column: str, group_by_column: str = None) -> str:
     """
-    ETHICS AGENT:
-    Check for potential regional bias in UK MSA (Modern Slavery Act) compliance
-    using the Non-Scored Research sheet, if a suitable MSA column is present.
+    ETHICS/DATA AGENT:
+    Get the value distribution of a specific categorical column (e.g., 'UK MSA', 'Remedy').
+    Optionally group by another column (e.g., 'Region') to check for bias or regional differences.
     """
     ctx = get_global_context()
-    non_scored = ctx.non_scored
-    if non_scored is None:
-        return "ERROR: Non-Scored Research sheet is not loaded."
+    df = None
 
-    msa_col = _find_uk_msa_column(non_scored)
-    if msa_col is None:
-        return "No column related to UK MSA / Modern Slavery Act found in Non-Scored Research."
-
-    region_col = None
-    for c in non_scored.columns:
-        if str(c).strip().lower() == "region":
-            region_col = c
-            break
-
-    df = non_scored.copy()
-    df["msa_yes"] = df[msa_col].astype(str).str.lower().isin(["yes", "y", "true", "1"])
-
-    if region_col:
-        grp = df.groupby(region_col)["msa_yes"].mean(numeric_only=True)
-        if grp.empty:
-            return "No regional distribution could be computed for UK MSA compliance."
-        lines = ["Share of 'Yes' responses to UK MSA compliance by Region:"]
-        for region, r in grp.items():
-            lines.append(f"- {region}: {r * 100:.1f}% of companies marked 'Yes'")
-        return "\n".join(lines)
+    if ctx.scoring is not None and target_column in ctx.scoring.columns:
+        df = ctx.scoring.copy()
+    elif ctx.non_scored is not None and target_column in ctx.non_scored.columns:
+        df = ctx.non_scored.copy()
     else:
-        yes_rate = float(df["msa_yes"].mean())
-        return (
-            f"Overall, about {yes_rate * 100:.1f}% of companies indicate 'Yes' for UK MSA compliance. "
-            "No Region column was found, so regional bias cannot be evaluated from this sheet."
-        )
+        if ctx.non_scored is not None:
+            matched_cols = [c for c in ctx.non_scored.columns if target_column.lower() in str(c).lower()]
+            if matched_cols:
+                df = ctx.non_scored.copy()
+                target_column = matched_cols[0]
 
+    if df is None:
+        return f"ERROR: Column containing '{target_column}' not found in loaded data."
 
-@tool
-def uk_msa_distribution() -> str:
-    """
-    ETHICS AGENT:
-    Show the distribution of raw values in the UK MSA / Modern Slavery Act-related column
-    (e.g., Yes / No / Unknown / N/A).
-    """
-    ctx = get_global_context()
-    non_scored = ctx.non_scored
-    if non_scored is None:
-        return "ERROR: Non-Scored Research sheet is not loaded."
+    lines = [f"Distribution analysis for '{target_column}':"]
 
-    msa_col = _find_uk_msa_column(non_scored)
-    if msa_col is None:
-        return "No UK MSA / Modern Slavery Act column found; cannot identify compliance patterns."
+    if group_by_column:
+        if group_by_column not in df.columns:
+            return f"ERROR: Grouping column '{group_by_column}' not found."
 
-    counts = non_scored[msa_col].astype(str).str.strip().value_counts().to_dict()
-    lines = ["Distribution of UK MSA compliance values (Non-Scored Research):"]
-    for val, cnt in counts.items():
-        lines.append(f"- '{val}': {cnt} companies")
+        # Calculate percentage distribution within each group
+        grouped = df.groupby(group_by_column)[target_column].value_counts(normalize=True).unstack(fill_value=0) * 100
+        lines.append(f"\nGrouped by '{group_by_column}' (percentages %):")
+        for index, row in grouped.iterrows():
+            stats = ", ".join([f"{col}: {val:.1f}%" for col, val in row.items() if val > 0])
+            lines.append(f"- {index}: {stats}")
+    else:
+        # Overall distribution
+        counts = df[target_column].astype(str).str.strip().value_counts()
+        percentages = df[target_column].astype(str).str.strip().value_counts(normalize=True) * 100
+        for val, count in counts.items():
+            pct = percentages[val]
+            lines.append(f"- '{val}': {count} companies ({pct:.1f}%)")
+
     return "\n".join(lines)
 
 

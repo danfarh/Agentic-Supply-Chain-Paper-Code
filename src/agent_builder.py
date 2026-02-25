@@ -25,7 +25,7 @@ def build_ktc_react_agent() -> AgentExecutor:
         get_indicator_comment,
         # Analysis tools
         get_column_stats,
-        marketcap_total_correlation,
+        calculate_correlation,
         perform_clustering,
         theme_medians_by_region,
         analyze_sentiment,
@@ -35,8 +35,7 @@ def build_ktc_react_agent() -> AgentExecutor:
         regression_indicator_impact,
         # Ethics tools
         remedy_region_means,
-        uk_msa_region_bias,
-        uk_msa_distribution,
+        get_categorical_distribution,
         high_level_ethics_note,
         # Document / PDF tools
         extract_pdf_text,
@@ -67,7 +66,7 @@ def build_ktc_react_agent() -> AgentExecutor:
 
     ANALYSIS tools:
     - get_column_stats(column_name): compute mean/std for ANY numeric column (e.g. 'Total_Benchmark', 'Remedy').
-    - marketcap_total_correlation(): correlation between Market_Cap and Total_Benchmark.
+    - calculate_correlation(column_name1, column_name2): correlation between two columns.
     - perform_clustering(features, k): k-means on arbitrary feature columns.
     - theme_medians_by_region(region_substring): medians for all themes in a region.
     - analyze_sentiment(text): analyze sentiment (polarity/subjectivity) of a given text.
@@ -79,8 +78,7 @@ def build_ktc_react_agent() -> AgentExecutor:
 
     ETHICS tools:
     - remedy_region_means(): average Remedy by Region.
-    - uk_msa_region_bias(): regional patterns in UK MSA compliance.
-    - uk_msa_distribution(): distribution of UK MSA values.
+    - get_categorical_distribution(target_column: str, group_by_column: str = None): Calculates the value distribution and percentages of a specific categorical column. Use this to check for compliance distribution and potential disparities (for example, evaluating 'UK MSA' compliance and grouping by 'Region' to identify regional bias).
     - high_level_ethics_note(topic): high-level ethical reflection.
 
     DOCUMENT / PDF tools:
