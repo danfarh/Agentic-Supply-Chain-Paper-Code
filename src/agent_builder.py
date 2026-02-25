@@ -38,8 +38,6 @@ def build_ktc_react_agent() -> AgentExecutor:
         get_categorical_distribution,
         high_level_ethics_note,
         # Document / PDF tools
-        extract_pdf_text,
-        semantic_pdf_search,
         company_pdf_rag,
         # Research / web tools
         duckduckgo_web_search,
@@ -82,10 +80,7 @@ def build_ktc_react_agent() -> AgentExecutor:
     - high_level_ethics_note(topic): high-level ethical reflection.
 
     DOCUMENT / PDF tools:
-    - extract_pdf_text(path, max_pages): extract raw text from local PDF files.
-    - semantic_pdf_search(path, question, k, max_pages): perform ad-hoc RAG over a single PDF file.
-    - company_pdf_rag(company_name, question, k): search a pre-built Chroma vector DB of ALL PDFs,
-      filtered by company metadata where possible.
+    - company_pdf_rag(company_name, question, k): search a pre-built Chroma vector DB of ALL PDFs, filtered by company metadata where possible.
 
     RESEARCH / WEB tools:
     - duckduckgo_web_search(query, max_results): use DuckDuckGo to search the web (e.g., latest ILO reports, recent news).
