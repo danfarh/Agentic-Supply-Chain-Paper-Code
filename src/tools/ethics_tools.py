@@ -76,20 +76,3 @@ def get_categorical_distribution(target_column: str, group_by_column: str = None
             lines.append(f"- '{val}': {count} companies ({pct:.1f}%)")
 
     return "\n".join(lines)
-
-
-@tool
-def high_level_ethics_note(topic: str) -> str:
-    """
-    ETHICS AGENT:
-    Provide a high-level ethical reflection for a given topic or question,
-    assuming numeric analysis may be handled by other tools.
-    """
-    return (
-        f"From an ethical perspective on '{topic}', it is important to consider how low scores "
-        "in areas like Remedy, Monitoring, or Purchasing Practices might translate into real-world "
-        "risks for workers, such as lack of effective grievance mechanisms, weak oversight, or "
-        "incentives that push costs and risks down the supply chain. Quantitative patterns in the "
-        "KTC dataset should be interpreted alongside qualitative information, stakeholder input, "
-        "and the lived experiences of workers."
-    )

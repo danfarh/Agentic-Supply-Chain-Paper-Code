@@ -37,21 +37,3 @@ def duckduckgo_web_search(query: str, max_results: int = 5) -> str:
 
     except Exception as e:
         return f"ERROR during DuckDuckGo search: {e}"
-
-
-@tool
-def external_data_note(topic: str) -> str:
-    """
-    RESEARCH AGENT (fallback):
-    Explain that external web / ILO / news data may require web search, and suggest
-    combining the fetched numbers with the KTC dataset.
-
-    Parameters:
-    - topic: e.g. 'ILO forced labour statistics in China and Malaysia'
-    """
-    return (
-        f"For external topic '{topic}', you can use the duckduckgo_web_search tool "
-        "to retrieve recent reports or statistics. Once key numbers or qualitative "
-        "findings are available, they can be compared with the KTC benchmark data, "
-        "especially focusing on Remedy scores, high-risk sourcing, and regional patterns."
-    )
