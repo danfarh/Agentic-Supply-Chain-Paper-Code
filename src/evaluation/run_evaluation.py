@@ -1,6 +1,11 @@
 import os
+import sys
 import time
 from datetime import datetime
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+if project_root not in sys.path:
+    sys.path.append(project_root)
 
 from src.agent_builder import build_ktc_react_agent
 from src.tools.document_tools import get_vector_db
