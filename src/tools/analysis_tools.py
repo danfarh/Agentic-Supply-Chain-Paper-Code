@@ -9,6 +9,10 @@ from textblob import TextBlob
 from src.data_loader import get_global_context
 
 
+def _normalize_name(name: str) -> str:
+    return str(name).strip().lower()
+
+
 @tool
 def get_column_stats(column_name: str) -> str:
     """
@@ -179,6 +183,88 @@ def theme_medians_by_region(region_substring: str) -> str:
     for k, v in medians.items():
         if v is not None:
             lines.append(f"- {nice_name.get(k, k)}: {v:.2f}")
+    return "\n".join(lines)
+
+
+@tool
+def compare_companies(company_names: List[str]) -> str:
+    """
+    ANALYSIS AGENT:
+    Compare multiple companies side-by-side across the total benchmark score and the 7 main themes.
+    This reveals their relative strengths, weaknesses, and identifies the leader in each theme.
+    
+    Parameters:
+    - company_names: A list of company names to compare (e.g., ["Apple", "Samsung", "Sony"]).
+    """
+    ctx = get_global_context()
+    scoring = ctx.scoring
+    if scoring is None:
+        return "ERROR: Scoring sheet is not loaded."
+
+    if "Company" not in scoring.columns:
+        return "ERROR: 'Company' column missing from Scoring sheet."
+
+    # 1. Find and match company names with the database
+    matched_companies = {}
+    for name in company_names:
+        mask = scoring["Company"].astype(str).str.lower().str.contains(_normalize_name(name), na=False)
+        df_match = scoring[mask]
+        if not df_match.empty:
+            row = df_match.iloc[0]
+            matched_companies[row["Company"]] = row
+        else:
+            matched_companies[f"'{name}' (Not Found)"] = None
+
+    valid_companies = {k: v for k, v in matched_companies.items() if v is not None}
+    
+    if len(valid_companies) < 2:
+        found_list = list(valid_companies.keys())
+        return f"ERROR: Need at least two valid companies to compare. Only found: {found_list}"
+
+    # 2. Define core KTC themes
+    themes_to_compare = [
+        "Total benchmark score",
+        "Commitment & Governance",
+        "Traceability & Risk Assessment",
+        "Purchasing Practices",
+        "Recruitment",
+        "Enabling Workers' Rights",
+        "Monitoring",
+        "Remedy"
+    ]
+
+    lines = [f"--- Side-by-Side Comparison: {', '.join(valid_companies.keys())} ---"]
+    
+    # 3. Compare and find the leader in each theme
+    for theme in themes_to_compare:
+        matched_col = next((c for c in scoring.columns if theme.lower() in str(c).lower()), None)
+        if not matched_col:
+            continue
+            
+        lines.append(f"\n{matched_col}:")
+        theme_scores = {}
+        
+        for comp_name, row in valid_companies.items():
+            try:
+                val = float(row[matched_col])
+                theme_scores[comp_name] = val
+                lines.append(f"  - {comp_name}: {val:.2f}")
+            except (ValueError, TypeError):
+                lines.append(f"  - {comp_name}: Data missing/non-numeric")
+        
+        if theme_scores:
+            max_score = max(theme_scores.values())
+            leaders = [c for c, v in theme_scores.items() if v == max_score]
+            if len(leaders) == len(theme_scores):
+                lines.append(f"  - Insight: All tied at {max_score:.2f}")
+            else:
+                lines.append(f"  - Insight: Leader(s) -> {', '.join(leaders)} ({max_score:.2f})")
+
+    # 4. Report companies that were not found in the dataset
+    missing = [k for k, v in matched_companies.items() if v is None]
+    if missing:
+        lines.append(f"\nNote: The following companies were not found in the dataset: {', '.join(missing)}")
+
     return "\n".join(lines)
 
 

@@ -59,45 +59,51 @@ def _pick_company_rows(
 
 
 @tool
-def project_total_benchmark(
-        target_year: int = 2027,
-        current_year: int = 2025,
-        annual_growth: float = 0.05
+def project_metric_growth(
+    column_name: str, 
+    annual_growth_rate: float, 
+    current_year: int = 2025, 
+    target_year: int = 2027
 ) -> str:
     """
     PREDICTION AGENT:
-    Project the industry average Total_Benchmark Score from current_year to target_year
-    assuming a constant annual growth rate.
-
+    Project the future industry average for ANY numeric metric, assuming a compound annual growth rate.
+    
     Parameters:
-    - target_year: e.g. 2027
-    - current_year: base year for current data (default 2025 for KTC 2025 dataset)
-    - annual_growth: e.g. 0.05 for 5% annual growth
+    - column_name: The metric to project (e.g., 'Total_Benchmark', 'Purchasing Practices').
+    - annual_growth_rate: The expected annual growth as a decimal (e.g., 0.05 for 5%).
+    - current_year: The base year (default is 2025).
+    - target_year: The future year (default is 2027).
     """
     ctx = get_global_context()
     scoring = ctx.scoring
     if scoring is None:
-        return "ERROR: Scoring sheet is not loaded."
+        return "ERROR: Scoring sheet not loaded."
 
-    if "Total_Benchmark" not in scoring.columns:
-        return "ERROR: Total_Benchmark column not found."
+    # Find the exact column dynamically
+    col_match = next((c for c in scoring.columns if column_name.lower() in str(c).lower()), None)
+    if not col_match:
+        return f"ERROR: Column '{column_name}' not found."
 
-    vals = pd.to_numeric(scoring["Total_Benchmark"], errors="coerce").dropna()
+    # Convert to numeric and drop empty rows
+    vals = pd.to_numeric(scoring[col_match], errors="coerce").dropna()
     if vals.empty:
-        return "ERROR: No Total_Benchmark values available."
+        return f"ERROR: No valid numeric data for '{col_match}'."
 
-    cur_mean = float(vals.mean())
+    current_avg = float(vals.mean())
+    years_diff = target_year - current_year
+    
+    if years_diff < 0:
+        return "ERROR: target_year must be >= current_year."
 
-    n_years = target_year - current_year
-    if n_years < 0:
-        return f"ERROR: Target year {target_year} is before current year {current_year}."
-
-    future = cur_mean * ((1 + annual_growth) ** n_years)
+    # Compound growth formula: Future Value (FV) = Present Value (PV) * (1 + r)^n
+    projected_avg = current_avg * ((1 + annual_growth_rate) ** years_diff)
 
     return (
-        f"The current average Total Benchmark Score (based on {current_year} data) is {cur_mean:.2f}. "
-        f"If it grows by {annual_growth * 100:.1f}% per year for {n_years} years, "
-        f"the projected average for {target_year} is about {future:.2f}."
+        f"Projection for '{col_match}':\n"
+        f"- Current Average ({current_year}): {current_avg:.2f}\n"
+        f"- Projected Average ({target_year}): {projected_avg:.2f} "
+        f"(assuming {annual_growth_rate*100:.1f}% annual growth over {years_diff} years)."
     )
 
 

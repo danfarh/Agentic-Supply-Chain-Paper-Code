@@ -83,36 +83,43 @@ def list_sourcing_companies(country_name: str) -> str:
 
 
 @tool
-def top_companies_by_total_benchmark(n: int = 5, drop_zero: bool = True) -> str:
+def get_top_companies_by_metric(column_name: str, n: int = 5, ascending: bool = False, drop_zero: bool = True) -> str:
     """
     DATA AGENT:
-    Clean the Scoring sheet (remove missing Total_Benchmark and optionally zero scores),
-    and list the top N companies by Total_Benchmark descending.
-
+    Get the top (or bottom) 'n' companies based on ANY numeric column.
+    
     Parameters:
-    - n: number of top companies (default 5)
-    - drop_zero: if True, remove rows with Total_Benchmark <= 0
+    - column_name: The metric to rank by (e.g., 'Total_Benchmark', 'Traceability', 'Remedy').
+    - n: Number of companies to return (default 5).
+    - ascending: Set to True to get the bottom/lowest companies, False for top/highest.
+    - drop_zero: If True, ignores companies with a score of 0.
     """
     ctx = get_global_context()
     scoring = ctx.scoring
     if scoring is None:
         return "ERROR: Scoring sheet is not loaded."
 
-    if not all(c in scoring.columns for c in ["Company", "Total_Benchmark"]):
-        return "ERROR: Required columns (Company, Total_Benchmark) not found."
+    col_match = next((c for c in scoring.columns if column_name.lower() in str(c).lower()), None)
+    if not col_match:
+        return f"ERROR: Column '{column_name}' not found."
 
-    df = scoring.dropna(subset=["Total_Benchmark"]).copy()
-    df["Total_Benchmark"] = df["Total_Benchmark"].astype(float)
+    df = scoring[["Company", col_match]].copy()
+    df[col_match] = pd.to_numeric(df[col_match], errors="coerce")
+    df = df.dropna(subset=[col_match])
+
     if drop_zero:
-        df = df[df["Total_Benchmark"] > 0]
+        df = df[df[col_match] > 0]
 
-    df = df.sort_values("Total_Benchmark", ascending=False).head(n)
     if df.empty:
-        return "No companies remain after cleaning by Total Benchmark."
+        return f"No companies found with valid non-zero scores for '{col_match}'."
 
-    lines = [f"Top {len(df)} companies by Total Benchmark:"]
-    for i, (_, row) in enumerate(df.iterrows(), start=1):
-        lines.append(f"{i}. {row['Company']}: {row['Total_Benchmark']:.2f}")
+    df_sorted = df.sort_values(by=col_match, ascending=ascending).head(n)
+    
+    order_str = "Bottom" if ascending else "Top"
+    lines = [f"{order_str} {len(df_sorted)} companies based on '{col_match}':"]
+    for _, row in df_sorted.iterrows():
+        lines.append(f"- {row['Company']}: {row[col_match]:.2f}")
+
     return "\n".join(lines)
 
 
@@ -229,3 +236,63 @@ def get_indicator_comment(company_keyword: str, indicator_code: str) -> str:
         return "No non-empty comments found."
 
     return "\n\n".join(rows_text)
+
+
+@tool
+def filter_companies_by_score(column_name: str, operator_str: str, threshold: float) -> str:
+    """
+    DATA AGENT:
+    Filter companies based on a specific score condition in the Scoring sheet.
+    
+    Parameters:
+    - column_name: The exact column (e.g., 'Remedy', 'Total_Benchmark', 'Purchasing Practices').
+    - operator_str: The mathematical operator. MUST be one of: '<', '>', '<=', '>=', '==', '!='
+    - threshold: The numeric value to compare against (e.g., 0, 50, 25.5).
+    """
+    ctx = get_global_context()
+    scoring = ctx.scoring
+    if scoring is None:
+        return "ERROR: Scoring sheet is not loaded."
+
+    # Try to find the exact column or a close match
+    col_match = None
+    for c in scoring.columns:
+        if str(c).strip().lower() == column_name.strip().lower():
+            col_match = c
+            break
+            
+    if not col_match:
+        return f"ERROR: Column '{column_name}' not found in the scoring sheet."
+
+    # Map string operators to Python functions safely
+    ops = {
+        '<': operator.lt,
+        '>': operator.gt,
+        '<=': operator.le,
+        '>=': operator.ge,
+        '==': operator.eq,
+        '!=': operator.ne
+    }
+    
+    if operator_str not in ops:
+        return f"ERROR: Invalid operator '{operator_str}'. Use one of {list(ops.keys())}."
+
+    op_func = ops[operator_str]
+
+    # Clean the data: drop NaNs and convert to numeric for safe comparison
+    df = scoring[['Company', col_match]].copy()
+    df[col_match] = pd.to_numeric(df[col_match], errors='coerce')
+    df = df.dropna(subset=[col_match])
+
+    # Apply the mathematical filter
+    filtered_df = df[op_func(df[col_match], threshold)].sort_values(by=col_match, ascending=False)
+
+    if filtered_df.empty:
+        return f"No companies found where '{col_match}' {operator_str} {threshold}."
+
+    # Build the output string
+    lines = [f"Found {len(filtered_df)} companies where '{col_match}' {operator_str} {threshold}:"]
+    for _, row in filtered_df.iterrows():
+        lines.append(f"- {row['Company']}: {row[col_match]:.2f}")
+
+    return "\n".join(lines)

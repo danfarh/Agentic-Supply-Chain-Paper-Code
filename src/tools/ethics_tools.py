@@ -4,30 +4,40 @@ from src.data_loader import get_global_context
 
 
 @tool
-def remedy_region_means() -> str:
+def compute_grouped_average(target_column: str, group_by_column: str) -> str:
     """
-    ETHICS AGENT:
-    Compute the average Remedy score by Region and present it for ethical comparison.
+    ANALYSIS / ETHICS AGENT:
+    Compute the average (mean) of any numeric column grouped by a categorical column.
+    Useful for finding regional or industry disparities (e.g., average 'Remedy' by 'Region', or 'Total_Benchmark' by 'Country').
+    
+    Parameters:
+    - target_column: The numeric column to average (e.g., 'Remedy', 'Purchasing Practices').
+    - group_by_column: The categorical column to group by (e.g., 'Region', 'Country', 'Subindustry').
     """
     ctx = get_global_context()
     scoring = ctx.scoring
     if scoring is None:
         return "ERROR: Scoring sheet is not loaded."
 
-    if "Region" not in scoring.columns or "Remedy" not in scoring.columns:
-        return "ERROR: Region or Remedy columns missing; cannot analyze regional Remedy differences."
+    # Find the exact column names dynamically to avoid case sensitivity issues
+    target_match = next((c for c in scoring.columns if target_column.lower() in str(c).lower()), None)
+    group_match = next((c for c in scoring.columns if group_by_column.lower() in str(c).lower()), None)
 
-    grp = scoring.groupby("Region")["Remedy"].mean(numeric_only=True)
+    if not target_match or not group_match:
+        return f"ERROR: Could not find columns matching '{target_column}' or '{group_by_column}'."
+
+    df = scoring[[group_match, target_match]].copy()
+    df[target_match] = pd.to_numeric(df[target_match], errors='coerce')
+    
+    grp = df.groupby(group_match)[target_match].mean().dropna().sort_values(ascending=False)
+    
     if grp.empty:
-        return "ERROR: No Remedy data grouped by Region could be computed."
+        return f"ERROR: No valid numeric data found to compute average of '{target_match}' grouped by '{group_match}'."
 
-    lines = ["Average Remedy scores by Region:"]
-    for region, val in grp.items():
-        lines.append(f"- {region}: {float(val):.2f}")
-    lines.append(
-        "\nThese are Remedy-only scores (not total benchmark), so ethical comparisons focus "
-        "specifically on access to remedy and grievance mechanisms."
-    )
+    lines = [f"Average '{target_match}' grouped by '{group_match}':"]
+    for cat, val in grp.items():
+        lines.append(f"- {cat}: {val:.2f}")
+        
     return "\n".join(lines)
 
 
