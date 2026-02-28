@@ -216,7 +216,7 @@ def compare_companies(company_names: List[str]) -> str:
             matched_companies[f"'{name}' (Not Found)"] = None
 
     valid_companies = {k: v for k, v in matched_companies.items() if v is not None}
-    
+
     if len(valid_companies) < 2:
         found_list = list(valid_companies.keys())
         return f"ERROR: Need at least two valid companies to compare. Only found: {found_list}"
@@ -234,16 +234,16 @@ def compare_companies(company_names: List[str]) -> str:
     ]
 
     lines = [f"--- Side-by-Side Comparison: {', '.join(valid_companies.keys())} ---"]
-    
+
     # 3. Compare and find the leader in each theme
     for theme in themes_to_compare:
         matched_col = next((c for c in scoring.columns if theme.lower() in str(c).lower()), None)
         if not matched_col:
             continue
-            
+
         lines.append(f"\n{matched_col}:")
         theme_scores = {}
-        
+
         for comp_name, row in valid_companies.items():
             try:
                 val = float(row[matched_col])
@@ -251,7 +251,7 @@ def compare_companies(company_names: List[str]) -> str:
                 lines.append(f"  - {comp_name}: {val:.2f}")
             except (ValueError, TypeError):
                 lines.append(f"  - {comp_name}: Data missing/non-numeric")
-        
+
         if theme_scores:
             max_score = max(theme_scores.values())
             leaders = [c for c, v in theme_scores.items() if v == max_score]

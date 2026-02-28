@@ -26,7 +26,7 @@ def build_ktc_langgraph_agent():
         get_top_companies_by_metric,
         get_indicator_comment,
         filter_companies_by_score,
-        
+
         # Analysis tools
         get_column_stats,
         calculate_correlation,
@@ -34,19 +34,19 @@ def build_ktc_langgraph_agent():
         perform_clustering,
         theme_medians_by_region,
         analyze_sentiment,
-        
+
         # Prediction tools
         project_metric_growth,
         model_improvement_impact,
         regression_indicator_impact,
-        
+
         # Ethics tools
         compute_grouped_average,
         get_categorical_distribution,
-        
+
         # Document / PDF tools
         company_pdf_rag,
-        
+
         # Research / web tools
         duckduckgo_web_search,
     ]

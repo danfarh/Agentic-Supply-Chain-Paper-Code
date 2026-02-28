@@ -28,16 +28,16 @@ def compute_grouped_average(target_column: str, group_by_column: str) -> str:
 
     df = scoring[[group_match, target_match]].copy()
     df[target_match] = pd.to_numeric(df[target_match], errors='coerce')
-    
+
     grp = df.groupby(group_match)[target_match].mean().dropna().sort_values(ascending=False)
-    
+
     if grp.empty:
         return f"ERROR: No valid numeric data found to compute average of '{target_match}' grouped by '{group_match}'."
 
     lines = [f"Average '{target_match}' grouped by '{group_match}':"]
     for cat, val in grp.items():
         lines.append(f"- {cat}: {val:.2f}")
-        
+
     return "\n".join(lines)
 
 

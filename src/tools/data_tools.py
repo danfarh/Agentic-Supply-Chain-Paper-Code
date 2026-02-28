@@ -114,7 +114,7 @@ def get_top_companies_by_metric(column_name: str, n: int = 5, ascending: bool = 
         return f"No companies found with valid non-zero scores for '{col_match}'."
 
     df_sorted = df.sort_values(by=col_match, ascending=ascending).head(n)
-    
+
     order_str = "Bottom" if ascending else "Top"
     lines = [f"{order_str} {len(df_sorted)} companies based on '{col_match}':"]
     for _, row in df_sorted.iterrows():
@@ -260,7 +260,7 @@ def filter_companies_by_score(column_name: str, operator_str: str, threshold: fl
         if str(c).strip().lower() == column_name.strip().lower():
             col_match = c
             break
-            
+
     if not col_match:
         return f"ERROR: Column '{column_name}' not found in the scoring sheet."
 
@@ -273,7 +273,7 @@ def filter_companies_by_score(column_name: str, operator_str: str, threshold: fl
         '==': operator.eq,
         '!=': operator.ne
     }
-    
+
     if operator_str not in ops:
         return f"ERROR: Invalid operator '{operator_str}'. Use one of {list(ops.keys())}."
 

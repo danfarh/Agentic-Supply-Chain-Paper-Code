@@ -60,10 +60,10 @@ def _pick_company_rows(
 
 @tool
 def project_metric_growth(
-    column_name: str, 
-    annual_growth_rate: float, 
-    current_year: int = 2025, 
-    target_year: int = 2027
+        column_name: str,
+        annual_growth_rate: float,
+        current_year: int = 2025,
+        target_year: int = 2027
 ) -> str:
     """
     PREDICTION AGENT:
@@ -92,7 +92,7 @@ def project_metric_growth(
 
     current_avg = float(vals.mean())
     years_diff = target_year - current_year
-    
+
     if years_diff < 0:
         return "ERROR: target_year must be >= current_year."
 
@@ -103,7 +103,7 @@ def project_metric_growth(
         f"Projection for '{col_match}':\n"
         f"- Current Average ({current_year}): {current_avg:.2f}\n"
         f"- Projected Average ({target_year}): {projected_avg:.2f} "
-        f"(assuming {annual_growth_rate*100:.1f}% annual growth over {years_diff} years)."
+        f"(assuming {annual_growth_rate * 100:.1f}% annual growth over {years_diff} years)."
     )
 
 
