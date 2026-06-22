@@ -1,3 +1,4 @@
+import pandas as pd
 from langchain_core.tools import tool
 
 from src.data_loader import get_global_context
