@@ -1,0 +1,8 @@
+agent_category,n,pass,partial,fail,missing,strict_pass_rate,pass_or_partial_rate,mean_score,mean_latency_seconds,median_latency_seconds,p95_latency_seconds
+Analysis Agent,4,3,0,1,0,0.75,0.75,0.825,,,
+Data Agent,4,4,0,0,0,1.0,1.0,1.0,,,
+Ethics Agent,4,4,0,0,0,1.0,1.0,0.988,,,
+Prediction Agent,4,0,0,4,0,0.0,0.0,0.017,,,
+Research Agent,4,0,2,2,0,0.0,0.5,0.487,,,
+Synthesis Agent,4,4,0,0,0,1.0,1.0,0.993,,,
+Text Mining Agent,4,4,0,0,0,1.0,1.0,0.943,,,
