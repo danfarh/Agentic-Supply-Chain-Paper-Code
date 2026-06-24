@@ -1,3 +1,4 @@
+import json
 import os
 
 from langchain_core.tools import tool
@@ -40,25 +41,29 @@ def company_pdf_rag(company_name: str, question: str, k: int = 5) -> str:
     Search a pre-built Chroma vector store of all company PDFs and retrieve the
     most relevant chunks for a given company and question.
 
-    This expects that you have already run `ingest_pdfs.py` to populate
-    the Chroma DB at CHROMA_DB_DIR.
-
-    Parameters:
-    - company_name: canonical or approximate company name (e.g., "Amazon.com Inc.", "Samsung")
-    - question: natural-language question (e.g., "high-risk sourcing countries", "opportunities for improvement")
-    - k: number of top chunks to return (default 5)
+    IMPORTANT FOR EVALUATION:
+    This tool returns a JSON string with both:
+    - display: human-readable excerpts for the agent to use in its final answer
+    - retrieved_contexts: structured chunks for RAGAS/evaluator faithfulness metrics
     """
     if not os.path.exists(CHROMA_DB_DIR):
-        return (
-            f"ERROR: Chroma vector database not found at '{CHROMA_DB_DIR}'. "
-            "Run the PDF ingestion script (ingest_pdfs.py) first to build it."
-        )
+        return json.dumps({
+            "tool_name": "company_pdf_rag",
+            "error": (
+                f"Chroma vector database not found at '{CHROMA_DB_DIR}'. "
+                "Run the PDF ingestion script (ingest_pdfs.py) first to build it."
+            ),
+            "retrieved_contexts": [],
+            "display": (
+                f"ERROR: Chroma vector database not found at '{CHROMA_DB_DIR}'. "
+                "Run the PDF ingestion script (ingest_pdfs.py) first to build it."
+            ),
+        }, ensure_ascii=False)
 
     try:
-        # Get the database
         vector_db = get_vector_db()
 
-        # 1. Search with metadata filter
+        # Search with metadata filter first.
         try:
             results = vector_db.similarity_search(
                 question,
@@ -68,17 +73,23 @@ def company_pdf_rag(company_name: str, question: str, k: int = 5) -> str:
         except TypeError:
             results = vector_db.similarity_search(question, k=k)
 
-        # 2. Fallback to a combined string search if no results are found via filtering
+        # Fallback if metadata filter is too strict.
         if not results:
             enriched_query = f"{company_name}: {question}"
             results = vector_db.similarity_search(enriched_query, k=k)
 
         if not results:
-            return f"No relevant information found for '{company_name}' regarding '{question}'."
+            return json.dumps({
+                "tool_name": "company_pdf_rag",
+                "company_name": company_name,
+                "question": question,
+                "retrieved_contexts": [],
+                "display": f"No relevant information found for '{company_name}' regarding '{question}'.",
+            }, ensure_ascii=False)
 
-        lines = [
-            f"Top {len(results)} excerpts for company '{company_name}' "
-            f"related to question: {question}",
+        retrieved_contexts = []
+        display_lines = [
+            f"Top {len(results)} excerpts for company '{company_name}' related to question: {question}",
             ""
         ]
 
@@ -86,15 +97,38 @@ def company_pdf_rag(company_name: str, question: str, k: int = 5) -> str:
             meta = doc.metadata or {}
             src = meta.get("source", "Unknown source")
             page = meta.get("page", None)
-            page_info = f"(page {page + 1})" if isinstance(page, int) else ""
+            page_number = page + 1 if isinstance(page, int) else None
+            content = doc.page_content.strip()
 
-            text_snippet = doc.page_content.strip()
-            if len(text_snippet) > 800:
-                text_snippet = text_snippet[:800] + "..."
+            retrieved_contexts.append({
+                "content": content,
+                "source": src,
+                "page": page_number,
+                "company": meta.get("company", company_name),
+                "rank": i,
+                "retriever": "Chroma.similarity_search",
+            })
 
-            lines.append(f"[{i}] {src} {page_info}\n{text_snippet}\n")
+            text_snippet = content[:800] + "..." if len(content) > 800 else content
+            page_info = f"(page {page_number})" if page_number is not None else ""
+            display_lines.append(f"[{i}] {src} {page_info}\n{text_snippet}\n")
 
-        return "\n".join(lines)
+        payload = {
+            "tool_name": "company_pdf_rag",
+            "company_name": company_name,
+            "question": question,
+            "k": k,
+            "retrieved_contexts": retrieved_contexts,
+            "display": "\n".join(display_lines),
+        }
+        return json.dumps(payload, ensure_ascii=False)
 
     except Exception as e:
-        return f"ERROR accessing or querying the Chroma vector DB: {e}"
+        return json.dumps({
+            "tool_name": "company_pdf_rag",
+            "company_name": company_name,
+            "question": question,
+            "error": str(e),
+            "retrieved_contexts": [],
+            "display": f"ERROR accessing or querying the Chroma vector DB: {e}",
+        }, ensure_ascii=False)

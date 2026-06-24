@@ -77,7 +77,7 @@ def calculate_correlation(column_x: str, column_y: str) -> str:
 
 
 @tool
-def perform_clustering(features: List[str], k: int = 3) -> str:
+def perform_clustering(features: List[str], k: int = 3, include_full_membership: bool = True) -> str:
     """
     ANALYSIS AGENT (GENERALIZED):
     Perform K-Means clustering on the specified list of numeric feature columns.
@@ -87,8 +87,12 @@ def perform_clustering(features: List[str], k: int = 3) -> str:
         ["Total_Benchmark", "Purchasing_Practices"],
         ["Remedy", "Recruitment"], etc.
     - k: number of clusters (default 3)
+    - include_full_membership: if True, list all companies in each cluster.
 
-    If a 'Company' column exists, example company names are shown for each cluster.
+    Reproducibility:
+    - rows with missing selected features are dropped
+    - features are standardized using sklearn StandardScaler
+    - KMeans uses random_state=42 and n_init=10
     """
     ctx = get_global_context()
     scoring = ctx.scoring
@@ -102,7 +106,10 @@ def perform_clustering(features: List[str], k: int = 3) -> str:
     if missing:
         return f"ERROR: The following feature columns are missing: {missing}"
 
-    df = scoring[features].apply(pd.to_numeric, errors="coerce").dropna()
+    feature_df = scoring[features].apply(pd.to_numeric, errors="coerce")
+    valid_idx = feature_df.dropna().index
+    df = feature_df.loc[valid_idx].copy()
+
     if len(df) < k:
         return "ERROR: Not enough rows with all specified features to run k-means."
 
@@ -118,21 +125,35 @@ def perform_clustering(features: List[str], k: int = 3) -> str:
 
     has_company = "Company" in scoring.columns
     if has_company:
-        df_cluster = df_cluster.join(scoring["Company"], how="left")
+        df_cluster = df_cluster.join(scoring.loc[valid_idx, "Company"], how="left")
 
-    lines = [f"k-means clustering (k={k}) on features: {features}"]
+    lines = [
+        f"k-means clustering (k={k}) on features: {features}",
+        "Reproducibility settings:",
+        "- Missing rows on selected features were dropped.",
+        "- Features were standardized with sklearn StandardScaler.",
+        "- KMeans parameters: random_state=42, n_init=10.",
+        f"- Number of clustered companies/rows: {len(df_cluster)}",
+        ""
+    ]
+
     for c_id, grp in df_cluster.groupby("Cluster"):
+        lines.append(f"Cluster {int(c_id)}: count = {len(grp)}")
         if has_company:
-            examples = ", ".join(
-                grp["Company"].dropna().astype(str).head(3).tolist()
-            )
+            companies = grp["Company"].dropna().astype(str).tolist()
+            if include_full_membership:
+                lines.append("- Full membership: " + ", ".join(companies))
+            else:
+                lines.append("- Example companies: " + ", ".join(companies[:3]))
         else:
-            examples = "(no company names available)"
-        lines.append(
-            f"- Cluster {int(c_id)}: count = {len(grp)}, "
-            f"example companies: {examples or '(no company names available)'}"
-        )
-    return "\n".join(lines)
+            lines.append("- Company names unavailable.")
+        centers_scaled = kmeans.cluster_centers_[int(c_id)]
+        centers_original = scaler.inverse_transform([centers_scaled])[0]
+        center_text = ", ".join(f"{feature}={value:.2f}" for feature, value in zip(features, centers_original))
+        lines.append(f"- Cluster center (original scale): {center_text}")
+        lines.append("")
+
+    return "\n".join(lines).strip()
 
 
 @tool

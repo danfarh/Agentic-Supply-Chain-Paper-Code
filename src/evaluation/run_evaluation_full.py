@@ -1440,6 +1440,9 @@ def evaluate_single_query(
         notes.append(
             f"Answer-key status is {answer_key_status}; this row is diagnostic only and excluded from final accuracy."
         )
+    
+    if answer_key_status in DIAGNOSTIC_ONLY_STATUSES:
+        verdict = "NOT_ADJUDICATED"
 
     return {
         "query_id": query_id,

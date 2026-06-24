@@ -1,29 +1,29 @@
 query_id,query_number,agent_category,answer_key_status,included_in_final_accuracy,adjudication_scope,evaluation_type,mas_status,latency_seconds,score,verdict,notes
-D1,1,Data Agent,CLEAN,True,FINAL,Exact list + numeric match,UNKNOWN,,1.0,PASS,
-D2,2,Data Agent,CLEAN,True,FINAL,Exact list + numeric match,UNKNOWN,,1.0,PASS,
-D3,3,Data Agent,CLEAN,True,FINAL,Top-k ranking exact match,UNKNOWN,,1.0,PASS,
-D4,4,Data Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim-level qualitative completeness + faithfulness,UNKNOWN,,1.0,PASS,
-A1,5,Analysis Agent,CLEAN,True,FINAL,Numeric exact match,UNKNOWN,,1.0,PASS,
-A2,6,Analysis Agent,CLEAN,True,FINAL,Numeric + interpretation,UNKNOWN,,1.0,PASS,
-A3,7,Analysis Agent,NEEDS_CORRECTION,False,DIAGNOSTIC_ONLY,Clustering reproducibility + membership,UNKNOWN,,0.299,FAIL,Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.
-A4,8,Analysis Agent,CLEAN,True,FINAL,Numeric exact match,UNKNOWN,,1.0,PASS,
-R1,9,Research Agent,NEEDS_SOURCE_SNAPSHOT,False,DIAGNOSTIC_ONLY,Hybrid evidence validation,UNKNOWN,,0.6,PARTIAL,External validation is too vague; exact ILO source/date/statistic is not snapshotted. Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.
-R2,10,Research Agent,NEEDS_SOURCE_SNAPSHOT,False,DIAGNOSTIC_ONLY,External source attribution + numeric comparison,UNKNOWN,,0.6,PARTIAL,External ILO report/source metadata is not sufficiently verified or snapshotted. Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.
-R3,11,Research Agent,NEEDS_CORRECTION,False,DIAGNOSTIC_ONLY,Consistency check + external validation,UNKNOWN,,0.2,FAIL,"Critical error: answer validates Samsung = 79.5, but corrected KTC Total Benchmark is 61.00. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy."
-R4,12,Research Agent,NEEDS_SOURCE_SNAPSHOT,False,DIAGNOSTIC_ONLY,Numeric + external comparability,UNKNOWN,,0.55,FAIL,"External comparison lacks reproducible benchmark, date, units, and source details. Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy."
-P1,13,Prediction Agent,NEEDS_CORRECTION,False,DIAGNOSTIC_ONLY,Scenario-modelling validity,UNKNOWN,,0.066,FAIL,Uses undocumented Remedy coefficient 1.211 / 12.11-point increase. Does not provide a valid requested 2027 rank and lacks rank-distribution assumptions. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.
-P2,14,Prediction Agent,NEEDS_CORRECTION,False,DIAGNOSTIC_ONLY,Formula-based numeric projection,UNKNOWN,,0.0,FAIL,Uses four compounding periods; corrected 2025→2027 projection is 22.29. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.
-P3,15,Prediction Agent,NEEDS_CORRECTION,False,DIAGNOSTIC_ONLY,Scenario numeric calculation,UNKNOWN,,0.0,FAIL,Incorrectly uses North America Purchasing Practices = 45 and inflated +17.2 result. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.
-P4,16,Prediction Agent,NEEDS_CORRECTION,False,DIAGNOSTIC_ONLY,Scenario validity + formula,UNKNOWN,,0.0,FAIL,Uses unsupported/inconsistent coefficient and does not define intervention delta. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.
-S1,17,Synthesis Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim-level synthesis,UNKNOWN,,1.0,PASS,
-S2,18,Synthesis Agent,CLEAN,True,FINAL,Numeric + ethical interpretation,UNKNOWN,,1.0,PASS,
-S3,19,Synthesis Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim-level RAG/synthesis,UNKNOWN,,0.971,PASS,
-S4,20,Synthesis Agent,CLEAN,True,FINAL,Numeric + ethical interpretation,UNKNOWN,,1.0,PASS,
-E1,21,Ethics Agent,CLEAN_WITH_RUBRIC,True,FINAL,Conceptual rubric,UNKNOWN,,1.0,PASS,
-E2,22,Ethics Agent,CLEAN,True,FINAL,Numeric + ethical interpretation,UNKNOWN,,1.0,PASS,
-E3,23,Ethics Agent,NEEDS_VALIDATION,False,DIAGNOSTIC_ONLY,Group proportion exact match,UNKNOWN,,0.95,PASS,Diagnostic match for current UK MSA regional pattern; row remains NEEDS_VALIDATION. Answer-key status is NEEDS_VALIDATION; this row is diagnostic only and excluded from final accuracy.
-E4,24,Ethics Agent,CLEAN_WITH_RUBRIC,True,FINAL,Conceptual risk rubric,UNKNOWN,,1.0,PASS,
-T1,25,Text Mining Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim-level RAG,UNKNOWN,,0.946,PASS,
-T2,26,Text Mining Agent,CLEAN_WITH_METHOD_NOTE,True,FINAL,Numeric + interpretation,UNKNOWN,,0.904,PASS,
-T3,27,Text Mining Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim/theme-level RAG,UNKNOWN,,0.973,PASS,
-T4,28,Text Mining Agent,NEEDS_VALIDATION,False,DIAGNOSTIC_ONLY,Group proportion exact match + interpretation,UNKNOWN,,0.95,PASS,Diagnostic match for current UK MSA regional pattern; row remains NEEDS_VALIDATION. Answer-key status is NEEDS_VALIDATION; this row is diagnostic only and excluded from final accuracy.
+D1,1,Data Agent,CLEAN,True,FINAL,Exact list + numeric match,SUCCESS,9.133,1.0,PASS,
+D2,2,Data Agent,CLEAN,True,FINAL,Exact list + numeric match,SUCCESS,17.6,0.85,PARTIAL,Market Cap unit mismatch: answer uses million instead of B/billion.
+D3,3,Data Agent,CLEAN,True,FINAL,Top-k ranking exact match,SUCCESS,14.151,1.0,PASS,
+D4,4,Data Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim-level qualitative completeness + faithfulness,SUCCESS,12.821,0.909,PASS,
+A1,5,Analysis Agent,CLEAN,True,FINAL,Numeric exact match,SUCCESS,3.233,1.0,PASS,
+A2,6,Analysis Agent,CLEAN,True,FINAL,Numeric + interpretation,SUCCESS,8.965,1.0,PASS,
+A3,7,Analysis Agent,NEEDS_CORRECTION,False,DIAGNOSTIC_ONLY,Clustering reproducibility + membership,SUCCESS,10.5,0.086,NOT_ADJUDICATED,Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.
+A4,8,Analysis Agent,CLEAN,True,FINAL,Numeric exact match,SUCCESS,5.95,1.0,PASS,
+R1,9,Research Agent,NEEDS_SOURCE_SNAPSHOT,False,DIAGNOSTIC_ONLY,Hybrid evidence validation,SUCCESS,58.971,0.6,NOT_ADJUDICATED,Answer mentions China/Malaysia but fails PDF-specific extraction requirement. Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.
+R2,10,Research Agent,NEEDS_SOURCE_SNAPSHOT,False,DIAGNOSTIC_ONLY,External source attribution + numeric comparison,SUCCESS,10.91,0.667,NOT_ADJUDICATED,Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.
+R3,11,Research Agent,NEEDS_SOURCE_SNAPSHOT,False,DIAGNOSTIC_ONLY,Consistency check + external validation,SUCCESS,8.981,0.667,NOT_ADJUDICATED,Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.
+R4,12,Research Agent,NEEDS_SOURCE_SNAPSHOT,False,DIAGNOSTIC_ONLY,Numeric + external comparability,SUCCESS,8.448,0.681,NOT_ADJUDICATED,Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.
+P1,13,Prediction Agent,CLEAN_WITH_METHOD_NOTE,True,FINAL,Scenario-modelling validity,SUCCESS,3.59,0.333,FAIL,
+P2,14,Prediction Agent,CLEAN_WITH_METHOD_NOTE,True,FINAL,Formula-based numeric projection,SUCCESS,2.52,1.0,PASS,
+P3,15,Prediction Agent,CLEAN_WITH_METHOD_NOTE,True,FINAL,Scenario numeric calculation,SUCCESS,7.544,1.0,PASS,
+P4,16,Prediction Agent,CLEAN_WITH_METHOD_NOTE,True,FINAL,Scenario validity + formula,SUCCESS,6.587,0.667,PARTIAL,
+S1,17,Synthesis Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim-level synthesis,SUCCESS,38.356,0.833,PARTIAL,
+S2,18,Synthesis Agent,CLEAN,True,FINAL,Numeric + ethical interpretation,SUCCESS,14.283,0.75,PARTIAL,
+S3,19,Synthesis Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim-level RAG/synthesis,SUCCESS,9.403,0.947,PASS,
+S4,20,Synthesis Agent,CLEAN,True,FINAL,Numeric + ethical interpretation,SUCCESS,13.084,1.0,PASS,
+E1,21,Ethics Agent,CLEAN_WITH_RUBRIC,True,FINAL,Conceptual rubric,SUCCESS,7.431,0.5,FAIL,
+E2,22,Ethics Agent,CLEAN,True,FINAL,Numeric + ethical interpretation,SUCCESS,7.01,0.0,FAIL,
+E3,23,Ethics Agent,NEEDS_VALIDATION,False,DIAGNOSTIC_ONLY,Group proportion exact match,SUCCESS,6.409,0.0,NOT_ADJUDICATED,Failed to locate/parse UK MSA field; answer key expects regional UK MSA pattern. Answer-key status is NEEDS_VALIDATION; this row is diagnostic only and excluded from final accuracy.
+E4,24,Ethics Agent,CLEAN_WITH_RUBRIC,True,FINAL,Conceptual risk rubric,SUCCESS,7.341,0.25,FAIL,
+T1,25,Text Mining Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim-level RAG,SUCCESS,8.288,0.714,PARTIAL,
+T2,26,Text Mining Agent,CLEAN_WITH_METHOD_NOTE,True,FINAL,Numeric + interpretation,SUCCESS,38.108,0.0,FAIL,
+T3,27,Text Mining Agent,CLEAN_WITH_RUBRIC,True,FINAL,Claim/theme-level RAG,SUCCESS,16.506,0.937,PASS,
+T4,28,Text Mining Agent,NEEDS_VALIDATION,False,DIAGNOSTIC_ONLY,Group proportion exact match + interpretation,SUCCESS,3.522,0.0,NOT_ADJUDICATED,Failed to locate/parse UK MSA field; answer key expects regional UK MSA pattern. Answer-key status is NEEDS_VALIDATION; this row is diagnostic only and excluded from final accuracy.

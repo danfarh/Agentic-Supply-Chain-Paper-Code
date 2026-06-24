@@ -1,24 +1,24 @@
 {
   "metadata": {
     "title": "Structured Answer Key for MAS Evaluation",
-    "version": "final_json_v1",
+    "version": "reference_fixed_v2",
     "source_workbook": "structured_answer_key_MAS_evaluation.xlsx",
     "source_reference_file": "4318a51f-4485-465f-a82a-553f17934e4f.docx",
     "article_context_file": "Multi_agent_AI_in_supply_chain_ethics__Article_(1).pdf",
     "created": "2026-06-23 07:49",
-    "exported_to_json_utc": "2026-06-23T07:52:53+00:00",
-    "important_note": "Rows marked NEEDS_CORRECTION or NEEDS_SOURCE_SNAPSHOT should not be used as final gold-standard answers until corrected or source-snapshotted.",
-    "recommended_use": "Use Answer_Key for query-level scoring, Atomic_Claims for long qualitative/RAG answers, Rubric for paper methodology, and Issues_To_Fix before reporting final results."
+    "exported_to_json_utc": "2026-06-24T09:34:16Z",
+    "important_note": "This v2 answer key separates validated rows, method-defined prediction rows, source-dependent rows, and still-unvalidated rows. Rows marked NEEDS_SOURCE_SNAPSHOT, NEEDS_CORRECTION, or NEEDS_VALIDATION should not be included in final accuracy.",
+    "recommended_use": "Use CLEAN/CLEAN_WITH_RUBRIC/CLEAN_WITH_METHOD_NOTE as final adjudicable rows. Use NEEDS_SOURCE_SNAPSHOT and NEEDS_VALIDATION for diagnostic/evidence-gap reporting only."
   },
   "summary": {
     "CLEAN": 9,
     "CLEAN_WITH_RUBRIC": 7,
-    "NEEDS_CORRECTION": 6,
-    "NEEDS_SOURCE_SNAPSHOT": 3,
+    "CLEAN_WITH_METHOD_NOTE": 5,
+    "NEEDS_CORRECTION": 1,
+    "NEEDS_SOURCE_SNAPSHOT": 4,
     "NEEDS_VALIDATION": 2,
-    "CLEAN_WITH_METHOD_NOTE": 1,
     "Total queries": 28,
-    "High-priority note": "Use the Issues_To_Fix sheet before reporting final performance values in the paper."
+    "High-priority note": "Final accuracy should be computed over CLEAN, CLEAN_WITH_RUBRIC, and CLEAN_WITH_METHOD_NOTE only. Source-dependent rows need archived source snapshots before inclusion."
   },
   "answer_key": [
     {
@@ -117,7 +117,7 @@
       "pass_criteria": "For a defensible gold answer, specify preprocessing, scaling, random_state, algorithm parameters, and full cluster membership. If only examples are expected, rewrite query to say 'provide cluster sizes and examples'.",
       "required_claim_ids": null,
       "status": "NEEDS_CORRECTION",
-      "correction_or_note": "Current answer is incomplete for 'list clusters'. It lacks full membership and reproducibility settings."
+      "correction_or_note": "Still excluded from final accuracy unless full cluster membership and reproducibility parameters are added, or the query is rewritten to ask only for cluster sizes and examples."
     },
     {
       "query_id": "A4",
@@ -172,8 +172,8 @@
       "numeric_tolerance": "±0.01 for KTC score",
       "pass_criteria": "Must not report 79.5 as KTC Total Benchmark unless a separate metric/source is explicitly defined. Must cite/date external evidence. Must discuss limitations, not only supportive evidence.",
       "required_claim_ids": "R3-C1;R3-C2;R3-C3",
-      "status": "NEEDS_CORRECTION",
-      "correction_or_note": "Current reference answer conflicts with the dataset maximum score of 61.00."
+      "status": "NEEDS_SOURCE_SNAPSHOT",
+      "correction_or_note": "Corrected KTC Total Benchmark score is 61.00. This row still requires dated external-source snapshots before it can be used as a final gold-standard external-validation item."
     },
     {
       "query_id": "R4",
@@ -199,9 +199,9 @@
       "evaluation_type": "Scenario-modelling validity",
       "numeric_tolerance": "Depends on stated coefficient",
       "pass_criteria": "Must state coefficient source; must not present a rank without distribution assumptions; if using Article Table 8 Remedy coefficient 0.1019, +10 Remedy implies +1.019 Total Benchmark points, not +12.11.",
-      "required_claim_ids": null,
-      "status": "NEEDS_CORRECTION",
-      "correction_or_note": "Current answer uses coefficient 1.211 without documented source and does not provide the requested rank."
+      "required_claim_ids": "P1-C1;P1-C2;P1-C3",
+      "status": "CLEAN_WITH_METHOD_NOTE",
+      "correction_or_note": "Reference corrected and made method-adjudicable in v2. Current answer uses coefficient 1.211 without documented source and does not provide the requested rank."
     },
     {
       "query_id": "P2",
@@ -213,9 +213,9 @@
       "evaluation_type": "Formula-based numeric projection",
       "numeric_tolerance": "±0.01",
       "pass_criteria": "Must state baseline year, target year, number of compounding periods, and formula. With 2025→2027, expected answer is 22.29.",
-      "required_claim_ids": null,
-      "status": "NEEDS_CORRECTION",
-      "correction_or_note": "Current answer 24.58 assumes four annual compounding periods, not 2025 to 2027."
+      "required_claim_ids": "P2-C1;P2-C2;P2-C3",
+      "status": "CLEAN_WITH_METHOD_NOTE",
+      "correction_or_note": "Reference corrected and made method-adjudicable in v2. Current answer 24.58 assumes four annual compounding periods, not 2025 to 2027."
     },
     {
       "query_id": "P3",
@@ -227,9 +227,9 @@
       "evaluation_type": "Scenario numeric calculation",
       "numeric_tolerance": "±0.01 for regional means; ±0.005 for computed improvement",
       "pass_criteria": "Must use 5.77 for North America, not 45. Must show calculation and avoid overstating practical significance.",
-      "required_claim_ids": null,
-      "status": "NEEDS_CORRECTION",
-      "correction_or_note": "Current answer incorrectly uses North America Purchasing Practices = 45 and produces an inflated 17.2-point improvement."
+      "required_claim_ids": "P3-C1;P3-C2;P3-C3;P3-C4",
+      "status": "CLEAN_WITH_METHOD_NOTE",
+      "correction_or_note": "Reference corrected and made method-adjudicable in v2. Current answer incorrectly uses North America Purchasing Practices = 45 and produces an inflated 17.2-point improvement."
     },
     {
       "query_id": "P4",
@@ -241,9 +241,9 @@
       "evaluation_type": "Scenario validity + formula",
       "numeric_tolerance": "Depends on defined Δ",
       "pass_criteria": "Must not infer a numerical score impact from 'addresses allegations' alone. Must specify which theme changes and by how many points.",
-      "required_claim_ids": null,
-      "status": "NEEDS_CORRECTION",
-      "correction_or_note": "Current answer contains inconsistent coefficients (0.703 and 0.665) and does not define the assumed intervention size."
+      "required_claim_ids": "P4-C1;P4-C2;P4-C3",
+      "status": "CLEAN_WITH_METHOD_NOTE",
+      "correction_or_note": "Reference corrected and made method-adjudicable in v2. Current answer contains inconsistent coefficients (0.703 and 0.665) and does not define the assumed intervention size."
     },
     {
       "query_id": "S1",
@@ -870,6 +870,110 @@
       "weight": 1,
       "evidence_source": "Amazon PDF scorecard",
       "scoring_note": null
+    },
+    {
+      "claim_id": "P1-C1",
+      "query_id": "P1",
+      "required_claim": "Amazon's 2027 rank cannot be predicted without baseline Total Benchmark score and rank-distribution assumptions.",
+      "weight": 1,
+      "evidence_source": "Scenario-modelling reference",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P1-C2",
+      "query_id": "P1",
+      "required_claim": "Any score-effect estimate must state the coefficient source and compute score increase as coefficient times 10.",
+      "weight": 1,
+      "evidence_source": "Scenario-modelling reference",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P1-C3",
+      "query_id": "P1",
+      "required_claim": "If using Article Table 8 Remedy coefficient 0.1019, plus 10 Remedy implies approximately plus 1.019 Total Benchmark points, not plus 12.11.",
+      "weight": 1,
+      "evidence_source": "Article Table 8 / scenario reference",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P2-C1",
+      "query_id": "P2",
+      "required_claim": "For 2025 to 2027, the projection uses two compounding periods.",
+      "weight": 1,
+      "evidence_source": "Formula reference",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P2-C2",
+      "query_id": "P2",
+      "required_claim": "The calculation is 20.22 multiplied by 1.05 squared, producing approximately 22.29.",
+      "weight": 1,
+      "evidence_source": "Formula reference",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P2-C3",
+      "query_id": "P2",
+      "required_claim": "A result of approximately 24.58 is valid only if four annual periods are explicitly assumed.",
+      "weight": 1,
+      "evidence_source": "Formula reference",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P3-C1",
+      "query_id": "P3",
+      "required_claim": "Asia Purchasing Practices average is 5.31.",
+      "weight": 1,
+      "evidence_source": "Article Table 7",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P3-C2",
+      "query_id": "P3",
+      "required_claim": "North America Purchasing Practices average is 5.77, not 45.",
+      "weight": 1,
+      "evidence_source": "Article Table 7",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P3-C3",
+      "query_id": "P3",
+      "required_claim": "The Purchasing Practices difference is 0.46.",
+      "weight": 1,
+      "evidence_source": "Article Table 7",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P3-C4",
+      "query_id": "P3",
+      "required_claim": "Using coefficient 0.0792, expected Total Benchmark improvement is approximately 0.036 points.",
+      "weight": 1,
+      "evidence_source": "Article Table 8",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P4-C1",
+      "query_id": "P4",
+      "required_claim": "The intervention size must be defined before Apple's score impact can be quantified.",
+      "weight": 1,
+      "evidence_source": "Scenario-modelling reference",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P4-C2",
+      "query_id": "P4",
+      "required_claim": "If using Traceability and Risk Assessment coefficient 0.2412, Total Benchmark increase equals 0.2412 times delta Traceability Risk.",
+      "weight": 1,
+      "evidence_source": "Article Table 8",
+      "scoring_note": null
+    },
+    {
+      "claim_id": "P4-C3",
+      "query_id": "P4",
+      "required_claim": "The answer must not infer a fixed numerical impact from addressing Uyghur forced labour allegations alone.",
+      "weight": 1,
+      "evidence_source": "Scenario-modelling reference",
+      "scoring_note": null
     }
   ],
   "rubric": [
@@ -934,56 +1038,64 @@
       "query_id": "R3",
       "severity": "High",
       "problem": "Samsung is reported as 79.5 in the reference answer, but Scoring/Article values show top Total Benchmark score = 61.00.",
-      "recommended_fix": "Replace 79.5 with 61.00 for KTC Total Benchmark or define 79.5 as a different external metric with source."
+      "recommended_fix": "Replace 79.5 with 61.00 for KTC Total Benchmark or define 79.5 as a different external metric with source.",
+      "v2_action": "Reference answer corrected/clarified. Status updated according to remaining adjudication requirements."
     },
     {
       "issue_id": "I2",
       "query_id": "P3",
       "severity": "High",
       "problem": "North America Purchasing Practices is written as 45, but Table 7 gives 5.77; answer inflates effect to 17.2 points.",
-      "recommended_fix": "Use Asia=5.31, North America=5.77, coefficient=0.0792; expected improvement ≈0.036 points."
+      "recommended_fix": "Use Asia=5.31, North America=5.77, coefficient=0.0792; expected improvement ≈0.036 points.",
+      "v2_action": "Reference answer corrected/clarified. Status updated according to remaining adjudication requirements."
     },
     {
       "issue_id": "I3",
       "query_id": "P2",
       "severity": "High",
       "problem": "2027 projection of 24.58 assumes four annual growth periods, not 2025→2027.",
-      "recommended_fix": "Use 20.22×1.05^2=22.29 for 2025→2027, or state the four-year assumption explicitly."
+      "recommended_fix": "Use 20.22×1.05^2=22.29 for 2025→2027, or state the four-year assumption explicitly.",
+      "v2_action": "Reference answer corrected/clarified. Status updated according to remaining adjudication requirements."
     },
     {
       "issue_id": "I4",
       "query_id": "P1",
       "severity": "High",
       "problem": "Prediction asks for rank but answer only computes score increase; coefficient source is unclear and conflicts with Article Table 8 Remedy coefficient.",
-      "recommended_fix": "Either change query to score-impact estimation or add rank-distribution assumptions. Cite coefficient source."
+      "recommended_fix": "Either change query to score-impact estimation or add rank-distribution assumptions. Cite coefficient source.",
+      "v2_action": "Reference answer corrected/clarified. Status updated according to remaining adjudication requirements."
     },
     {
       "issue_id": "I5",
       "query_id": "P4",
       "severity": "High",
       "problem": "Apple scenario has inconsistent coefficients and no defined intervention size.",
-      "recommended_fix": "Use formula TotalScoreIncrease = coefficient × ΔThemeScore; define Δ before quantifying."
+      "recommended_fix": "Use formula TotalScoreIncrease = coefficient × ΔThemeScore; define Δ before quantifying.",
+      "v2_action": "Reference answer corrected/clarified. Status updated according to remaining adjudication requirements."
     },
     {
       "issue_id": "I6",
       "query_id": "A3",
       "severity": "Medium",
       "problem": "K-means answer gives only examples, not full clusters, and lacks random_state/scaling details.",
-      "recommended_fix": "Add full cluster membership and reproducibility parameters or rewrite prompt to ask for examples only."
+      "recommended_fix": "Add full cluster membership and reproducibility parameters or rewrite prompt to ask for examples only.",
+      "v2_action": "Still open: full cluster membership or query rewrite required."
     },
     {
       "issue_id": "I7",
       "query_id": "R1/R2/R4",
       "severity": "Medium",
       "problem": "External Research answers are too vague and lack exact source snapshots, dates, units, and retrieval metadata.",
-      "recommended_fix": "Create archived external-source table and require source attribution for all external validation answers."
+      "recommended_fix": "Create archived external-source table and require source attribution for all external validation answers.",
+      "v2_action": "Still open: source snapshots required."
     },
     {
       "issue_id": "I8",
       "query_id": "E3/T4",
       "severity": "Medium",
       "problem": "UK MSA pattern is counterintuitive and lacks denominators/field validation.",
-      "recommended_fix": "Verify field semantics, include denominators, and distinguish disclosure coding from legal compliance."
+      "recommended_fix": "Verify field semantics, include denominators, and distinguish disclosure coding from legal compliance.",
+      "v2_action": "Still open: field semantics/denominators need validation."
     },
     {
       "issue_id": "I9",

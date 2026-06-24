@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "answer_key_path": "D:\\Agentic-Supply-Chain-Paper-Code\\src\\evaluation\\logs\\structured_answer_key_MAS_evaluation_final.json",
-    "generated_answers_path": "D:\\Agentic-Supply-Chain-Paper-Code\\src\\evaluation\\logs\\generated_answers_structured.json",
+    "answer_key_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/logs/structured_answer_key_MAS_evaluation_final.json",
+    "generated_answers_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/logs/generated_answers_structured.json",
     "query_id_order": [
       "D1",
       "D2",
@@ -72,43 +72,43 @@
   },
   "summary": {
     "final_accuracy_only_validated_answer_key_rows": {
-      "n": 17,
-      "pass": 17,
-      "partial": 0,
-      "fail": 0,
+      "n": 21,
+      "pass": 11,
+      "partial": 5,
+      "fail": 5,
       "missing": 0,
-      "strict_pass_rate": 1.0,
-      "pass_or_partial_rate": 1.0,
-      "mean_score": 0.988,
-      "mean_latency_seconds": null,
-      "median_latency_seconds": null,
-      "p95_latency_seconds": null
+      "strict_pass_rate": 0.524,
+      "pass_or_partial_rate": 0.762,
+      "mean_score": 0.747,
+      "mean_latency_seconds": 11.995,
+      "median_latency_seconds": 8.965,
+      "p95_latency_seconds": 38.108
     },
     "diagnostic_outcomes_all_28_rows_not_final_accuracy": {
       "n": 28,
-      "pass": 19,
-      "partial": 2,
-      "fail": 7,
+      "pass": 11,
+      "partial": 5,
+      "fail": 5,
       "missing": 0,
-      "strict_pass_rate": 0.679,
-      "pass_or_partial_rate": 0.75,
-      "mean_score": 0.75,
-      "mean_latency_seconds": null,
-      "median_latency_seconds": null,
-      "p95_latency_seconds": null
+      "strict_pass_rate": 0.393,
+      "pass_or_partial_rate": 0.571,
+      "mean_score": 0.657,
+      "mean_latency_seconds": 12.844,
+      "median_latency_seconds": 8.973,
+      "p95_latency_seconds": 38.356
     },
     "diagnostic_only_rows_excluded_from_final_accuracy": {
-      "n": 11,
-      "pass": 2,
-      "partial": 2,
-      "fail": 7,
+      "n": 7,
+      "pass": 0,
+      "partial": 0,
+      "fail": 0,
       "missing": 0,
-      "strict_pass_rate": 0.182,
-      "pass_or_partial_rate": 0.364,
-      "mean_score": 0.383,
-      "mean_latency_seconds": null,
-      "median_latency_seconds": null,
-      "p95_latency_seconds": null
+      "strict_pass_rate": 0.0,
+      "pass_or_partial_rate": 0.0,
+      "mean_score": 0.386,
+      "mean_latency_seconds": 15.392,
+      "median_latency_seconds": 8.981,
+      "p95_latency_seconds": 58.971
     },
     "by_category_final_rows": {
       "Analysis Agent": {
@@ -120,61 +120,74 @@
         "strict_pass_rate": 1.0,
         "pass_or_partial_rate": 1.0,
         "mean_score": 1.0,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "mean_latency_seconds": 6.049,
+        "median_latency_seconds": 5.95,
+        "p95_latency_seconds": 8.965
       },
       "Data Agent": {
         "n": 4,
-        "pass": 4,
-        "partial": 0,
+        "pass": 3,
+        "partial": 1,
         "fail": 0,
         "missing": 0,
-        "strict_pass_rate": 1.0,
+        "strict_pass_rate": 0.75,
         "pass_or_partial_rate": 1.0,
-        "mean_score": 1.0,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "mean_score": 0.94,
+        "mean_latency_seconds": 13.426,
+        "median_latency_seconds": 13.486,
+        "p95_latency_seconds": 17.6
       },
       "Ethics Agent": {
         "n": 3,
-        "pass": 3,
+        "pass": 0,
         "partial": 0,
-        "fail": 0,
+        "fail": 3,
         "missing": 0,
-        "strict_pass_rate": 1.0,
-        "pass_or_partial_rate": 1.0,
-        "mean_score": 1.0,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "strict_pass_rate": 0.0,
+        "pass_or_partial_rate": 0.0,
+        "mean_score": 0.25,
+        "mean_latency_seconds": 7.261,
+        "median_latency_seconds": 7.341,
+        "p95_latency_seconds": 7.431
+      },
+      "Prediction Agent": {
+        "n": 4,
+        "pass": 2,
+        "partial": 1,
+        "fail": 1,
+        "missing": 0,
+        "strict_pass_rate": 0.5,
+        "pass_or_partial_rate": 0.75,
+        "mean_score": 0.75,
+        "mean_latency_seconds": 5.06,
+        "median_latency_seconds": 5.088,
+        "p95_latency_seconds": 7.544
       },
       "Synthesis Agent": {
         "n": 4,
-        "pass": 4,
-        "partial": 0,
+        "pass": 2,
+        "partial": 2,
         "fail": 0,
         "missing": 0,
-        "strict_pass_rate": 1.0,
+        "strict_pass_rate": 0.5,
         "pass_or_partial_rate": 1.0,
-        "mean_score": 0.993,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "mean_score": 0.882,
+        "mean_latency_seconds": 18.782,
+        "median_latency_seconds": 13.683,
+        "p95_latency_seconds": 38.356
       },
       "Text Mining Agent": {
         "n": 3,
-        "pass": 3,
-        "partial": 0,
-        "fail": 0,
+        "pass": 1,
+        "partial": 1,
+        "fail": 1,
         "missing": 0,
-        "strict_pass_rate": 1.0,
-        "pass_or_partial_rate": 1.0,
-        "mean_score": 0.941,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "strict_pass_rate": 0.333,
+        "pass_or_partial_rate": 0.667,
+        "mean_score": 0.55,
+        "mean_latency_seconds": 20.967,
+        "median_latency_seconds": 16.506,
+        "p95_latency_seconds": 38.108
       }
     },
     "by_category_all_rows_diagnostic": {
@@ -182,100 +195,100 @@
         "n": 4,
         "pass": 3,
         "partial": 0,
-        "fail": 1,
+        "fail": 0,
         "missing": 0,
         "strict_pass_rate": 0.75,
         "pass_or_partial_rate": 0.75,
-        "mean_score": 0.825,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "mean_score": 0.771,
+        "mean_latency_seconds": 7.162,
+        "median_latency_seconds": 7.457,
+        "p95_latency_seconds": 10.5
       },
       "Data Agent": {
         "n": 4,
-        "pass": 4,
-        "partial": 0,
+        "pass": 3,
+        "partial": 1,
         "fail": 0,
         "missing": 0,
-        "strict_pass_rate": 1.0,
+        "strict_pass_rate": 0.75,
         "pass_or_partial_rate": 1.0,
-        "mean_score": 1.0,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "mean_score": 0.94,
+        "mean_latency_seconds": 13.426,
+        "median_latency_seconds": 13.486,
+        "p95_latency_seconds": 17.6
       },
       "Ethics Agent": {
         "n": 4,
-        "pass": 4,
-        "partial": 0,
-        "fail": 0,
-        "missing": 0,
-        "strict_pass_rate": 1.0,
-        "pass_or_partial_rate": 1.0,
-        "mean_score": 0.988,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
-      },
-      "Prediction Agent": {
-        "n": 4,
         "pass": 0,
         "partial": 0,
-        "fail": 4,
+        "fail": 3,
         "missing": 0,
         "strict_pass_rate": 0.0,
         "pass_or_partial_rate": 0.0,
-        "mean_score": 0.017,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "mean_score": 0.188,
+        "mean_latency_seconds": 7.048,
+        "median_latency_seconds": 7.175,
+        "p95_latency_seconds": 7.431
+      },
+      "Prediction Agent": {
+        "n": 4,
+        "pass": 2,
+        "partial": 1,
+        "fail": 1,
+        "missing": 0,
+        "strict_pass_rate": 0.5,
+        "pass_or_partial_rate": 0.75,
+        "mean_score": 0.75,
+        "mean_latency_seconds": 5.06,
+        "median_latency_seconds": 5.088,
+        "p95_latency_seconds": 7.544
       },
       "Research Agent": {
         "n": 4,
         "pass": 0,
-        "partial": 2,
-        "fail": 2,
+        "partial": 0,
+        "fail": 0,
         "missing": 0,
         "strict_pass_rate": 0.0,
-        "pass_or_partial_rate": 0.5,
-        "mean_score": 0.487,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "pass_or_partial_rate": 0.0,
+        "mean_score": 0.654,
+        "mean_latency_seconds": 21.828,
+        "median_latency_seconds": 9.945,
+        "p95_latency_seconds": 58.971
       },
       "Synthesis Agent": {
         "n": 4,
-        "pass": 4,
-        "partial": 0,
+        "pass": 2,
+        "partial": 2,
         "fail": 0,
         "missing": 0,
-        "strict_pass_rate": 1.0,
+        "strict_pass_rate": 0.5,
         "pass_or_partial_rate": 1.0,
-        "mean_score": 0.993,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "mean_score": 0.882,
+        "mean_latency_seconds": 18.782,
+        "median_latency_seconds": 13.683,
+        "p95_latency_seconds": 38.356
       },
       "Text Mining Agent": {
         "n": 4,
-        "pass": 4,
-        "partial": 0,
-        "fail": 0,
+        "pass": 1,
+        "partial": 1,
+        "fail": 1,
         "missing": 0,
-        "strict_pass_rate": 1.0,
-        "pass_or_partial_rate": 1.0,
-        "mean_score": 0.943,
-        "mean_latency_seconds": null,
-        "median_latency_seconds": null,
-        "p95_latency_seconds": null
+        "strict_pass_rate": 0.25,
+        "pass_or_partial_rate": 0.5,
+        "mean_score": 0.413,
+        "mean_latency_seconds": 16.606,
+        "median_latency_seconds": 12.397,
+        "p95_latency_seconds": 38.108
       }
     },
     "answer_key_status_counts": {
       "CLEAN": 9,
-      "CLEAN_WITH_METHOD_NOTE": 1,
+      "CLEAN_WITH_METHOD_NOTE": 5,
       "CLEAN_WITH_RUBRIC": 7,
-      "NEEDS_CORRECTION": 6,
-      "NEEDS_SOURCE_SNAPSHOT": 3,
+      "NEEDS_CORRECTION": 1,
+      "NEEDS_SOURCE_SNAPSHOT": 4,
       "NEEDS_VALIDATION": 2
     },
     "important_note": "Only rows with CLEAN, CLEAN_WITH_RUBRIC, or CLEAN_WITH_METHOD_NOTE are included in final accuracy. Rows marked NEEDS_CORRECTION, NEEDS_SOURCE_SNAPSHOT, or NEEDS_VALIDATION are diagnostic only. Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are computed only when retrieved_contexts are present."
@@ -289,13 +302,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Exact list + numeric match",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 9.133,
       "score": 1.0,
       "verdict": "PASS",
       "notes": "",
       "question": "Filter the companies in the Scoring sheet by Region = `Asia` and list their Company Names and Total Benchmark Scores.",
-      "answer": "Here are the companies in the Scoring sheet with Region containing \"Asia\" and their Total Benchmark Scores:\n\n- Samsung Electronics Co. Ltd.: 61.00\n- LG Electronics Inc.: 24.00\n- SK Hynix Inc.: 20.00\n- Sony Corp.: 20.00\n- Hon Hai Precision Industry Co. Ltd. (Foxconn): 19.00\n- Taiwan Semiconductor Manufacturing Co. Ltd.: 19.00\n- Canon Inc.: 13.00\n- Panasonic Corp.: 10.00\n- Murata Manufacturing Co. Ltd.: 10.00\n- Fujifilm Holdings Corp.: 9.00\n- Keyence Corp.: 7.00\n- Kyocera Corp.: 6.00\n- Xiaomi Corp.: 5.00\n- Luxshare Precision Industry Co. Ltd.: 4.00\n- Semiconductor Manufacturing International Corp: 3.00\n- BOE Technology Group Co. Ltd.: 0.00",
+      "answer": "Here are the companies in the Scoring sheet from the Asia region along with their Total Benchmark Scores:\n\n1. Samsung Electronics Co. Ltd.: 61.00\n2. LG Electronics Inc.: 24.00\n3. SK Hynix Inc.: 20.00\n4. Sony Corp.: 20.00\n5. Hon Hai Precision Industry Co. Ltd. (Foxconn): 19.00\n6. Taiwan Semiconductor Manufacturing Co. Ltd.: 19.00\n7. Canon Inc.: 13.00\n8. Panasonic Corp.: 10.00\n9. Murata Manufacturing Co. Ltd.: 10.00\n10. Fujifilm Holdings Corp.: 9.00\n11. Keyence Corp.: 7.00\n12. Kyocera Corp.: 6.00\n13. Xiaomi Corp.: 5.00\n14. Luxshare Precision Industry Co. Ltd.: 4.00\n15. Semiconductor Manufacturing International Corp: 3.00\n16. BOE Technology Group Co. Ltd.: 0.00",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -678,13 +691,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Exact list + numeric match",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 1.0,
-      "verdict": "PASS",
-      "notes": "",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 17.6,
+      "score": 0.85,
+      "verdict": "PARTIAL",
+      "notes": "Market Cap unit mismatch: answer uses million instead of B/billion.",
       "question": "From the Non-Scored Research sheet, extract all companies that disclose sourcing from `China` and list their Company Names and Market Caps.",
-      "answer": "The companies that disclose sourcing from China along with their Market Caps are:\n\n- Advanced Micro Devices Inc: Market Cap = 235.74B\n- Amazon.com Inc.: Market Cap = 1393.87B\n- Apple Inc.: Market Cap = 2991.81B\n- Best Buy Co. Inc.: Market Cap = 15.56B\n- Cisco Systems Inc.: Market Cap = 204.96B\n- Corning Inc.: Market Cap = 22.55B\n- Dell Technologies Inc.: Market Cap = 9.39B\n- Hewlett Packard Enterprise Co. (HPE): Market Cap = 21.71B\n- HP Inc.: Market Cap = 29.70B\n- Infineon Technologies AG: Market Cap = 43.08B\n- Logitech International S.A.: Market Cap = 8.72B\n- Luxshare Precision Industry Co. Ltd.: Market Cap = 19.33B\n- Nokia Oyj: Market Cap = 20.14B\n- NVIDIA Corp.: Market Cap = 345.43B\n- NXP Semiconductors NV: Market Cap = 40.93B\n- Panasonic Corp.: Market Cap = 17.77B\n- Qualcomm Inc.: Market Cap = 160.98B\n- Samsung Electronics Co. Ltd.: Market Cap = 377.05B\n- Seagate Technology PLC: Market Cap = 18.32B\n- Telefonaktiebolaget LM Ericsson (publ): Market Cap = 18.13B\n- Xiaomi Corp.: Market Cap = 22.29B\n\nIf you need further details or analysis on these companies, please let me know!",
+      "answer": "Here are the companies that disclose sourcing from China, along with their Market Caps:\n\n1. Advanced Micro Devices Inc: Market Cap = 235.74 million\n2. Amazon.com Inc.: Market Cap = 1,393.87 million\n3. Apple Inc.: Market Cap = 2,991.81 million\n4. Best Buy Co. Inc.: Market Cap = 15.56 million\n5. Cisco Systems Inc.: Market Cap = 204.96 million\n6. Corning Inc.: Market Cap = 22.55 million\n7. Dell Technologies Inc.: Market Cap = 9.39 million\n8. Hewlett Packard Enterprise Co. (HPE): Market Cap = 21.71 million\n9. HP Inc.: Market Cap = 29.70 million\n10. Infineon Technologies AG: Market Cap = 43.08 million\n11. Logitech International S.A.: Market Cap = 8.72 million\n12. Luxshare Precision Industry Co. Ltd.: Market Cap = 19.33 million\n13. Nokia Oyj: Market Cap = 20.14 million\n14. NVIDIA Corp.: Market Cap = 345.43 million\n15. NXP Semiconductors NV: Market Cap = 40.93 million\n16. Panasonic Corp.: Market Cap = 17.77 million\n17. Qualcomm Inc.: Market Cap = 160.98 million\n18. Samsung Electronics Co. Ltd.: Market Cap = 377.05 million\n19. Seagate Technology PLC: Market Cap = 18.32 million\n20. Telefonaktiebolaget LM Ericsson (publ): Market Cap = 18.13 million\n21. Xiaomi Corp.: Market Cap = 22.29 million\n\nIf you need further analysis or information, feel free to ask!",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -714,8 +727,10 @@
             ],
             "answer_numbers": [
               235.74,
-              1393.87,
-              2991.81,
+              1.0,
+              393.87,
+              2.0,
+              991.81,
               15.56,
               204.96,
               22.55,
@@ -737,8 +752,6 @@
             ],
             "numeric_found": [
               235.74,
-              1393.87,
-              2991.81,
               15.56,
               204.96,
               22.55,
@@ -758,12 +771,20 @@
               18.13,
               22.29
             ],
-            "numeric_missing": [],
-            "numeric_extra": [],
-            "numeric_precision": 1.0,
-            "numeric_recall": 1.0,
-            "numeric_f1": 1.0,
-            "mean_absolute_error_nearest": 0.0,
+            "numeric_missing": [
+              1393.87,
+              2991.81
+            ],
+            "numeric_extra": [
+              1.0,
+              393.87,
+              2.0,
+              991.81
+            ],
+            "numeric_precision": 0.826,
+            "numeric_recall": 0.905,
+            "numeric_f1": 0.864,
+            "mean_absolute_error_nearest": 114.3838,
             "numeric_tolerance": 0.01
           },
           "entity_metrics": {
@@ -979,18 +1000,6 @@
                 ]
               },
               {
-                "entity": "Amazon.com Inc.",
-                "values": [
-                  1393.87
-                ]
-              },
-              {
-                "entity": "Apple Inc.",
-                "values": [
-                  2991.81
-                ]
-              },
-              {
                 "entity": "Best Buy Co. Inc.",
                 "values": [
                   15.56
@@ -1099,8 +1108,31 @@
                 ]
               }
             ],
-            "incorrect_or_missing_pairs": [],
-            "entity_value_pair_accuracy": 1.0
+            "incorrect_or_missing_pairs": [
+              {
+                "entity": "Amazon.com Inc.",
+                "expected_values": [
+                  1393.87
+                ],
+                "matched_text": "Amazon.com Inc.: Market Cap = 1,393.87 million",
+                "matched_numbers": [
+                  1.0,
+                  393.87
+                ]
+              },
+              {
+                "entity": "Apple Inc.",
+                "expected_values": [
+                  2991.81
+                ],
+                "matched_text": "Apple Inc.: Market Cap = 2,991.81 million",
+                "matched_numbers": [
+                  2.0,
+                  991.81
+                ]
+              }
+            ],
+            "entity_value_pair_accuracy": 0.905
           },
           "ranking_metrics": {
             "expected_order": [
@@ -1167,13 +1199,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Top-k ranking exact match",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 14.151,
       "score": 1.0,
       "verdict": "PASS",
       "notes": "",
       "question": "Clean the Scoring sheet by removing any rows with missing or zero Total Benchmark Scores, then list the top 5 companies by Total Benchmark Score descending.",
-      "answer": "The top 5 companies by Total Benchmark Score, after cleaning the data to remove missing or zero scores, are:\n\n1. Samsung Electronics Co. Ltd. with a score of 61.00\n2. Hewlett Packard Enterprise Co. (HPE) with a score of 53.00\n3. Cisco Systems Inc. with a score of 51.00\n4. HP Inc. with a score of 48.00\n5. Apple Inc. with a score of 46.00",
+      "answer": "The top 5 companies by Total Benchmark Score, after removing any rows with missing or zero scores, are:\n\n1. **Samsung Electronics Co. Ltd.**: 61.00\n2. **Hewlett Packard Enterprise Co. (HPE)**: 53.00\n3. **Cisco Systems Inc.**: 51.00\n4. **HP Inc.**: 48.00\n5. **Apple Inc.**: 46.00",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -1339,19 +1371,19 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Claim-level qualitative completeness + faithfulness",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 1.0,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 12.821,
+      "score": 0.909,
       "verdict": "PASS",
       "notes": "",
       "question": "Extract from the Detailed Scoring & Research sheet the comment for Amazon.com Inc. on indicator 1.1 (Supplier Code of Conduct).",
-      "answer": "The comment for Amazon.com Inc. on indicator 1.1 (Supplier Code of Conduct) from the Detailed Scoring & Research sheet is extensive. Here is a summary of key points:\n\n- Amazon discloses its supply chain standards prohibiting forced labour, child labour, discrimination, and requiring safe working conditions. It states suppliers must respect workers' rights to freedom of association and collective bargaining but limits this right to compliance with local law only.\n- In 2023, Amazon hosted training on its Supply Chain Standards and responsible recruitment in several countries, but it is unclear how much this covered electronics suppliers or beyond first-tier suppliers.\n- Amazon has a centralized team managing human rights due diligence and dedicated teams in key sourcing regions working with suppliers, but details on internal management and incentives are limited.\n- The company introduced training on responsible purchasing practices but does not specify if procurement teams are trained on forced labour risks.\n- The board's nominating and corporate governance committee oversees human rights and ethical business practices but details on forced labour discussions or stakeholder input are not disclosed.\n- Amazon discloses a supplier list on the Open Supply Hub with many electronics suppliers but does not specify coverage percentage.\n- It identifies risks through human rights assessments and collaborates with the International Organisation for Migration (IOM) and other NGOs on migrant worker rights and responsible recruitment.\n- Amazon discloses some remediation efforts related to recruitment fees in its own operations but not clearly for electronics supply chains.\n- The company monitors audits of suppliers using recognized standards but does not clarify coverage beyond first-tier suppliers.\n- Amazon has a grievance mechanism for human rights and environmental complaints but does not disclose how it is communicated to supply chain workers.\n- The company has faced allegations of sourcing from suppliers linked to forced Uyghur labour in Xinjiang and states it is collaborating with industry partners and experts to enhance due diligence in response.\n\nIf you want, I can provide the full detailed text or focus on any specific aspect.",
+      "answer": "The comment for Amazon.com Inc. on indicator 1.1 (Supplier Code of Conduct) is as follows:\n\nAmazon discloses its supply chain standards which prohibit forced labour, child labour, and discrimination, and require the provision of a safe and healthy working environment. In relation to freedom of association and the right to collective bargaining, the company states, \"Suppliers must respect the rights of workers to form, join, or refrain from joining, a labour union or other lawful organization of their own selection. Suppliers must respect workers’ rights to freedom of association and collective bargaining.\" The code requires suppliers to \"continuously monitor and enforce these Standards in their own operations and supply chain.\" However, the code limits the right to freedom of association to compliance with local law only, as it limits free association to \"lawful organizations.\"\n\nDuring 2023, Amazon hosted both in-person and online training on its Supply Chain Standards, including a \"peer-learning workshop series\" for factory management in various countries. However, it is unclear to what extent this covered the company's electronics suppliers. The company has expanded training on responsible recruitment to additional countries common for foreign migrant workers, focusing on risk mitigation controls and management systems. However, it does not disclose capacity building for suppliers to manage forced labour risks with their own suppliers.\n\nAmazon states it has a centralized team managing human rights and environmental due diligence and integrates human rights considerations into business decisions. However, it does not disclose incentives for staff tied to improvements in supply chain working conditions.\n\nThe company introduced Better Buying's online training on responsible purchasing in 2023 to strengthen its sourcing teams' understanding of how purchasing practices can drive respect for human rights in its supply chain. It does not specify whether procurement teams have been trained on forced labour risks.\n\nAmazon's board of directors oversees policies related to corporate social responsibility, including human rights and ethical business practices, but does not disclose details on forced labour topics discussed or outcomes of board discussions.\n\nThe company discloses its supplier list on the Open Supply Hub, but it is unclear what percentage of first-tier suppliers for its ICT supply chains are covered. It also states it conducts human rights assessments to identify risks, but does not disclose further detail on sources used or stakeholders engaged in assessing human rights risks.\n\nOverall, while Amazon has established standards and training programs, there are significant gaps in transparency regarding the implementation and effectiveness of these measures, particularly concerning forced labour risks in its supply chains.",
       "retrieved_contexts": [],
       "details": {
         "claim_eval": {
-          "claim_score": 1.0,
-          "completeness": 1.0,
-          "covered_claims": 11,
+          "claim_score": 0.909,
+          "completeness": 0.909,
+          "covered_claims": 10,
           "total_claims": 11,
           "claim_results": [
             {
@@ -1359,21 +1391,21 @@
               "required_claim": "Amazon discloses supply-chain standards prohibiting forced labour, child labour, and discrimination.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.9
             },
             {
               "claim_id": "D4-C2",
               "required_claim": "Amazon requires safe working conditions.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.8
+              "keyword_overlap": 1.0
             },
             {
               "claim_id": "D4-C3",
               "required_claim": "Freedom of association / collective bargaining language is limited to local law compliance.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.889
+              "keyword_overlap": 0.778
             },
             {
               "claim_id": "D4-C4",
@@ -1394,42 +1426,42 @@
               "required_claim": "Board oversight exists but details on forced-labour discussions or stakeholder input are limited.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.8
+              "keyword_overlap": 0.6
             },
             {
               "claim_id": "D4-C7",
               "required_claim": "Amazon discloses a supplier list on Open Supply Hub but coverage percentage is unclear.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.9
             },
             {
               "claim_id": "D4-C8",
               "required_claim": "Amazon collaborates with IOM/NGOs on migrant-worker rights or responsible recruitment.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.667
             },
             {
               "claim_id": "D4-C9",
               "required_claim": "Remediation disclosure is limited and not clearly tied to electronics supply chains.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.75
+              "keyword_overlap": 0.5
             },
             {
               "claim_id": "D4-C10",
               "required_claim": "Audit monitoring is disclosed but coverage beyond first-tier suppliers is unclear.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 0.889
+              "covered_auto": false,
+              "keyword_overlap": 0.444
             },
             {
               "claim_id": "D4-C11",
               "required_claim": "Amazon has faced allegations linked to Uyghur forced labour and states it is enhancing due diligence.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.909
+              "keyword_overlap": 0.545
             }
           ]
         }
@@ -1443,13 +1475,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Numeric exact match",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 3.233,
       "score": 1.0,
       "verdict": "PASS",
       "notes": "",
       "question": "Compute the average Total Benchmark Score across all companies in the Scoring sheet, and the standard deviation.",
-      "answer": "The average Total Benchmark Score across all companies in the Scoring sheet is 20.22, with a standard deviation of 14.23.",
+      "answer": "The average Total Benchmark Score across all companies is 20.22, with a standard deviation of 14.23.",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -1511,13 +1543,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Numeric + interpretation",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 8.965,
       "score": 1.0,
       "verdict": "PASS",
       "notes": "",
       "question": "Calculate the correlation between Market Cap and Total Benchmark Score using the Scoring sheet data.",
-      "answer": "The correlation between Market Cap and Total Benchmark Score is 0.323 based on 45 companies. This positive correlation suggests that companies with higher market capitalization tend to have higher Total Benchmark Scores, although this does not imply causation.",
+      "answer": "The Pearson correlation coefficient between Market Cap and Total Benchmark Score is 0.323, based on a sample size of 45 companies. This indicates a moderate positive correlation, meaning that as Market Cap increases, the Total Benchmark Score tends to increase as well. However, it's important to remember that correlation does not imply causality.",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -1579,16 +1611,16 @@
       "included_in_final_accuracy": false,
       "adjudication_scope": "DIAGNOSTIC_ONLY",
       "evaluation_type": "Clustering reproducibility + membership",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.299,
-      "verdict": "FAIL",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 10.5,
+      "score": 0.086,
+      "verdict": "NOT_ADJUDICATED",
       "notes": "Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.",
       "question": "Perform k-means clustering (k=3) on companies based on Total Benchmark Score and Purchasing Practices score from Scoring sheet, and list clusters.",
-      "answer": "The k-means clustering (k=3) on companies based on Total Benchmark Score and Purchasing Practices score resulted in three clusters:\n\n- Cluster 0: 32 companies, examples include LG Electronics Inc., Best Buy Co. Inc., Seagate Technology PLC\n- Cluster 1: 9 companies, examples include Hewlett Packard Enterprise Co. (HPE), HP Inc., Apple Inc.\n- Cluster 2: 4 companies, examples include Samsung Electronics Co. Ltd., Cisco Systems Inc., Corning Inc.\n\nIf you want, I can provide more details about each cluster.",
+      "answer": "The k-means clustering (k=3) based on Total Benchmark Score and Purchasing Practices score has resulted in the following clusters:\n\n### Cluster 0\n- **Count:** 32 companies\n- **Cluster Center:** \n  - Total Benchmark: 13.12\n  - Purchasing Practices: 1.59\n- **Companies:**\n  - LG Electronics Inc.\n  - Best Buy Co. Inc.\n  - Seagate Technology PLC\n  - Western Digital Corp.\n  - Logitech International S.A.\n  - Nokia Oyj\n  - SK Hynix Inc.\n  - STMicroelectronics NV\n  - Hon Hai Precision Industry Co. Ltd. (Foxconn)\n  - Taiwan Semiconductor Manufacturing Co. Ltd.\n  - Micron Technology Inc.\n  - Walmart Inc.\n  - Qualcomm Inc.\n  - Skyworks Solutions Inc.\n  - Canon Inc.\n  - Motorola Solutions Inc.\n  - Texas Instruments Inc.\n  - Microchip Technology Inc.\n  - NVIDIA Corp.\n  - Analog Devices Inc.\n  - Panasonic Corp.\n  - Murata Manufacturing Co. Ltd.\n  - Fujifilm Holdings Corp.\n  - Infineon Technologies AG\n  - Broadcom Inc.\n  - Amphenol Corp.\n  - Keyence Corp.\n  - Kyocera Corp.\n  - Xiaomi Corp.\n  - Luxshare Precision Industry Co. Ltd.\n  - Semiconductor Manufacturing International Corp.\n  - BOE Technology Group Co. Ltd.\n\n### Cluster 1\n- **Count:** 9 companies\n- **Cluster Center:** \n  - Total Benchmark: 37.33\n  - Purchasing Practices: 0.00\n- **Companies:**\n  - Hewlett Packard Enterprise Co. (HPE)\n  - HP Inc.\n  - Apple Inc.\n  - NXP Semiconductors NV\n  - Advanced Micro Devices Inc.\n  - Intel Corp.\n  - Telefonaktiebolaget LM Ericsson (publ)\n  - Amazon.com Inc.\n  - Dell Technologies Inc.\n\n### Cluster 2\n- **Count:** 4 companies\n- **Cluster Center:** \n  - Total Benchmark: 38.50\n  - Purchasing Practices: 40.25\n- **Companies:**\n  - Samsung Electronics Co. Ltd.\n  - Cisco Systems Inc.\n  - Corning Inc.\n  - Sony Corp.\n\nThese clusters reflect different performance levels in terms of Total Benchmark and Purchasing Practices among the companies analyzed.",
       "retrieved_contexts": [],
       "details": {
-        "fallback_lexical_similarity": 0.299
+        "fallback_lexical_similarity": 0.086
       }
     },
     {
@@ -1599,13 +1631,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Numeric exact match",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 5.95,
       "score": 1.0,
       "verdict": "PASS",
       "notes": "",
       "question": "Compute the median score for each theme (e.g., Commitment & Governance) across North American companies.",
-      "answer": "The median scores for each theme across North American companies are as follows:\n- Commitment & Governance: 54.5\n- Traceability & Risk: 20.0\n- Purchasing Practices: 0.0\n- Recruitment: 8.0\n- Enabling Workers: 3.0\n- Monitoring: 7.5\n- Remedy: 8.0\n- Total Benchmark: 19.0",
+      "answer": "The median scores for each theme across North American companies are as follows:\n\n- **Total Benchmark:** 19.00\n- **Commitment & Governance:** 54.50\n- **Traceability & Risk:** 20.00\n- **Purchasing Practices:** 0.00\n- **Recruitment:** 8.00\n- **Enabling Workers:** 3.00\n- **Monitoring:** 7.50\n- **Remedy:** 8.00",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -1621,14 +1653,14 @@
               19.0
             ],
             "answer_numbers": [
+              19.0,
               54.5,
               20.0,
               0.0,
               8.0,
               3.0,
               7.5,
-              8.0,
-              19.0
+              8.0
             ],
             "numeric_found": [
               54.5,
@@ -1685,14 +1717,23 @@
       "included_in_final_accuracy": false,
       "adjudication_scope": "DIAGNOSTIC_ONLY",
       "evaluation_type": "Hybrid evidence validation",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 58.971,
       "score": 0.6,
-      "verdict": "PARTIAL",
-      "notes": "External validation is too vague; exact ILO source/date/statistic is not snapshotted. Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.",
+      "verdict": "NOT_ADJUDICATED",
+      "notes": "Answer mentions China/Malaysia but fails PDF-specific extraction requirement. Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.",
       "question": "Cross-verify the high-risk sourcing countries for Amazon from the PDF with current ILO statistics on forced labour prevalence in China and Malaysia.",
-      "answer": "From the 2025 KnowTheChain ICT Scorecard PDF for Amazon.com Inc., the identified high-risk sourcing countries for Amazon are China and Malaysia.\n\nRegarding current ILO statistics on forced labour prevalence in China and Malaysia, recent ILO resources and reports indicate ongoing concerns and efforts related to forced labour in these countries. The ILO Forced Labour Observatory provides comprehensive data on forced labour globally, including China and Malaysia. The ILO has also provided technical assistance to Malaysia and China among other countries to combat forced labour. Additionally, forced labour among domestic workers trafficked from China to Malaysia and other nearby regions remains a significant issue.\n\nIn summary, the high-risk sourcing countries for Amazon identified in the PDF (China and Malaysia) align with the countries where the ILO reports ongoing forced labour risks and interventions. If you want, I can provide more detailed numeric statistics or specific ILO report excerpts.",
-      "retrieved_contexts": [],
+      "answer": "### High-Risk Sourcing Countries for Amazon\n\nFrom the PDF analysis, Amazon is noted to source raw materials at high risk of forced labour. The company is encouraged to improve its purchasing practices to mitigate these risks, including better planning, forecasting, and ensuring that pricing reflects the full cost of production, including a living wage. Specific countries were not explicitly mentioned in the excerpts retrieved, but the emphasis is on the need for transparency in sourcing and risk assessment.\n\n### ILO Statistics on Forced Labour in China and Malaysia\n\n1. **General Statistics**:\n   - The Asia and the Pacific region has the highest number of people in forced labour, totaling **15.1 million** individuals.\n   - The Arab States have the highest prevalence rate, with **5.3 per thousand people** affected.\n\n2. **Resources**:\n   - The **Forced Labour Observatory (FLO)** provides comprehensive information on forced labour globally, including country-specific data.\n   - A synthesis report by the ILO discusses advances in quantifying forced labour across various sectors.\n\n3. **Country-Specific Information**:\n   - Malaysia has been a member of the ILO since 1957 and has ratified 18 ILO Conventions, focusing on migrant worker rights and forced labour issues.\n\n### Summary\n\nWhile the PDF does not specify the exact countries Amazon sources from, it highlights the risks associated with forced labour in its supply chain. The ILO statistics indicate significant forced labour prevalence in the Asia-Pacific region, which includes both China and Malaysia. This aligns with the concerns raised in the PDF regarding the need for better sourcing practices to mitigate risks associated with forced labour. \n\nFor further details, you can explore the following resources:\n- [ILO Data and Research on Forced Labour](https://www.ilo.org/topics/forced-labour-modern-slavery-and-trafficking-persons/data-and-research-forced-labour)\n- [Forced Labour Observatory](https://humantraffickingsearch.org/forced-labour-observatory/)\n- [Malaysia's ILO Profile](https://www.ilo.org/regions-and-countries/asia-and-pacific/malaysia)",
+      "retrieved_contexts": [
+        "it sources raw mate rials at high risk of forced labour, and data on the demographics of the \nsupply chain workforce (such as the percentage of women and migrant workers). The \ncompany discloses some sources used to assess human rights risks in its supply chains and \nis further encouraged to disclose detail on the sources used and stakeholders engaged to \nassess forced labour risks across its supply chains and disclose the risks identified. \nPurchasing Practices: To address forced labour risks in its supply chains, the company is \nencouraged to adopt purchasing practices that decrease the risk of forced labour, such as \nimproving planning and forecasting and prompt payment, and disclose quantitative data \nevidencing the implementation of responsible purchasing practices. The company is further \nencouraged to take steps to ensure that pricing includes the full cost of production, including \na living wage/income, and may consider ring -fencing labour c osts such that they are not",
+        "compliances related to excessive overtime are particularly common in its supply chain related \nto hardware manufacturing, but that the risks cut-across other categories such as logistics and \nsite services, and t hat migrant workers, temporary, contract and self -employed workers and \nwomen are among those at heightened risk. \nOPPORTUNITIES FOR IMPROVEMENT \nTraceability & Risk Assessment:  The company is encouraged to demonstrate a strong \nunderstanding of its supply chains by disclosing the names and addresses of its first -tier \nsuppliers (either across high -risk raw materials or across all first -tier suppliers). Further, the \ncompany is encouraged t o disclose the names and locations of sub-tier suppliers other than \nsmelters and refiners of 3TG, as well as  the countries from which it sources raw materials at \nhigh risk of forced labour other than the 3TG. \nPurchasing Practices: To address forced labour risks in its supply chains, the company is",
+        "it sources raw mate rials at high risk of forced labour, and data on the demographics of the \nsupply chain workforce (such as the percentage of women and migrant workers). While the \ncompany discloses the use of questionnaire surveys for suppliers and states it assesses risks \nin its supplier selection process, t he company is further encouraged to  disclose detail on the \nsources used and stakeholders engaged to  systematically assess forced labour risks across \nits supply chains and disclose the risks identified. \nEnabling Workers’ Rights: To prevent and address forced labour risks in its supply chains, \nthe company may consider ensuring that a public formal and effective mechanism to report \ngrievances regarding labour conditions is available and communicated to its suppliers’ workers \nand relevant stakeholders, such as worker organisations or labour NGOs. Further, the \ncompany is encouraged to take steps  to ensure that workers in its supply chains are able to",
+        "The Asia and the Pacific region has the highest number of people in forced labour (15.1 million) and the Arab States the highest prevalence (5.3 per thousand people).",
+        "The International Labor Organization has launched a platform called Forced Labour Observatory (FLO) that provides comprehensive global and country information on forced labour .",
+        "Attribution – The user must indicate if changes were made and must cite the work as follows: ILO , Forced labour : A synthesis report – Advances in quantifying forced labour across the world and sectors, Geneva: International Labour Office, 2024. © ILO .",
+        "Global Estimates of Modern Slavery: Forced Labour and Forced Marriage - This report provides the latest global data on forced labour and forced marriage, offering insights into their prevalence , trends, and regional disparities.",
+        "Malaysia has been a member of the ILO since 1957 and has ratified 18 ILO Conventions of which 14 are in force. ILO works with its constituents in Malaysia in a number of areas including migrant worker rights, forced labour and supply chains."
+      ],
       "details": {
         "claim_eval": {
           "claim_score": 1.0,
@@ -1733,14 +1774,20 @@
       "included_in_final_accuracy": false,
       "adjudication_scope": "DIAGNOSTIC_ONLY",
       "evaluation_type": "External source attribution + numeric comparison",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.6,
-      "verdict": "PARTIAL",
-      "notes": "External ILO report/source metadata is not sufficiently verified or snapshotted. Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 10.91,
+      "score": 0.667,
+      "verdict": "NOT_ADJUDICATED",
+      "notes": "Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.",
       "question": "Search for the latest ILO report on forced labour in the ICT sector and compare it to the average KTC Remedy score (7/100).",
-      "answer": "The latest ILO report relevant to forced labour in the ICT sector appears to be the \"ILO Indicators of Forced Labour 2025,\" which provides updated practical tools and indicators to detect forced labour. This report was released recently and focuses on advancing social justice and decent work.\n\nComparing this to the KnowTheChain (KTC) dataset, the average Remedy score across companies is about 7 out of 100 (mean 6.98, std dev 9.99), indicating very low average performance in remedying forced labour issues in the ICT supply chains.\n\nThis suggests that despite the availability of updated ILO guidance and indicators, the actual implementation and remedy efforts by companies in the ICT sector remain quite limited on average.",
-      "retrieved_contexts": [],
+      "answer": "The latest ILO report on forced labour in the ICT sector includes several key documents:\n\n1. **ILO Indicators of Forced Labour (2025 Revised Edition)** - This report provides practical tools for frontline actors to detect forced labour, highlighting common indicators and their interpretation. [Read more here](https://www.ilo.org/publications/ilo-indicators-forced-labour-1).\n\n2. **Forced Labour: A Synthesis Report (2024)** - This report advances the quantification of forced labour across various sectors, including ICT. [Access the report here](https://www.ilo.org/sites/default/files/2024-07/Forced+Labour+-+A+synthesis+report.pdf).\n\n3. **New Analysis on Forced Labour Risks in Tech** - This analysis emphasizes the ongoing risks of forced labour in tech industry supply chains, referencing the KnowTheChain ICT Benchmark 2025. [Find the analysis here](https://www.business-humanrights.org/en/from-us/press-releases/new-analysis-forced-labour-remains-a-huge-risk-in-tech-industry-supply-chains/).\n\n### Comparison with KTC Remedy Score\nThe average KTC Remedy score is approximately **6.98** out of 100, which is very close to the reported average of **7/100**. This score indicates a significant gap in effective grievance mechanisms and remedies for workers, reflecting a concerning reality where many workers may lack access to adequate support and protection against forced labour practices.\n\n### Ethical Reflection\nThe low average Remedy score suggests that many companies may not be providing sufficient mechanisms for workers to report grievances or seek redress. This can lead to real-world risks for workers, including exploitation and abuse, particularly in high-risk sectors like ICT. The findings from the ILO reports highlight the urgent need for companies to improve their practices and ensure that workers' rights are respected and protected.",
+      "retrieved_contexts": [
+        "Choose From Thousands Of Reports Written By Mintel's Expert Analysts. Stay Ahead Of The Competition With The Latest Industry Research Reports . Independant Analysis · High Quality Insights · Expert Recommendations · Credible Data",
+        "Nov 18, 2025 · The revised 2025 edition of the ILO Indicators of Forced Labour provides frontline actors with practical tools to detect forced labour . Grounded in decades of research, it highlights the most common indicators and explains how to interpret them in real-world contexts.",
+        "Attribution – The user must indicate if changes were made and must cite the work as follows: ILO , Forced labour : A synthesis report – Advances in quantifying forced labour across the world and sectors, Geneva: International Labour Office, 2024. © ILO .",
+        "Apr 2, 2025 · The analysis comes from our KnowTheChain ICT Benchmark 2025, a critical tool for businesses and investors to identify and assess forced labour risks and impacts in supply chains using a range of indicators including: recruitment, purchasing and monitoring practices, and workers’ rights to organise.",
+        "Jan 1, 2025 · The 2025 revised edition of the ILO Indicators of Forced Labour , published by the International Labour Organization ( ILO ), is a practical guidance booklet designed to help frontline actors identify and respond to situations of forced labor by translating international legal standards into eleven observable indicators of coercion and lack of ..."
+      ],
       "details": {
         "deterministic_eval": {
           "numeric_metrics": {
@@ -1750,21 +1797,26 @@
               9.99
             ],
             "answer_numbers": [
-              7.0,
+              1.0,
+              -7.0,
               6.98,
-              9.99
+              7.0
             ],
             "numeric_found": [
               6.98,
-              7.0,
+              7.0
+            ],
+            "numeric_missing": [
               9.99
             ],
-            "numeric_missing": [],
-            "numeric_extra": [],
-            "numeric_precision": 1.0,
-            "numeric_recall": 1.0,
-            "numeric_f1": 1.0,
-            "mean_absolute_error_nearest": 0.0,
+            "numeric_extra": [
+              1.0,
+              -7.0
+            ],
+            "numeric_precision": 0.5,
+            "numeric_recall": 0.667,
+            "numeric_f1": 0.571,
+            "mean_absolute_error_nearest": 0.9967,
             "numeric_tolerance": 0.01
           },
           "entity_metrics": {
@@ -1819,25 +1871,117 @@
               "required_claim": "External ILO source must be named, dated, and relevant to forced-labour indicators or ICT sector.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.727
+              "keyword_overlap": 0.545
             }
           ]
         },
         "rag_eval": {
           "is_rag_related": true,
-          "contexts_available": false,
-          "num_contexts": 0,
-          "context_precision": null,
-          "context_recall": null,
-          "answer_relevance": 0.762,
-          "faithfulness": null,
-          "faithfulness_details": null,
-          "answer_correctness": 0.952,
+          "contexts_available": true,
+          "num_contexts": 5,
+          "context_precision": 0.679,
+          "context_recall": 0.333,
+          "answer_relevance": 0.719,
+          "faithfulness": 0.765,
+          "faithfulness_details": {
+            "faithfulness": 0.765,
+            "supported_answer_claims": 13,
+            "total_answer_claims": 17,
+            "support_source": "retrieved_contexts",
+            "claim_support": [
+              {
+                "answer_claim": "The latest ILO report on forced labour in the ICT sector includes several key documents:",
+                "support_overlap": 0.6,
+                "supported": true
+              },
+              {
+                "answer_claim": "**ILO Indicators of Forced Labour (2025 Revised Edition)**",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "This report provides practical tools for frontline actors to detect forced labour, highlighting common indicators and their interpretation.",
+                "support_overlap": 0.786,
+                "supported": true
+              },
+              {
+                "answer_claim": "[Read more here](https://www.ilo.org/publications/ilo-indicators-forced-labour-1).",
+                "support_overlap": 0.4,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Forced Labour: A Synthesis Report (2024)**",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "This report advances the quantification of forced labour across various sectors, including ICT.",
+                "support_overlap": 0.75,
+                "supported": true
+              },
+              {
+                "answer_claim": "[Access the report here](https://www.ilo.org/sites/default/files/2024-07/Forced+Labour+-+A+synthesis+report.pdf).",
+                "support_overlap": 0.4,
+                "supported": true
+              },
+              {
+                "answer_claim": "**New Analysis on Forced Labour Risks in Tech**",
+                "support_overlap": 0.667,
+                "supported": true
+              },
+              {
+                "answer_claim": "This analysis emphasizes the ongoing risks of forced labour in tech industry supply chains, referencing the KnowTheChain ICT Benchmark 2025.",
+                "support_overlap": 0.733,
+                "supported": true
+              },
+              {
+                "answer_claim": "[Find the analysis here](https://www.business-humanrights.org/en/from-us/press-releases/new-analysis-forced-labour-remains-a-huge-risk-in-tech-industry-supply-chains/).",
+                "support_overlap": 0.3,
+                "supported": true
+              },
+              {
+                "answer_claim": "### Comparison with KTC Remedy Score",
+                "support_overlap": 0.0,
+                "supported": false
+              },
+              {
+                "answer_claim": "The average KTC Remedy score is approximately **6.98** out of 100, which is very close to the reported average of **7/100**.",
+                "support_overlap": 0.0,
+                "supported": false
+              },
+              {
+                "answer_claim": "This score indicates a significant gap in effective grievance mechanisms and remedies for workers, reflecting a concerning reality where many workers may lack access to adequate support and protection against forced labour practices.",
+                "support_overlap": 0.238,
+                "supported": true
+              },
+              {
+                "answer_claim": "### Ethical Reflection",
+                "support_overlap": 0.0,
+                "supported": false
+              },
+              {
+                "answer_claim": "The low average Remedy score suggests that many companies may not be providing sufficient mechanisms for workers to report grievances or seek redress.",
+                "support_overlap": 0.167,
+                "supported": false
+              },
+              {
+                "answer_claim": "This can lead to real-world risks for workers, including exploitation and abuse, particularly in high-risk sectors like ICT.",
+                "support_overlap": 0.538,
+                "supported": true
+              },
+              {
+                "answer_claim": "The findings from the ILO reports highlight the urgent need for companies to improve their practices and ensure that workers' rights are respected and protected.",
+                "support_overlap": 0.357,
+                "supported": true
+              }
+            ]
+          },
+          "answer_correctness": 0.841,
           "completeness": 1.0,
-          "unsupported_claim_rate": null,
-          "context_sufficiency": null,
-          "rag_composite": 0.937,
-          "rag_note": "retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."
+          "unsupported_claim_rate": 0.235,
+          "context_sufficiency": 0.471,
+          "rag_composite": 0.802,
+          "rag_note": "RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics."
         }
       }
     },
@@ -1845,18 +1989,24 @@
       "query_id": "R3",
       "query_number": 11,
       "agent_category": "Research Agent",
-      "answer_key_status": "NEEDS_CORRECTION",
+      "answer_key_status": "NEEDS_SOURCE_SNAPSHOT",
       "included_in_final_accuracy": false,
       "adjudication_scope": "DIAGNOSTIC_ONLY",
       "evaluation_type": "Consistency check + external validation",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.2,
-      "verdict": "FAIL",
-      "notes": "Critical error: answer validates Samsung = 79.5, but corrected KTC Total Benchmark is 61.00. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.",
-      "question": "Validate Samsung's top rank (79.5) by searching for recent news on its supply chain practices.",
-      "answer": "Samsung's top rank with a Total Benchmark score of 79.5 is supported by detailed disclosures and recent news on its supply chain practices in 2024:\n\n- Samsung has a comprehensive Supplier Code of Conduct prohibiting forced labor, child labor, and discrimination, with requirements for a healthy and safe working environment. However, there is some ambiguity about the protection of freedom of association in line with ILO standards versus local law.\n\n- The company provides extensive training programs to its suppliers, including online and in-person courses on labor rights, responsible recruitment, and ESG due diligence. In 2024, thousands of suppliers and workers participated in these trainings.\n\n- Samsung has organizational units dedicated to implementing human rights policies, conducting audits, and monitoring supplier compliance. It uses self-assessments, Samsung-led audits, and third-party audits, including specialized forced labor audits.\n\n- Samsung discloses detailed monitoring of working hours, grievance mechanisms, and remediation efforts. It reports specific cases where wage underpayments or recruitment fees were reimbursed to workers.\n\n- The company identifies forced labor risks in certain countries and supply chain tiers and has engaged with the International Organization for Migration (IOM) for training on forced labor risks of migrant workers.\n\n- Regarding allegations of Uyghur forced labor, Samsung has denied direct involvement with suppliers accused of such practices and has responded to inquiries from UN bodies. It discloses engagement with the Responsible Business Alliance (RBA) and ongoing due diligence but does not disclose detailed remediation outcomes or stakeholder engagement related to these allegations.\n\n- Samsung's supply chain transparency includes publishing first-tier supplier lists and smelter/refiner lists for conflict minerals, with audits covering a significant portion of suppliers.\n\nOverall, Samsung demonstrates a high level of disclosure, training, monitoring, and remediation efforts in its supply chain practices, which aligns with its high benchmark score. However, some areas such as freedom of association protections, cascading training beyond first-tier suppliers, and detailed remediation outcomes could be clearer.\n\nIf you want, I can provide more specific excerpts or details from the disclosures or news.",
-      "retrieved_contexts": [],
+      "mas_status": "SUCCESS",
+      "latency_seconds": 8.981,
+      "score": 0.667,
+      "verdict": "NOT_ADJUDICATED",
+      "notes": "Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.",
+      "question": "Validate Samsung's top rank in the KTC Total Benchmark dataset by searching for recent news on its supply chain practices.",
+      "answer": "Recent news articles highlight Samsung's proactive approach to supply chain management, which supports its strong ranking in the KTC Total Benchmark dataset. Here are some key points from the articles:\n\n1. **Sustainability Goals**: Samsung is integrating sustainability into its supply chain management, setting targets to reduce greenhouse gas emissions and encouraging suppliers to adopt environmentally responsible practices. [Read more here](https://procurementpro.com/samsung-electronics-supply-chain-a-closer-look/).\n\n2. **Stability in Supply Chains**: A regional executive stated that Samsung views its global supply chains as \"100% stable,\" indicating a recovery from previous disruptions. This stability is crucial for maintaining operational efficiency. [Read more here](https://www.thenationalnews.com/business/technology/2023/02/16/samsung-expects-smartphone-demand-to-grow-as-supply-chains-are-now-100-stable/).\n\n3. **Support for Suppliers**: Samsung aims to support its suppliers in building a competitive edge, which is part of its strategy to establish a sustainable supply chain. This approach not only strengthens its supply chain but also fosters a sound corporate ecosystem. [Read more here](https://procurementmag.com/articles/how-do-samsung-work-with-sustainable-suppliers).\n\nThese insights reflect Samsung's commitment to enhancing its supply chain practices, which likely contributes to its top rank in the KTC Total Benchmark dataset.",
+      "retrieved_contexts": [
+        "September 1, 2025 - Samsung integrates sustainability goals into its supply chain management . It sets targets to reduce greenhouse gas emissions, prioritises renewable energy adoption in its operations, and encourages suppliers to adopt environmentally responsible ...",
+        "February 9, 2026 - A complete production shift could ... chains for enhanced resilience. Industry Insight : A 2023 McKinsey survey revealed that 44% of companies are developing regionalized supply networks , up from 25% the previous year, indicating a significant shift towards regionalization in ...",
+        "January 21, 2026 - Geographical diversification is critical for Samsung’s supply chain, enabling it to build resilience against geopolitical disruptions, drive cost reductions, access new markets, and better serve its global customer base.",
+        "February 16, 2023 - Samsung Electronics, the world's biggest mobile phone manufacturer, sees global supply chains as being \" 100 per cent stable \" following a period of disruptions when company operations were hampered, according to a regional executive.",
+        "November 20, 2023 - As part of their supply chain management strategy, Samsung aims to support their suppliers to build a stronger competitive edge in order to establish a sound corporate ecosystem and a sustainable supply chain ."
+      ],
       "details": {
         "claim_eval": {
           "claim_score": 0.667,
@@ -1869,39 +2019,101 @@
               "required_claim": "Samsung's KTC Total Benchmark score is 61.00.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.75
+              "keyword_overlap": 1.0
             },
             {
               "claim_id": "R3-C2",
               "required_claim": "Samsung is the top-ranked company in the dataset if ranking by Total Benchmark score.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.571
+              "keyword_overlap": 0.857
             },
             {
               "claim_id": "R3-C3",
               "required_claim": "External evidence must include both supportive details and limitations where applicable.",
               "weight": 1.0,
               "covered_auto": false,
-              "keyword_overlap": 0.143
+              "keyword_overlap": 0.0
             }
           ]
         },
         "rag_eval": {
           "is_rag_related": true,
-          "contexts_available": false,
-          "num_contexts": 0,
-          "context_precision": null,
-          "context_recall": null,
-          "answer_relevance": 0.527,
-          "faithfulness": null,
-          "faithfulness_details": null,
-          "answer_correctness": 0.63,
+          "contexts_available": true,
+          "num_contexts": 5,
+          "context_precision": 0.756,
+          "context_recall": 0.667,
+          "answer_relevance": 0.627,
+          "faithfulness": 0.818,
+          "faithfulness_details": {
+            "faithfulness": 0.818,
+            "supported_answer_claims": 9,
+            "total_answer_claims": 11,
+            "support_source": "retrieved_contexts",
+            "claim_support": [
+              {
+                "answer_claim": "Recent news articles highlight Samsung's proactive approach to supply chain management, which supports its strong ranking in the KTC Total Benchmark dataset.",
+                "support_overlap": 0.278,
+                "supported": true
+              },
+              {
+                "answer_claim": "Here are some key points from the articles:",
+                "support_overlap": 0.0,
+                "supported": false
+              },
+              {
+                "answer_claim": "**Sustainability Goals**: Samsung is integrating sustainability into its supply chain management, setting targets to reduce greenhouse gas emissions and encouraging suppliers to adopt environmentally responsible practices.",
+                "support_overlap": 0.8,
+                "supported": true
+              },
+              {
+                "answer_claim": "[Read more here](https://procurementpro.com/samsung-electronics-supply-chain-a-closer-look/).",
+                "support_overlap": 0.364,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Stability in Supply Chains**: A regional executive stated that Samsung views its global supply chains as \"100% stable,\" indicating a recovery from previous disruptions.",
+                "support_overlap": 0.75,
+                "supported": true
+              },
+              {
+                "answer_claim": "This stability is crucial for maintaining operational efficiency.",
+                "support_overlap": 0.0,
+                "supported": false
+              },
+              {
+                "answer_claim": "[Read more here](https://www.thenationalnews.com/business/technology/2023/02/16/samsung-expects-smartphone-demand-to-grow-as-supply-chains-are-now-100-stable/).",
+                "support_overlap": 0.316,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Support for Suppliers**: Samsung aims to support its suppliers in building a competitive edge, which is part of its strategy to establish a sustainable supply chain.",
+                "support_overlap": 0.929,
+                "supported": true
+              },
+              {
+                "answer_claim": "This approach not only strengthens its supply chain but also fosters a sound corporate ecosystem.",
+                "support_overlap": 0.6,
+                "supported": true
+              },
+              {
+                "answer_claim": "[Read more here](https://procurementmag.com/articles/how-do-samsung-work-with-sustainable-suppliers).",
+                "support_overlap": 0.3,
+                "supported": true
+              },
+              {
+                "answer_claim": "These insights reflect Samsung's commitment to enhancing its supply chain practices, which likely contributes to its top rank in the KTC Total Benchmark dataset.",
+                "support_overlap": 0.235,
+                "supported": true
+              }
+            ]
+          },
+          "answer_correctness": 0.697,
           "completeness": 0.667,
-          "unsupported_claim_rate": null,
-          "context_sufficiency": null,
-          "rag_composite": 0.63,
-          "rag_note": "retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."
+          "unsupported_claim_rate": 0.182,
+          "context_sufficiency": 0.703,
+          "rag_composite": 0.698,
+          "rag_note": "RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics."
         }
       }
     },
@@ -1913,14 +2125,20 @@
       "included_in_final_accuracy": false,
       "adjudication_scope": "DIAGNOSTIC_ONLY",
       "evaluation_type": "Numeric + external comparability",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.55,
-      "verdict": "FAIL",
-      "notes": "External comparison lacks reproducible benchmark, date, units, and source details. Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 8.448,
+      "score": 0.681,
+      "verdict": "NOT_ADJUDICATED",
+      "notes": "Answer-key status is NEEDS_SOURCE_SNAPSHOT; this row is diagnostic only and excluded from final accuracy.",
       "question": "Fetch external data on global average market cap for ICT semiconductors and compare to KTC dataset average.",
-      "answer": "The external data from recent web sources indicates that the global semiconductor industry is dominated by a few large companies with significant market capitalizations, such as Nvidia, Samsung Electronics, and Intel, with market cap shares varying widely.\n\nFrom the KnowTheChain (KTC) dataset, the average Market Cap for companies in the ICT semiconductors sector is approximately 186.94 (units not specified, likely billion USD or similar), with a high standard deviation of 485.36, indicating a wide range of company sizes.\n\nIn summary, the KTC dataset's average market cap aligns with the presence of both very large and smaller semiconductor companies, reflecting the industry's market cap distribution seen in external data sources.",
-      "retrieved_contexts": [],
+      "answer": "The global semiconductor market is projected to reach a total value of approximately **$700.9 billion** in 2025, with the combined global market capitalization exceeding **$12 trillion** across the sector. \n\nIn comparison, the average market capitalization for companies in the KTC dataset is approximately **$186.94 million**, with a standard deviation of **$485.36 million**. \n\nThis indicates a significant disparity between the average market cap of companies in the KTC dataset and the overall market capitalization of the global semiconductor industry. The KTC dataset reflects a much smaller scale of market capitalization compared to the broader industry figures.",
+      "retrieved_contexts": [
+        "Client-Ready Financial Charts and Market Insights Ready for Download. High-Impact Visuals That Help You Break Down Market Trends — New Charts Added Monthly. Investment Insights · Connect With Clients · New Charts Each Month · Long-Term Perspective",
+        "Our solutions aim to meet the unique needs of institutional investors around the world. Explore our collection of market insights from our thought leaders. Driven by research. Open Architecture · Customization · Technicals & Volatility · 650+ Investment Staff Types : Mutual Funds, Exchange-Traded Funds, Managed Accounts, Model Portfolios, 529 Plans",
+        "Dec 9, 2025 · In 2025 , the combined global market capitalization has exceeded USD 12 trillion, reflecting the sector's central role in enabling artificial intelligence, high-performance computing, autonomous systems, and next-generation connectivity.",
+        "Following a strong rebound in 2024, the global semiconductor market is projected to expand by 11.2% in 2025 , reaching a total value of $700.9 billion. This confirms WSTS's outlook for sustained industry growth.",
+        "Dec 17, 2025 · With the semiconductor market expected to approach 700 billion U.S. dollars in 2025 , these AI drivers are set to launch semiconductor companies further into the global spotlight."
+      ],
       "details": {
         "deterministic_eval": {
           "numeric_metrics": {
@@ -1929,6 +2147,8 @@
               485.36
             ],
             "answer_numbers": [
+              700.9,
+              12.0,
               186.94,
               485.36
             ],
@@ -1937,26 +2157,23 @@
               485.36
             ],
             "numeric_missing": [],
-            "numeric_extra": [],
-            "numeric_precision": 1.0,
+            "numeric_extra": [
+              700.9,
+              12.0
+            ],
+            "numeric_precision": 0.5,
             "numeric_recall": 1.0,
-            "numeric_f1": 1.0,
+            "numeric_f1": 0.667,
             "mean_absolute_error_nearest": 0.0,
             "numeric_tolerance": 0.01
           },
           "entity_metrics": {
             "expected_entities": [],
-            "predicted_entities": [
-              "NVIDIA Corp.",
-              "Samsung Electronics Co. Ltd."
-            ],
+            "predicted_entities": [],
             "entity_true_positive": [],
             "entity_missing": [],
-            "entity_extra": [
-              "NVIDIA Corp.",
-              "Samsung Electronics Co. Ltd."
-            ],
-            "entity_precision": 0.0,
+            "entity_extra": [],
+            "entity_precision": 1.0,
             "entity_recall": null,
             "entity_f1": null
           },
@@ -1979,19 +2196,46 @@
         },
         "rag_eval": {
           "is_rag_related": true,
-          "contexts_available": false,
-          "num_contexts": 0,
-          "context_precision": null,
-          "context_recall": null,
-          "answer_relevance": 0.68,
-          "faithfulness": null,
-          "faithfulness_details": null,
-          "answer_correctness": 0.858,
+          "contexts_available": true,
+          "num_contexts": 5,
+          "context_precision": 0.478,
+          "context_recall": 0.5,
+          "answer_relevance": 0.52,
+          "faithfulness": 1.0,
+          "faithfulness_details": {
+            "faithfulness": 1.0,
+            "supported_answer_claims": 4,
+            "total_answer_claims": 4,
+            "support_source": "retrieved_contexts",
+            "claim_support": [
+              {
+                "answer_claim": "The global semiconductor market is projected to reach a total value of approximately **$700.9 billion** in 2025, with the combined global market capitalization exceeding **$12 trillion** across the sector.",
+                "support_overlap": 0.867,
+                "supported": true
+              },
+              {
+                "answer_claim": "In comparison, the average market capitalization for companies in the KTC dataset is approximately **$186.94 million**, with a standard deviation of **$485.36 million**.",
+                "support_overlap": 0.2,
+                "supported": true
+              },
+              {
+                "answer_claim": "This indicates a significant disparity between the average market cap of companies in the KTC dataset and the overall market capitalization of the global semiconductor industry.",
+                "support_overlap": 0.417,
+                "supported": true
+              },
+              {
+                "answer_claim": "The KTC dataset reflects a much smaller scale of market capitalization compared to the broader industry figures.",
+                "support_overlap": 0.25,
+                "supported": true
+              }
+            ]
+          },
+          "answer_correctness": 0.863,
           "completeness": null,
-          "unsupported_claim_rate": null,
-          "context_sufficiency": null,
-          "rag_composite": 0.68,
-          "rag_note": "retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."
+          "unsupported_claim_rate": 0.0,
+          "context_sufficiency": 0.491,
+          "rag_composite": 0.681,
+          "rag_note": "RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics."
         }
       }
     },
@@ -1999,37 +2243,65 @@
       "query_id": "P1",
       "query_number": 13,
       "agent_category": "Prediction Agent",
-      "answer_key_status": "NEEDS_CORRECTION",
-      "included_in_final_accuracy": false,
-      "adjudication_scope": "DIAGNOSTIC_ONLY",
+      "answer_key_status": "CLEAN_WITH_METHOD_NOTE",
+      "included_in_final_accuracy": true,
+      "adjudication_scope": "FINAL",
       "evaluation_type": "Scenario-modelling validity",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.066,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 3.59,
+      "score": 0.333,
       "verdict": "FAIL",
-      "notes": "Uses undocumented Remedy coefficient 1.211 / 12.11-point increase. Does not provide a valid requested 2027 rank and lacks rank-distribution assumptions. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.",
+      "notes": "",
       "question": "Based on historical ranks (e.g., Amazon 2022 rank 8, 2025 rank 10), predict Amazon's 2027 rank if it improves Remedy by 10 points.",
-      "answer": "Amazon's current Remedy score is approximately 8. If Amazon improves its Remedy score by 10 points, the expected increase in its Total Benchmark score can be estimated using the regression coefficient of about 1.211 per one-point change in Remedy.\n\nThe expected increase in Total Benchmark = 1.211 × 10 = 12.11 points.\n\nTo predict Amazon's 2027 rank based on this improvement, I would need the current Total Benchmark score and the distribution of scores/ranks of other companies for comparison. Could you please provide Amazon's current Total Benchmark score or historical ranks with corresponding scores? Alternatively, I can retrieve Amazon's current Total Benchmark score and the top companies' scores to estimate the rank change. Would you like me to do that?",
+      "answer": "If Amazon improves its Remedy score by 10 points, the estimated change in its Total Benchmark score would be approximately +1.02 points, resulting in a new Total Benchmark score of around 28.02. \n\nHowever, I cannot predict Amazon's 2027 rank based solely on this score change, as future score distributions and ranking assumptions are necessary for such a prediction.",
       "retrieved_contexts": [],
       "details": {
-        "fallback_lexical_similarity": 0.066
+        "claim_eval": {
+          "claim_score": 0.333,
+          "completeness": 0.333,
+          "covered_claims": 1,
+          "total_claims": 3,
+          "claim_results": [
+            {
+              "claim_id": "P1-C1",
+              "required_claim": "Amazon's 2027 rank cannot be predicted without baseline Total Benchmark score and rank-distribution assumptions.",
+              "weight": 1.0,
+              "covered_auto": true,
+              "keyword_overlap": 0.727
+            },
+            {
+              "claim_id": "P1-C2",
+              "required_claim": "Any score-effect estimate must state the coefficient source and compute score increase as coefficient times 10.",
+              "weight": 1.0,
+              "covered_auto": false,
+              "keyword_overlap": 0.111
+            },
+            {
+              "claim_id": "P1-C3",
+              "required_claim": "If using Article Table 8 Remedy coefficient 0.1019, plus 10 Remedy implies approximately plus 1.019 Total Benchmark points, not plus 12.11.",
+              "weight": 1.0,
+              "covered_auto": false,
+              "keyword_overlap": 0.4
+            }
+          ]
+        }
       }
     },
     {
       "query_id": "P2",
       "query_number": 14,
       "agent_category": "Prediction Agent",
-      "answer_key_status": "NEEDS_CORRECTION",
-      "included_in_final_accuracy": false,
-      "adjudication_scope": "DIAGNOSTIC_ONLY",
+      "answer_key_status": "CLEAN_WITH_METHOD_NOTE",
+      "included_in_final_accuracy": true,
+      "adjudication_scope": "FINAL",
       "evaluation_type": "Formula-based numeric projection",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.0,
-      "verdict": "FAIL",
-      "notes": "Uses four compounding periods; corrected 2025→2027 projection is 22.29. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 2.52,
+      "score": 1.0,
+      "verdict": "PASS",
+      "notes": "",
       "question": "Project the industry average Total Benchmark Score for 2027 if scores increase by 5% annually.",
-      "answer": "The projected industry average Total Benchmark Score for 2027, assuming a 5% annual increase from the current average of 20.22 in 2023, is approximately 24.58.",
+      "answer": "The projected industry average Total Benchmark Score for 2027, assuming a 5% annual increase, is approximately **22.29**.",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -2046,28 +2318,27 @@
             ],
             "answer_numbers": [
               5.0,
-              20.22,
-              24.58
+              22.29
             ],
             "numeric_found": [
-              20.22,
-              20.22,
-              24.58
+              22.29
             ],
             "numeric_missing": [
+              20.22,
               1.05,
               2.0,
-              22.29,
+              20.22,
               1.05,
-              4.0
+              4.0,
+              24.58
             ],
             "numeric_extra": [
               5.0
             ],
-            "numeric_precision": 0.667,
-            "numeric_recall": 0.375,
-            "numeric_f1": 0.48,
-            "mean_absolute_error_nearest": 1.7463,
+            "numeric_precision": 0.5,
+            "numeric_recall": 0.125,
+            "numeric_f1": 0.2,
+            "mean_absolute_error_nearest": 2.2912,
             "numeric_tolerance": 0.01
           },
           "entity_metrics": {
@@ -2096,6 +2367,35 @@
             "unit_issue": false,
             "unit_issue_type": null
           }
+        },
+        "claim_eval": {
+          "claim_score": 0.0,
+          "completeness": 0.0,
+          "covered_claims": 0,
+          "total_claims": 3,
+          "claim_results": [
+            {
+              "claim_id": "P2-C1",
+              "required_claim": "For 2025 to 2027, the projection uses two compounding periods.",
+              "weight": 1.0,
+              "covered_auto": false,
+              "keyword_overlap": 0.143
+            },
+            {
+              "claim_id": "P2-C2",
+              "required_claim": "The calculation is 20.22 multiplied by 1.05 squared, producing approximately 22.29.",
+              "weight": 1.0,
+              "covered_auto": false,
+              "keyword_overlap": 0.0
+            },
+            {
+              "claim_id": "P2-C3",
+              "required_claim": "A result of approximately 24.58 is valid only if four annual periods are explicitly assumed.",
+              "weight": 1.0,
+              "covered_auto": false,
+              "keyword_overlap": 0.125
+            }
+          ]
         }
       }
     },
@@ -2103,17 +2403,17 @@
       "query_id": "P3",
       "query_number": 15,
       "agent_category": "Prediction Agent",
-      "answer_key_status": "NEEDS_CORRECTION",
-      "included_in_final_accuracy": false,
-      "adjudication_scope": "DIAGNOSTIC_ONLY",
+      "answer_key_status": "CLEAN_WITH_METHOD_NOTE",
+      "included_in_final_accuracy": true,
+      "adjudication_scope": "FINAL",
       "evaluation_type": "Scenario numeric calculation",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.0,
-      "verdict": "FAIL",
-      "notes": "Incorrectly uses North America Purchasing Practices = 45 and inflated +17.2 result. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.",
-      "question": "Model score improvement for Asian companies if they match North America's avg Purchasing Practices (45).",
-      "answer": "If Asian companies improve their average Purchasing Practices score from the current 5.31 to match North America's average of 45, their Total Benchmark score could increase by approximately 17.2 points on average. This estimate is based on a linear regression model linking Purchasing Practices improvements to Total Benchmark score changes.",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 7.544,
+      "score": 1.0,
+      "verdict": "PASS",
+      "notes": "",
+      "question": "Model score improvement for Asian companies if they match North America's average Purchasing Practices score. (5.77)",
+      "answer": "To model the score improvement for Asian companies if they match North America's average Purchasing Practices score of 5.77:\n\n- **Current Asia average**: 5.31\n- **Target score**: 5.77\n- **Required improvement (Delta)**: +0.46 points\n\nUsing the coefficient from Article Table 8 for Purchasing Practices (0.0792), the estimated impact on the Total Benchmark score would be:\n\n- **Estimated Total Benchmark impact**: \\(0.46 \\times 0.0792 = +0.036\\) points.\n\nThis indicates that if Asian companies improve their Purchasing Practices to match North America's average, it could lead to a small increase of approximately 0.036 points in their Total Benchmark score. This is a scenario-based estimate and should not be interpreted as a causal prediction.",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -2129,14 +2429,19 @@
               0.036
             ],
             "answer_numbers": [
+              5.77,
               5.31,
-              45.0,
-              17.2
+              5.77,
+              0.46,
+              8.0,
+              0.0792,
+              0.46,
+              0.0792,
+              0.036,
+              0.036
             ],
             "numeric_found": [
-              5.31
-            ],
-            "numeric_missing": [
+              5.31,
               5.77,
               0.46,
               8.0,
@@ -2145,14 +2450,15 @@
               0.0792,
               0.036
             ],
+            "numeric_missing": [],
             "numeric_extra": [
-              45.0,
-              17.2
+              5.77,
+              0.036
             ],
-            "numeric_precision": 0.333,
-            "numeric_recall": 0.125,
-            "numeric_f1": 0.182,
-            "mean_absolute_error_nearest": 3.5732,
+            "numeric_precision": 0.8,
+            "numeric_recall": 1.0,
+            "numeric_f1": 0.889,
+            "mean_absolute_error_nearest": 0.0,
             "numeric_tolerance": 0.01
           },
           "entity_metrics": {
@@ -2181,6 +2487,42 @@
             "unit_issue": false,
             "unit_issue_type": null
           }
+        },
+        "claim_eval": {
+          "claim_score": 1.0,
+          "completeness": 1.0,
+          "covered_claims": 4,
+          "total_claims": 4,
+          "claim_results": [
+            {
+              "claim_id": "P3-C1",
+              "required_claim": "Asia Purchasing Practices average is 5.31.",
+              "weight": 1.0,
+              "covered_auto": true,
+              "keyword_overlap": 1.0
+            },
+            {
+              "claim_id": "P3-C2",
+              "required_claim": "North America Purchasing Practices average is 5.77, not 45.",
+              "weight": 1.0,
+              "covered_auto": true,
+              "keyword_overlap": 1.0
+            },
+            {
+              "claim_id": "P3-C3",
+              "required_claim": "The Purchasing Practices difference is 0.46.",
+              "weight": 1.0,
+              "covered_auto": true,
+              "keyword_overlap": 0.667
+            },
+            {
+              "claim_id": "P3-C4",
+              "required_claim": "Using coefficient 0.0792, expected Total Benchmark improvement is approximately 0.036 points.",
+              "weight": 1.0,
+              "covered_auto": true,
+              "keyword_overlap": 0.875
+            }
+          ]
         }
       }
     },
@@ -2188,17 +2530,17 @@
       "query_id": "P4",
       "query_number": 16,
       "agent_category": "Prediction Agent",
-      "answer_key_status": "NEEDS_CORRECTION",
-      "included_in_final_accuracy": false,
-      "adjudication_scope": "DIAGNOSTIC_ONLY",
+      "answer_key_status": "CLEAN_WITH_METHOD_NOTE",
+      "included_in_final_accuracy": true,
+      "adjudication_scope": "FINAL",
       "evaluation_type": "Scenario validity + formula",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.0,
-      "verdict": "FAIL",
-      "notes": "Uses unsupported/inconsistent coefficient and does not define intervention delta. Answer-key status is NEEDS_CORRECTION; this row is diagnostic only and excluded from final accuracy.",
-      "question": "Predict the impact on Apple's score if it addresses Uyghur forced labour allegations (from data).",
-      "answer": "If Apple addresses the Uyghur forced labour allegations by improving its Traceability Risk score, the impact on its Total Benchmark score can be estimated using the regression coefficient of about 0.703. This means that for each one-point improvement in Apple's Traceability Risk score, its Total Benchmark score is expected to increase by approximately 0.703 points. Currently, Apple's Traceability Risk score is around 50. So, any positive change in this indicator would proportionally raise its overall benchmark score.",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 6.587,
+      "score": 0.667,
+      "verdict": "PARTIAL",
+      "notes": "",
+      "question": "Predict the impact on Apple's score if it addresses Uyghur forced labour allegations from data.",
+      "answer": "The analysis indicates that Apple's Total Benchmark score is correlated with its Traceability Risk, with a coefficient of 0.2412 from Article Table 8. However, to quantify the impact on Apple's score if it addresses the Uyghur forced labour allegations, we need to define a specific change in the Traceability Risk score (delta_points).\n\nCurrently, Apple's Traceability Risk score is 50, and its Total Benchmark score is 46. If you can provide an assumed change in the Traceability Risk score (e.g., how many points you expect it to improve), I can then calculate the potential impact on Apple's Total Benchmark score.",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -2209,25 +2551,25 @@
               0.2412
             ],
             "answer_numbers": [
-              0.703,
-              0.703,
-              50.0
+              0.2412,
+              8.0,
+              50.0,
+              46.0
             ],
-            "numeric_found": [],
-            "numeric_missing": [
+            "numeric_found": [
               8.0,
               0.2412,
               0.2412
             ],
+            "numeric_missing": [],
             "numeric_extra": [
-              0.703,
-              0.703,
-              50.0
+              50.0,
+              46.0
             ],
-            "numeric_precision": 0.0,
-            "numeric_recall": 0.0,
-            "numeric_f1": 0.0,
-            "mean_absolute_error_nearest": 2.7402,
+            "numeric_precision": 0.5,
+            "numeric_recall": 1.0,
+            "numeric_f1": 0.667,
+            "mean_absolute_error_nearest": 0.0,
             "numeric_tolerance": 0.01
           },
           "entity_metrics": {
@@ -2260,6 +2602,35 @@
             "unit_issue": false,
             "unit_issue_type": null
           }
+        },
+        "claim_eval": {
+          "claim_score": 0.667,
+          "completeness": 0.667,
+          "covered_claims": 2,
+          "total_claims": 3,
+          "claim_results": [
+            {
+              "claim_id": "P4-C1",
+              "required_claim": "The intervention size must be defined before Apple's score impact can be quantified.",
+              "weight": 1.0,
+              "covered_auto": false,
+              "keyword_overlap": 0.286
+            },
+            {
+              "claim_id": "P4-C2",
+              "required_claim": "If using Traceability and Risk Assessment coefficient 0.2412, Total Benchmark increase equals 0.2412 times delta Traceability Risk.",
+              "weight": 1.0,
+              "covered_auto": true,
+              "keyword_overlap": 0.636
+            },
+            {
+              "claim_id": "P4-C3",
+              "required_claim": "The answer must not infer a fixed numerical impact from addressing Uyghur forced labour allegations alone.",
+              "weight": 1.0,
+              "covered_auto": true,
+              "keyword_overlap": 0.5
+            }
+          ]
         }
       }
     },
@@ -2271,19 +2642,19 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Claim-level synthesis",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 1.0,
-      "verdict": "PASS",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 38.356,
+      "score": 0.833,
+      "verdict": "PARTIAL",
       "notes": "",
       "question": "Synthesise key insights on top 5 companies' strengths and weaknesses from Scoring sheet.",
-      "answer": "Here is a synthesis of key insights on strengths and weaknesses for the top 5 companies by Total Benchmark score from the Scoring sheet:\n\n1. Samsung Electronics Co. Ltd. (Score: 61)\n   Strengths:\n   - Comprehensive supplier code of conduct prohibiting forced labor, child labor, and discrimination.\n   - Extensive supplier training programs including online and in-person sessions covering labor rights, responsible recruitment, and ESG due diligence.\n   - Strong organizational structure for supply chain human rights management with dedicated teams and executive oversight.\n   - Detailed supplier lists and conflict minerals due diligence with audits and risk identification.\n   - Monitoring includes self-assessments, audits (including specialized forced labor audits), and grievance mechanisms.\n   - Active remediation examples including repayment of recruitment fees and corrective actions at suppliers.\n   \n   Weaknesses:\n   - Ambiguity in policy language regarding freedom of association and collective bargaining rights.\n   - Limited disclosure on cascading training and capacity building beyond first-tier suppliers.\n   - Limited transparency on engagement with workers and their representatives in remedy processes.\n   - Monitoring beyond first-tier suppliers is limited and not fully disclosed.\n   - No clear evidence of worker-driven monitoring or involvement in grievance mechanism design.\n   - Some allegations of Uyghur forced labor linked to suppliers, with limited disclosed response details.\n\n2. Hewlett Packard Enterprise Co. (HPE) (Score: 53)\n   Strengths:\n   - Supplier code aligned with RBA standards, including respect for freedom of association and alternative worker representation.\n   - Extensive supplier training covering forced labor risks, including tier 1 and tier 2 suppliers.\n   - Dedicated Social and Environmental Responsibility (SER) team and executive-level Ethics and Compliance Committee oversight.\n   - Risk mapping includes external expert data and stakeholder engagement.\n   - Supplier monitoring includes audits covering tier 1 and tier 2 suppliers, with some unannounced audits.\n   - Clear migrant worker standards with reimbursement of recruitment fees and use of tools to assess recruitment agencies.\n   - Some examples of engagement with unions and NGOs to address worker concerns.\n   \n   Weaknesses:\n   - Limited disclosure on purchasing practices and pricing to cover full production costs.\n   - Limited transparency on grievance resolution processes and outcomes.\n   - Limited disclosure on worker involvement in grievance mechanism design or monitoring.\n   - Some allegations of sourcing from Xinjiang-linked gold mines with limited disclosed responses.\n\n3. Cisco Systems Inc. (Score: 51)\n   Strengths:\n   - Adoption of RBA Code of Conduct with supplier cascading requirements.\n   - Regular supplier training on code fundamentals and forced labor risk identification.\n   - Board-level oversight through an Environmental, Social, and Public Policy Committee.\n   - Supplier list disclosure covering 80% of spend and conflict minerals due diligence.\n   - Risk assessments include social and environmental factors and human rights impact assessments with worker interviews.\n   - Active remediation of recruitment fees with millions reimbursed to workers.\n   - Use of third-party audits including unannounced audits and focused assessments.\n   - Grievance mechanisms accessible to supply chain workers with some reported cases addressed.\n   \n   Weaknesses:\n   - Limited disclosure on purchasing practices and living wage strategies.\n   - Limited transparency on worker involvement in grievance mechanism design.\n   - Some allegations of Uyghur forced labor linked to suppliers with limited disclosed responses.\n\n4. HP Inc. (Score: 48)\n   Strengths:\n   - Supplier code prohibiting forced labor and requiring respect for freedom of association.\n   - Extensive supplier and worker training programs including Human Rights 101 and responsible recruitment.\n   - Dedicated human rights team with board oversight through a Human Rights Council.\n   - Supplier list disclosure covering 95% of first-tier production suppliers.\n   - Risk assessments include external stakeholder engagement and human rights impact assessments in key countries.\n   - Use of audits including RBA VAP and SA8000 covering a large portion of suppliers.\n   - Active remediation including repayment of recruitment fees and addressing grievances.\n   - Partnerships with NGOs for worker voice and grievance mechanisms.\n   \n   Weaknesses:\n   - Limited disclosure on purchasing practices and living wage implementation.\n   - Limited transparency on worker involvement in grievance mechanism design beyond limited NGO partnerships.\n   - Some allegations of forced labor and poor labor conditions at suppliers with limited disclosed responses.\n\n5. Apple Inc. (Score: 46)\n   Strengths:\n   - Supplier code prohibiting forced labor and requiring cascading to sub-tier suppliers.\n   - Developed Responsible Labor Recruitment Due Diligence Toolkit with extensive training reach.\n   - Dedicated cross-functional teams for human rights due diligence and board oversight.\n   - Supplier list covering 98% of direct spend and conflict minerals due diligence with third-party audits.\n   - Risk assessments include multiple data sources and worker voice dashboard monitoring.\n   - Active remediation including repayment of recruitment fees and corrective actions at suppliers.\n   - Grievance mechanisms with broad communication campaigns reaching hundreds of thousands of workers.\n   \n   Weaknesses:\n   - Supplier code limits freedom of association to local law compliance without alternative organizing rights.\n   - Limited disclosure on capacity building for suppliers beyond first tier.\n   - Limited transparency on worker involvement in grievance mechanism design or remedy processes.\n   - Some allegations of Uyghur forced labor linked to suppliers with limited disclosed responses.\n\nSummary:\nAll top companies demonstrate strong policies prohibiting forced labor, extensive training programs, and active monitoring and remediation efforts. They also show board-level oversight and some level of stakeholder engagement. Common weaknesses include limited transparency on cascading capacity building beyond first-tier suppliers, limited worker involvement in grievance mechanism design and remedy processes, and limited disclosure on purchasing practices and living wage strategies. Allegations related to Uyghur forced labor appear across several companies with limited detailed responses disclosed.\n\nIf you want, I can provide more detailed insights on any specific company or theme.",
+      "answer": "Here are the key insights on the strengths and weaknesses of the top 5 companies based on the 2025 KnowTheChain ICT benchmark:\n\n### 1. **Samsung Electronics Co. Ltd.**\n   - **Strengths:**\n     - **Recruitment Practices:** Samsung leads in recruitment practices with a score of 84.00, indicating strong policies and training for suppliers on labor rights.\n     - **Monitoring:** The company has a robust monitoring system in place, scoring 50.00, which includes regular audits and training for suppliers.\n     - **Remedy Mechanisms:** Samsung has a relatively high score of 40.00 in remedy, indicating some effectiveness in addressing grievances and ensuring worker rights.\n   - **Weaknesses:**\n     - **Freedom of Association:** There are concerns regarding the clarity of policies on freedom of association, particularly in contexts where local laws restrict such rights.\n     - **Transparency:** While Samsung discloses training and monitoring efforts, there is limited information on how these efforts translate into tangible improvements for workers in lower tiers of the supply chain.\n\n### 2. **Hewlett Packard Enterprise Co. (HPE)**\n   - **Strengths:**\n     - **Training and Capacity Building:** HPE conducts extensive training for suppliers, covering forced labor and human rights due diligence, reaching a significant percentage of its supply chain.\n     - **Governance Structure:** The company has a dedicated team overseeing human rights issues, ensuring that policies are integrated into business operations.\n   - **Weaknesses:**\n     - **Grievance Mechanisms:** There is a lack of transparency regarding the effectiveness of grievance mechanisms, with limited data on how grievances are resolved.\n     - **Engagement with Workers:** HPE does not disclose sufficient engagement with workers or their representatives in the design and implementation of its human rights policies.\n\n### 3. **Cisco Systems Inc.**\n   - **Strengths:**\n     - **Adoption of RBA Code:** Cisco has adopted the Responsible Business Alliance (RBA) code, which includes strong provisions against forced labor.\n     - **Training Initiatives:** The company actively trains suppliers on the RBA code and forced labor risks, demonstrating a commitment to improving supplier practices.\n   - **Weaknesses:**\n     - **Limited Transparency on Audits:** Cisco does not provide detailed information on the percentage of unannounced audits or the effectiveness of its monitoring processes.\n     - **Engagement with Affected Workers:** There is insufficient evidence of direct engagement with affected workers in the grievance resolution process.\n\n### 4. **HP Inc.**\n   - **Strengths:**\n     - **Comprehensive Supplier Code:** HP's supplier code prohibits forced labor and requires respect for workers' rights, including freedom of association.\n     - **Training and Awareness:** The company has implemented extensive training programs for workers on their rights and responsibilities, reaching a large number of supply chain employees.\n   - **Weaknesses:**\n     - **Grievance Mechanisms:** HP's grievance mechanisms lack clarity and transparency, particularly regarding how grievances are addressed and resolved.\n     - **Engagement with Lower Tiers:** There is limited information on how HP engages with lower-tier suppliers and ensures compliance with its standards.\n\n### 5. **Apple Inc.**\n   - **Strengths:**\n     - **Strong Supplier Code:** Apple's supplier code includes robust provisions against forced labor and mandates that workers should not pay recruitment fees.\n     - **Training Initiatives:** The company has invested significantly in training programs for workers and labor agents, enhancing awareness of rights and responsibilities.\n   - **Weaknesses:**\n     - **Allegations of Forced Labor:** Apple faces serious allegations regarding the use of forced labor in its supply chain, particularly related to Uyghur labor.\n     - **Transparency Issues:** There is a lack of transparency regarding the effectiveness of its grievance mechanisms and how worker feedback is integrated into policy improvements.\n\n### Conclusion\nWhile these companies demonstrate strengths in various areas of labor rights and supply chain management, they also face significant challenges, particularly in transparency, engagement with workers, and addressing allegations of forced labor. Continuous improvement in these areas is essential to enhance their overall performance and ensure the protection of workers' rights throughout their supply chains.",
       "retrieved_contexts": [],
       "details": {
         "claim_eval": {
-          "claim_score": 1.0,
-          "completeness": 1.0,
-          "covered_claims": 5,
+          "claim_score": 0.833,
+          "completeness": 0.833,
+          "covered_claims": 4,
           "total_claims": 5,
           "claim_results": [
             {
@@ -2304,22 +2675,22 @@
               "claim_id": "S1-C3",
               "required_claim": "Weaknesses include purchasing practices and living-wage/pricing disclosure.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 1.0
+              "covered_auto": false,
+              "keyword_overlap": 0.286
             },
             {
               "claim_id": "S1-C4",
               "required_claim": "Weaknesses include limited worker involvement in grievance/remedy design.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.857
             },
             {
               "claim_id": "S1-C5",
               "required_claim": "Uyghur forced-labour allegation responses are limited or require clearer disclosure across several top firms.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.833
+              "keyword_overlap": 0.583
             }
           ]
         }
@@ -2333,13 +2704,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Numeric + ethical interpretation",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 1.0,
-      "verdict": "PASS",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 14.283,
+      "score": 0.75,
+      "verdict": "PARTIAL",
       "notes": "",
       "question": "Compile a report on regional differences in Remedy scores, with ethical note on data biases.",
-      "answer": "Report on Regional Differences in Remedy Scores with Ethical Note on Data Biases:\n\n1. Regional Differences in Remedy Scores:\n- Asia: Average Remedy score is 3.31\n- Europe: Average Remedy score is 9.43\n- North America: Average Remedy score is 8.86\n\nThese scores reflect the companies' performance specifically on Remedy, which relates to access to remedy and grievance mechanisms for workers. The notably lower average score in Asia compared to Europe and North America suggests regional disparities in how effectively companies provide remedy and address grievances.\n\n2. Ethical Note on Data Biases:\nFrom an ethical perspective, the observed regional differences in Remedy scores highlight important concerns. Low Remedy scores may indicate real-world risks such as inadequate grievance mechanisms, weak monitoring, and insufficient incentives to address forced labor or other abuses in supply chains. However, these quantitative scores should not be interpreted in isolation. It is crucial to consider qualitative context, stakeholder perspectives, and the lived experiences of workers in different regions.\n\nMoreover, data biases may exist due to differences in disclosure practices, regulatory environments, and cultural factors influencing reporting. These biases can affect the comparability of scores across regions. Ethical analysis must therefore combine quantitative data with broader contextual understanding to avoid unfair judgments and to support meaningful improvements in labor rights and corporate accountability globally.",
+      "answer": "### Regional Differences in Remedy Scores\n\n#### Average Remedy Scores by Region\n- **Europe**: 9.43\n- **North America**: 8.86\n- **Asia**: 3.31\n\n#### Distribution of Remedy Scores by Region\n- **Asia**:\n  - Score 0: 87.5%\n  - Score 13: 6.2%\n  - Score 40: 6.2%\n  \n- **Europe**:\n  - Score 0: 42.9%\n  - Score 13: 28.6%\n  - Score 20: 28.6%\n  \n- **North America**:\n  - Score 0: 45.5%\n  - Score 8: 9.1%\n  - Score 13: 18.2%\n  - Score 15: 4.5%\n  - Score 19: 4.5%\n  - Score 20: 13.6%\n  - Score 33: 4.5%\n\n### Ethical Reflection on Data Biases\nThe data reveals significant disparities in Remedy scores across regions, with Asia showing a notably lower average score (3.31) compared to Europe (9.43) and North America (8.86). This disparity raises ethical concerns regarding the effectiveness of grievance mechanisms and the overall treatment of workers in the ICT sector.\n\nThe high percentage of companies in Asia scoring zero (87.5%) indicates a lack of effective remedies for workers, which could translate into real-world risks such as inadequate grievance mechanisms and insufficient oversight. This situation may perpetuate exploitation and hinder workers' rights, reflecting systemic issues in supply chain management.\n\nIn contrast, while Europe and North America also show companies with low scores, the distribution suggests a more varied approach to remedying issues, with some companies achieving higher scores. However, the presence of companies with zero scores in these regions also highlights that challenges remain.\n\nOverall, these findings underscore the need for a more equitable approach to worker rights and protections, particularly in regions with lower scores, to ensure that all workers have access to effective remedies and support.",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -2350,9 +2721,39 @@
               8.86
             ],
             "answer_numbers": [
+              9.43,
+              8.86,
+              3.31,
+              0.0,
+              87.5,
+              13.0,
+              6.2,
+              40.0,
+              6.2,
+              0.0,
+              42.9,
+              13.0,
+              28.6,
+              20.0,
+              28.6,
+              0.0,
+              45.5,
+              8.0,
+              9.1,
+              13.0,
+              18.2,
+              15.0,
+              4.5,
+              19.0,
+              4.5,
+              20.0,
+              13.6,
+              33.0,
+              4.5,
               3.31,
               9.43,
-              8.86
+              8.86,
+              87.5
             ],
             "numeric_found": [
               3.31,
@@ -2360,10 +2761,41 @@
               8.86
             ],
             "numeric_missing": [],
-            "numeric_extra": [],
-            "numeric_precision": 1.0,
+            "numeric_extra": [
+              0.0,
+              87.5,
+              13.0,
+              6.2,
+              40.0,
+              6.2,
+              0.0,
+              42.9,
+              13.0,
+              28.6,
+              20.0,
+              28.6,
+              0.0,
+              45.5,
+              8.0,
+              9.1,
+              13.0,
+              18.2,
+              15.0,
+              4.5,
+              19.0,
+              4.5,
+              20.0,
+              13.6,
+              33.0,
+              4.5,
+              3.31,
+              9.43,
+              8.86,
+              87.5
+            ],
+            "numeric_precision": 0.091,
             "numeric_recall": 1.0,
-            "numeric_f1": 1.0,
+            "numeric_f1": 0.167,
             "mean_absolute_error_nearest": 0.0,
             "numeric_tolerance": 0.01
           },
@@ -2395,9 +2827,9 @@
           }
         },
         "claim_eval": {
-          "claim_score": 1.0,
-          "completeness": 1.0,
-          "covered_claims": 3,
+          "claim_score": 0.75,
+          "completeness": 0.75,
+          "covered_claims": 2,
           "total_claims": 3,
           "claim_results": [
             {
@@ -2412,14 +2844,14 @@
               "required_claim": "Interpret Remedy as access to remedy and grievance mechanisms for workers.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.833
             },
             {
               "claim_id": "S2-C3",
               "required_claim": "Avoid simplistic regional judgement; consider disclosure/regulatory/contextual biases.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 0.778
+              "covered_auto": false,
+              "keyword_overlap": 0.222
             }
           ]
         }
@@ -2433,14 +2865,18 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Claim-level RAG/synthesis",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.971,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 9.403,
+      "score": 0.947,
       "verdict": "PASS",
       "notes": "",
       "question": "Synthesise opportunities for improvement from Amazon PDF.",
-      "answer": "From the 2025 KnowTheChain ICT Benchmark PDF for Amazon.com Inc., the key opportunities for improvement are:\n\n1. Purchasing Practices: Amazon performed poorly in this theme. The company is encouraged to adopt purchasing practices that reduce forced labor risks, such as improving planning and forecasting, prompt payment, and disclosing quantitative data on responsible purchasing practices. They should also ensure pricing includes the full cost of production, including living wages, and consider integrating responsible buying practices into supplier contracts.\n\n2. Enabling Workers' Rights: Amazon scored poorly here as well, indicating a need to strengthen policies and practices that support workers' rights in their supply chains.\n\n3. Remedy for Supply Chain Workers: Amazon currently does not disclose providing remedy for supply chain workers affected by forced labor risks. This is a critical area for improvement.\n\n4. Addressing Uyghur Forced Labor Risks: There is an identified allegation of forced labor related to Uyghur forced labor in Amazon's supply chains. However, Amazon does not disclose steps taken to address these risks across raw materials and supply chain tiers.\n\nOverall, Amazon's rank dropped from 8th to 10th out of 45 companies, mainly due to lack of progress in these key themes despite some disclosure improvements in grievance response processes.\n\nWould you like me to provide more detailed suggestions or focus on a specific theme?",
-      "retrieved_contexts": [],
+      "answer": "Amazon.com Inc. has several opportunities for improvement based on the 2025 KTC ICT Scorecard:\n\n1. **Purchasing Practices**: Amazon performed poorly in this area, which suggests a need for better practices that ensure fair treatment of suppliers and workers. Improving purchasing practices can help mitigate risks in the supply chain.\n\n2. **Enabling Workers' Rights**: The company has not made significant improvements in enabling workers' rights. Enhancing policies and practices that support workers' rights can lead to better working conditions and compliance with ethical standards.\n\n3. **Remedy for Supply Chain Workers**: Amazon currently lacks effective mechanisms for providing remedies to workers in its supply chain. Developing and disclosing clear processes for addressing grievances and providing remedies is crucial, especially in light of allegations related to forced labor.\n\n4. **Disclosure on Forced Labor Risks**: There is a need for greater transparency regarding the steps taken to address risks associated with forced labor, particularly concerning allegations of Uyghur forced labor in its supply chains. Improved disclosure can enhance accountability and trust.\n\n5. **Overall Score Improvement**: With an overall score of 27 out of 100 and a drop in rank from 8th to 10th place, there is a clear need for Amazon to enhance its overall performance across all themes to regain its standing in the industry.\n\nBy focusing on these areas, Amazon can not only improve its scores in the benchmark but also contribute positively to the welfare of workers in its supply chain.",
+      "retrieved_contexts": [
+        "ICT Benchmark \nCOMPANY SCORECARD 2025  \nSUMMARY \nAmazon.com Inc. (Amazon) the world’s largest online retailer,4 ranks 10th out of 45 companies. \nSince 2022, the company began disclosing some information on its process for responding to \ngrievances and providing remedy.  However, the company did not improve across other \nthemes. The company performed particularly poorly on the themes of Purchasing Practices \nand Enabling Workers ’ Rights. As such, the company’s rank has dropped by 2 places.  \nKnowTheChain identified one allegation of forced labour in the company’s supply chains, \nrelated to alleged Uyghur forced labour.  However, the company does not disclose the steps \nit has taken to address the risks of alleged Uyghur forced labour across raw materials and \nsupply chain tiers. The company is encouraged to improve its performance and disclosure on \nthe themes of Purchasing Practices, Enabling Workers’ Rights, and Remedy.  \nLEADING PRACTICES \nNone.  \nOPPORTUNITIES FOR IMPROVEMENT",
+        "ICT Benchmark \nCOMPANY SCORECARD 2025  \nAmazon.com Inc. (Amazon) \n \nTICKER \nAMZN \nMARKET CAPITALISATION \nUS$1393.9 billion  \nHEADQUARTERS \nUnited States \nDISCLOSURES \nUK Modern Slavery Act:  Yes \nCalifornia Transparency in Supply Chains Act:  Yes \n \n \n \nAustralia Modern \nSlavery Act:  Yes \nOVERALL RANKING \n10 out of 45 \n2022 Rank: 8 out of 601 \n OVERALL SCORE \n27 out of 100 \n \nTHEME-LEVEL SCORES \n \n \nKEY DATA POINTS \n \nFIRST-TIER SUPPLIER LIST \nYes (Partial information) \n \nNO-FEE POLICY \nYes (Employer Pays Principle) \nRISK ASSESSMENT \nYes \n \nREMEDY FOR SUPPLY CHAIN WORKERS \n No \nENGAGED WITH KNOWTHECHAIN2  \nYes  \nHIGH-RISK SOURCING COUNTRIES3   \n China and Malaysia \n \n55\n33\n0\n45\n3\n20\n8\n52\n21\n5\n20\n5\n15\n7\n0 10 20 30 40 50 60 70 80 90 100\nCommitment & Governance\nTraceability & Risk Assessment\nPurchasing Practices\nRecruitment\nEnabling Workers' Rights\nMonitoring\nRemedy\nCompany score Industry average",
+        "ICT Benchmark \nCOMPANY SCORECARD 2025  \nSUMMARY \nWalmart Inc. (Walmart), a US retail corporation, ranks joint 24th out of 45 companies. Since \n2022, the company improved on the themes of Commitment & Governance and Traceability \n& Risk Assessment , disclosing board oversight of its responsible sourcing programme, \nincluding forced labour risks in its supply chains, and more detail on its human rights risk \nassessment process . However, the company did not improve across other themes. The \ncompany performed particularly poorly on the themes of Purchasing Practices, Recruitment \nand Remedy. As such, the company’s rank has dropped by 6 places.  It scores higher than \naverage on the themes of Enabling Workers’ Rights and Monitoring, and lower than average \non all remaining themes.The company is encouraged to improve its performance and \ndisclosure on the themes of Purchasing Practices, Recruitment and Remedy.   \nLEADING PRACTICES \nNone.  \nOPPORTUNITIES FOR IMPROVEMENT"
+      ],
       "details": {
         "claim_eval": {
           "claim_score": 1.0,
@@ -2460,39 +2896,101 @@
               "required_claim": "Amazon should strengthen Enabling Workers' Rights.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.8
             },
             {
               "claim_id": "S3-C3",
               "required_claim": "Amazon should provide/disclose Remedy for supply-chain workers.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.714
             },
             {
               "claim_id": "S3-C4",
               "required_claim": "Amazon should address Uyghur forced-labour risks across raw materials and tiers.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.667
             }
           ]
         },
         "rag_eval": {
           "is_rag_related": true,
-          "contexts_available": false,
-          "num_contexts": 0,
-          "context_precision": null,
-          "context_recall": null,
-          "answer_relevance": 0.891,
-          "faithfulness": null,
-          "faithfulness_details": null,
-          "answer_correctness": 0.971,
+          "contexts_available": true,
+          "num_contexts": 3,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "answer_relevance": 0.669,
+          "faithfulness": 1.0,
+          "faithfulness_details": {
+            "faithfulness": 1.0,
+            "supported_answer_claims": 11,
+            "total_answer_claims": 11,
+            "support_source": "retrieved_contexts",
+            "claim_support": [
+              {
+                "answer_claim": "has several opportunities for improvement based on the 2025 KTC ICT Scorecard:",
+                "support_overlap": 0.714,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Purchasing Practices**: Amazon performed poorly in this area, which suggests a need for better practices that ensure fair treatment of suppliers and workers.",
+                "support_overlap": 0.429,
+                "supported": true
+              },
+              {
+                "answer_claim": "Improving purchasing practices can help mitigate risks in the supply chain.",
+                "support_overlap": 0.625,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Enabling Workers' Rights**: The company has not made significant improvements in enabling workers' rights.",
+                "support_overlap": 0.5,
+                "supported": true
+              },
+              {
+                "answer_claim": "Enhancing policies and practices that support workers' rights can lead to better working conditions and compliance with ethical standards.",
+                "support_overlap": 0.231,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Remedy for Supply Chain Workers**: Amazon currently lacks effective mechanisms for providing remedies to workers in its supply chain.",
+                "support_overlap": 0.583,
+                "supported": true
+              },
+              {
+                "answer_claim": "Developing and disclosing clear processes for addressing grievances and providing remedies is crucial, especially in light of allegations related to forced labor.",
+                "support_overlap": 0.4,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Disclosure on Forced Labor Risks**: There is a need for greater transparency regarding the steps taken to address risks associated with forced labor, particularly concerning allegations of Uyghur forced labor in its supply chains.",
+                "support_overlap": 0.684,
+                "supported": true
+              },
+              {
+                "answer_claim": "Improved disclosure can enhance accountability and trust.",
+                "support_overlap": 0.4,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Overall Score Improvement**: With an overall score of 27 out of 100 and a drop in rank from 8th to 10th place, there is a clear need for Amazon to enhance its overall performance across all themes to regain its standing in the industry.",
+                "support_overlap": 0.579,
+                "supported": true
+              },
+              {
+                "answer_claim": "By focusing on these areas, Amazon can not only improve its scores in the benchmark but also contribute positively to the welfare of workers in its supply chain.",
+                "support_overlap": 0.538,
+                "supported": true
+              }
+            ]
+          },
+          "answer_correctness": 0.934,
           "completeness": 1.0,
-          "unsupported_claim_rate": null,
-          "context_sufficiency": null,
-          "rag_composite": 0.971,
-          "rag_note": "retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."
+          "unsupported_claim_rate": 0.0,
+          "context_sufficiency": 1.0,
+          "rag_composite": 0.947,
+          "rag_note": "RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics."
         }
       }
     },
@@ -2504,13 +3002,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Numeric + ethical interpretation",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 13.084,
       "score": 1.0,
       "verdict": "PASS",
       "notes": "",
       "question": "Compile insights on correlations between Market Cap and scores, noting ethical implications.",
-      "answer": "The correlation between Market Cap and Total Benchmark Score is moderately positive (r = 0.323, n = 45), indicating that companies with higher market capitalization tend to have better overall benchmark scores. However, this correlation does not imply causality; larger companies might have more resources to invest in compliance and reporting, but other factors also play a role.\n\nFrom an ethical perspective, looking at Remedy scores (which reflect access to remedy and grievance mechanisms), there are notable regional differences: Asia averages 3.31, Europe 9.43, and North America 8.86. This suggests that companies in Europe and North America generally provide better access to remedy compared to those in Asia. The ethical implication is that market size alone does not guarantee better human rights practices, and regional disparities in remedy access highlight the need for targeted improvements to ensure fair treatment and accountability across all regions.",
+      "answer": "Here are the insights on the correlations between Market Cap and various scores:\n\n1. **Market Cap and Total Benchmark**: The Pearson correlation coefficient is **0.323** (sample size n=45). This indicates a moderate positive correlation, suggesting that larger companies tend to have higher Total Benchmark scores. However, it's important to note that correlation does not imply causation; other factors may influence these scores.\n\n2. **Market Cap and Remedy**: The Pearson correlation coefficient is **0.211** (sample size n=45). This indicates a weak positive correlation, suggesting that larger companies may have slightly better scores in the area of Remedy. Again, this does not imply that a higher Market Cap directly leads to better Remedy scores.\n\n3. **Market Cap and Purchasing Practices**: An error occurred while attempting to calculate this correlation, indicating that both columns may not exist in the dataset.\n\n### Ethical Implications\nThe correlations observed raise important ethical considerations:\n\n- **Larger Companies and Accountability**: The moderate correlation between Market Cap and Total Benchmark scores suggests that larger companies may have more resources to invest in compliance and ethical practices. However, this does not guarantee that they are doing so effectively. The weak correlation with Remedy scores indicates that even larger companies may struggle to implement effective grievance mechanisms or address worker concerns adequately.\n\n- **Potential Risks for Workers**: If larger companies are not held accountable for their practices, it could lead to a situation where they prioritize profit over ethical considerations. This can result in inadequate oversight, lack of effective grievance mechanisms, and ultimately, risks for workers in their supply chains.\n\n- **Need for Transparency**: The findings highlight the importance of transparency and accountability in corporate practices, especially for larger firms. Stakeholders, including consumers and investors, should demand higher standards and better practices from these companies to ensure that their size does not shield them from scrutiny.\n\nIn summary, while there are observable correlations between Market Cap and certain scores, the ethical implications suggest a need for vigilance and accountability in corporate practices, particularly concerning worker rights and welfare.",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -2522,9 +3020,8 @@
             "answer_numbers": [
               0.323,
               45.0,
-              3.31,
-              9.43,
-              8.86
+              0.211,
+              45.0
             ],
             "numeric_found": [
               0.323,
@@ -2532,13 +3029,12 @@
             ],
             "numeric_missing": [],
             "numeric_extra": [
-              3.31,
-              9.43,
-              8.86
+              0.211,
+              45.0
             ],
-            "numeric_precision": 0.4,
+            "numeric_precision": 0.5,
             "numeric_recall": 1.0,
-            "numeric_f1": 0.571,
+            "numeric_f1": 0.667,
             "mean_absolute_error_nearest": 0.0,
             "numeric_tolerance": 0.001
           },
@@ -2587,14 +3083,14 @@
               "required_claim": "Correlation does not imply causation.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.667
+              "keyword_overlap": 1.0
             },
             {
               "claim_id": "S4-C3",
               "required_claim": "Ethical implication: market size does not guarantee remedy or worker protection.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.75
+              "keyword_overlap": 0.875
             }
           ]
         }
@@ -2608,19 +3104,19 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Conceptual rubric",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 1.0,
-      "verdict": "PASS",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 7.431,
+      "score": 0.5,
+      "verdict": "FAIL",
       "notes": "",
       "question": "Evaluate potential biases in the Scoring sheet data, using principal-agent theory.",
-      "answer": "Using principal-agent theory to evaluate potential biases in the Scoring sheet data involves considering the relationships and incentives between different parties: the principals (e.g., workers, regulators, consumers) and the agents (e.g., companies, suppliers). Biases may arise if agents have incentives to underreport or overstate their performance on indicators like Remedy, Monitoring, or Purchasing Practices to appear compliant or responsible, while principals may lack full visibility or enforcement power.\n\nThe KTC dataset's scores could reflect such biases if companies strategically disclose or score themselves in ways that minimize perceived risks or responsibilities. For example, low Remedy scores might indicate weak grievance mechanisms, which could be a result of agents not fully aligning with principals' interests in worker protection. Similarly, regional or sectoral patterns in scores might reveal systemic biases where agents in certain contexts face different pressures or incentives.\n\nTherefore, interpreting the data requires combining quantitative scores with qualitative insights, stakeholder feedback, and real-world worker experiences to understand how principal-agent dynamics influence reporting and actual practices. This approach helps identify where data may be biased or incomplete due to misaligned incentives between principals and agents.",
+      "answer": "To evaluate potential biases in the Scoring sheet data using principal-agent theory, we can consider the following aspects:\n\n1. **Principal-Agent Dynamics**: In the context of the Scoring sheet, the \"principals\" are the stakeholders (e.g., consumers, investors, regulators) who expect companies to act in their best interests regarding ethical practices, while the \"agents\" are the companies themselves. There may be a misalignment of interests, where companies prioritize profit over ethical considerations, leading to biased reporting or scoring.\n\n2. **Information Asymmetry**: Companies may have more information about their practices than the stakeholders. This can lead to biased scores if companies selectively disclose information that paints them in a favorable light while omitting negative aspects. For example, if a company has poor practices in remedy mechanisms but highlights only its positive initiatives, the score may not accurately reflect its true performance.\n\n3. **Incentives and Accountability**: If the scoring system does not adequately hold companies accountable for their practices, there may be little incentive for them to improve. This can create a bias where companies with lower scores do not feel pressured to change, perpetuating poor practices.\n\n4. **Regional Disparities**: There may be biases based on regional differences in enforcement of labor laws, cultural attitudes towards labor rights, and economic conditions. Companies operating in regions with weaker regulations may score differently than those in more regulated environments, not necessarily reflecting their actual practices.\n\n5. **Categorical Distribution**: Analyzing the distribution of scores across different categories (e.g., regions, company sizes) can reveal potential biases. For instance, if a significant number of companies in a particular region score poorly on \"Remedy\" compared to others, it may indicate systemic issues that are not being addressed.\n\nTo further investigate these potential biases quantitatively, we can compute the average scores grouped by region and analyze the distribution of scores across different categories. This will help identify any disparities that may exist. \n\nWould you like me to perform any specific analyses to uncover these biases in the data?",
       "retrieved_contexts": [],
       "details": {
         "claim_eval": {
-          "claim_score": 1.0,
-          "completeness": 1.0,
-          "covered_claims": 4,
+          "claim_score": 0.5,
+          "completeness": 0.5,
+          "covered_claims": 2,
           "total_claims": 4,
           "claim_results": [
             {
@@ -2628,28 +3124,28 @@
               "required_claim": "Principal-agent information asymmetry can bias company disclosures.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.5
+              "keyword_overlap": 0.833
             },
             {
               "claim_id": "E1-C2",
               "required_claim": "Agents may strategically underreport risk or overstate compliance.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 0.833
+              "covered_auto": false,
+              "keyword_overlap": 0.167
             },
             {
               "claim_id": "E1-C3",
               "required_claim": "Low Remedy/Monitoring/Purchasing scores indicate areas where hidden action and weak accountability may persist.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.545
+              "keyword_overlap": 0.455
             },
             {
               "claim_id": "E1-C4",
               "required_claim": "Triangulation with qualitative evidence, stakeholder input, and worker experiences is needed.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 0.5
+              "covered_auto": false,
+              "keyword_overlap": 0.125
             }
           ]
         }
@@ -2663,13 +3159,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Numeric + ethical interpretation",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 1.0,
-      "verdict": "PASS",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 7.01,
+      "score": 0.0,
+      "verdict": "FAIL",
       "notes": "",
       "question": "Assess if low Remedy scores (avg 7) could amplify ethical risks in supply chains.",
-      "answer": "The average Remedy score in the dataset is about 7, which is quite low. Ethically, low Remedy scores can amplify risks in supply chains because they often indicate weak or ineffective mechanisms for addressing harms such as forced labor or worker exploitation. Without strong Remedy processes, grievances may go unresolved, and systemic issues may persist or worsen. This can lead to increased ethical risks, including harm to workers and reputational damage for companies. Thus, low Remedy scores highlight a critical area needing improvement to mitigate ethical risks in supply chains.",
+      "answer": "Low Remedy scores, such as an average of 7, can significantly amplify ethical risks in supply chains. Here's a high-level reflection on the implications:\n\n1. **Lack of Grievance Mechanisms**: A low Remedy score often indicates that companies do not have effective grievance mechanisms in place. This can lead to workers being unable to report abuses or unsafe working conditions, which can perpetuate exploitation and harm.\n\n2. **Weak Oversight**: Companies with low scores may lack robust monitoring and oversight of their supply chains. This can result in undetected labor violations, including forced labor, child labor, and unsafe working conditions, as there are insufficient checks to ensure compliance with ethical standards.\n\n3. **Cost and Risk Shifting**: Companies may prioritize cost-cutting over ethical practices, pushing risks down the supply chain. This can lead to suppliers cutting corners on worker safety and rights to maintain profitability, further exacerbating the risks faced by workers.\n\n4. **Reputation Damage**: Low Remedy scores can lead to reputational damage for companies, which may result in consumer backlash and loss of market share. This can create a cycle where companies are less willing to invest in ethical practices due to financial pressures.\n\n5. **Legal and Regulatory Risks**: Companies with low Remedy scores may face increased scrutiny from regulators and potential legal challenges. This can lead to financial penalties and further harm to their reputation.\n\n6. **Worker Well-being**: Ultimately, low Remedy scores translate into real-world risks for workers, including poor working conditions, lack of support in cases of grievances, and overall diminished well-being.\n\nIn summary, low Remedy scores are indicative of systemic issues within supply chains that can lead to significant ethical risks, affecting not only the companies involved but also the workers and communities they impact. Addressing these scores is crucial for fostering ethical practices and protecting workers' rights.",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -2680,14 +3176,16 @@
             "answer_numbers": [
               7.0
             ],
-            "numeric_found": [
+            "numeric_found": [],
+            "numeric_missing": [
               6.98
             ],
-            "numeric_missing": [],
-            "numeric_extra": [],
-            "numeric_precision": 1.0,
-            "numeric_recall": 1.0,
-            "numeric_f1": 1.0,
+            "numeric_extra": [
+              7.0
+            ],
+            "numeric_precision": 0.0,
+            "numeric_recall": 0.0,
+            "numeric_f1": 0.0,
             "mean_absolute_error_nearest": 0.02,
             "numeric_tolerance": 0.01
           },
@@ -2719,16 +3217,16 @@
           }
         },
         "claim_eval": {
-          "claim_score": 1.0,
-          "completeness": 1.0,
-          "covered_claims": 3,
+          "claim_score": 0.667,
+          "completeness": 0.667,
+          "covered_claims": 2,
           "total_claims": 3,
           "claim_results": [
             {
               "claim_id": "E2-C1",
               "required_claim": "Average Remedy is approximately 6.98/100.",
               "weight": 1.0,
-              "covered_auto": true,
+              "covered_auto": false,
               "keyword_overlap": 0.5
             },
             {
@@ -2736,14 +3234,14 @@
               "required_claim": "Low Remedy indicates weak grievance/remedy mechanisms.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.833
+              "keyword_overlap": 1.0
             },
             {
               "claim_id": "E2-C3",
               "required_claim": "Weak remedy can leave harms unresolved and amplify ethical risks.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.875
+              "keyword_overlap": 0.625
             }
           ]
         }
@@ -2757,13 +3255,13 @@
       "included_in_final_accuracy": false,
       "adjudication_scope": "DIAGNOSTIC_ONLY",
       "evaluation_type": "Group proportion exact match",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.95,
-      "verdict": "PASS",
-      "notes": "Diagnostic match for current UK MSA regional pattern; row remains NEEDS_VALIDATION. Answer-key status is NEEDS_VALIDATION; this row is diagnostic only and excluded from final accuracy.",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 6.409,
+      "score": 0.0,
+      "verdict": "NOT_ADJUDICATED",
+      "notes": "Failed to locate/parse UK MSA field; answer key expects regional UK MSA pattern. Answer-key status is NEEDS_VALIDATION; this row is diagnostic only and excluded from final accuracy.",
       "question": "Check for regional bias in Non-Scored Research (e.g., more \"Yes\" for UK MSA in NA/Europe).",
-      "answer": "The data shows a regional bias in UK MSA compliance responses in the Non-Scored Research dataset. Specifically, 25% of companies in Asia marked \"Yes\" for UK MSA compliance, while no companies in Europe or North America marked \"Yes.\" This indicates that the \"Yes\" responses are concentrated in Asia, with none reported in Europe or North America.",
+      "answer": "It seems that the \"UK MSA\" column is not available in the dataset. Therefore, I cannot check for regional bias regarding this specific metric. If you have another metric or aspect in mind, please let me know!",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -2773,21 +3271,18 @@
               0.0,
               0.0
             ],
-            "answer_numbers": [
-              25.0
-            ],
-            "numeric_found": [
-              25.0
-            ],
+            "answer_numbers": [],
+            "numeric_found": [],
             "numeric_missing": [
+              25.0,
               0.0,
               0.0
             ],
             "numeric_extra": [],
-            "numeric_precision": 1.0,
-            "numeric_recall": 0.333,
-            "numeric_f1": 0.5,
-            "mean_absolute_error_nearest": 16.6667,
+            "numeric_precision": null,
+            "numeric_recall": 0.0,
+            "numeric_f1": null,
+            "mean_absolute_error_nearest": null,
             "numeric_tolerance": 0.01
           },
           "entity_metrics": {
@@ -2827,48 +3322,48 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Conceptual risk rubric",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 1.0,
-      "verdict": "PASS",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 7.341,
+      "score": 0.25,
+      "verdict": "FAIL",
       "notes": "",
       "question": "Evaluate ethical risks in predicting improvements for low-scorers like BOE (0 score).",
-      "answer": "Evaluating ethical risks in predicting improvements for low-scorers like BOE (which has a 0 Total Benchmark score) involves several considerations based on the data and comments:\n\n1. Lack of Transparency and Disclosure:\n   - BOE does not clearly disclose comprehensive policies explicitly prohibiting all forms of forced labor.\n   - The company’s supplier code and human rights policies have gaps, such as limited coverage of ILO core labor standards, unclear grievance mechanisms, and lack of detailed forced labor risk assessments.\n   - This opacity makes it ethically risky to predict improvements without clear evidence of current practices or commitments.\n\n2. Potential Forced Labor Risks:\n   - There are allegations linked to BOE’s suppliers involving Uyghur forced labor, which is a serious ethical concern.\n   - Predicting improvements without addressing such systemic and severe risks could lead to misleading conclusions or underestimating the harm.\n\n3. Remedy and Grievance Mechanisms:\n   - BOE’s region (Asia) has a relatively low average Remedy score (3.31) compared to Europe and North America (above 8).\n   - This suggests limited access to effective remedy and grievance channels, which are critical for ethical supply chain management.\n   - Predicting improvements without strengthening remedy mechanisms risks ignoring victims' rights and justice.\n\n4. Ethical Risk of Over-Simplification:\n   - Predictive models may oversimplify complex social issues like forced labor, ignoring local legal restrictions, cultural contexts, and enforcement challenges.\n   - For a company like BOE with zero current score and significant disclosure gaps, predictions must be cautious and accompanied by qualitative assessments.\n\nIn summary, ethical risks in predicting improvements for BOE include the danger of relying on incomplete or non-transparent data, overlooking serious forced labor allegations, and underestimating the importance of remedy mechanisms. Any predictive effort should be paired with rigorous due diligence, stakeholder engagement, and a focus on human rights impact rather than just numeric score improvements.",
+      "answer": "When evaluating ethical risks in predicting improvements for low-scorers like BOE, which has a score of 0, several key considerations arise:\n\n1. **Lack of Effective Grievance Mechanisms**: A score of 0 in areas like Remedy indicates that there may be no effective systems in place for workers to report grievances or seek redress. This can lead to a culture of fear and silence, where workers are unable to voice concerns about labor practices, exploitation, or unsafe working conditions.\n\n2. **Weak Oversight and Accountability**: Companies with low scores often lack robust monitoring and oversight mechanisms. This can result in unchecked labor abuses, such as forced labor or unsafe working conditions, as there are no systems in place to ensure compliance with ethical labor standards.\n\n3. **Incentives to Cut Costs**: Low scores in areas like Purchasing Practices may reflect a business model that prioritizes cost-cutting over ethical considerations. This can push risks and costs down the supply chain, leading to exploitation of workers in lower-tier suppliers who may be more vulnerable to labor abuses.\n\n4. **Potential for Greenwashing**: Predicting improvements without a clear, actionable plan can lead to greenwashing, where companies make superficial changes to improve their scores without addressing the underlying issues. This can mislead stakeholders and consumers about the company's actual commitment to ethical practices.\n\n5. **Impact on Stakeholder Trust**: If improvements are predicted without substantial evidence or commitment, it can erode trust among stakeholders, including employees, consumers, and investors. Stakeholders may feel that the company is not genuinely committed to ethical practices, leading to reputational damage.\n\n6. **Real-World Implications for Workers**: Ultimately, the lack of improvements in low-scoring areas translates into real-world risks for workers. This includes continued exposure to poor working conditions, lack of job security, and potential violations of human rights.\n\nIn summary, while predicting improvements for low-scorers like BOE may seem optimistic, it is crucial to approach such predictions with caution. They should be grounded in a genuine commitment to ethical practices, with clear, actionable steps to address the underlying issues that contribute to low scores. Without this, the risks to workers and the integrity of the company remain significant.",
       "retrieved_contexts": [],
       "details": {
         "claim_eval": {
-          "claim_score": 1.0,
-          "completeness": 1.0,
-          "covered_claims": 4,
+          "claim_score": 0.25,
+          "completeness": 0.25,
+          "covered_claims": 1,
           "total_claims": 4,
           "claim_results": [
             {
               "claim_id": "E4-C1",
               "required_claim": "BOE has a zero Total Benchmark score.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 1.0
+              "covered_auto": false,
+              "keyword_overlap": 0.25
             },
             {
               "claim_id": "E4-C2",
               "required_claim": "Prediction for BOE is risky because of limited transparency/disclosure.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 0.857
+              "covered_auto": false,
+              "keyword_overlap": 0.286
             },
             {
               "claim_id": "E4-C3",
               "required_claim": "Potential forced-labour allegations must not be ignored.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.8
+              "keyword_overlap": 0.6
             },
             {
               "claim_id": "E4-C4",
               "required_claim": "Predictive outputs must be paired with due diligence, stakeholder engagement, and human-rights impact analysis.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 0.818
+              "covered_auto": false,
+              "keyword_overlap": 0.364
             }
           ]
         }
@@ -2882,19 +3377,23 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Claim-level RAG",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.946,
-      "verdict": "PASS",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 8.288,
+      "score": 0.714,
+      "verdict": "PARTIAL",
       "notes": "",
-      "question": "Extract and summarise key phrases from Amazon PDF on `Opportunities for Improvement`",
-      "answer": "From the Amazon PDF on \"Opportunities for Improvement,\" key points are:\n\n- Amazon ranks 10th out of 45 companies in the 2025 ICT Benchmark but dropped 2 places since 2022.\n- The company began disclosing some grievance response and remedy processes but did not improve in other themes.\n- Amazon performed particularly poorly on Purchasing Practices and Enabling Workers' Rights.\n- There is one known allegation of forced labor related to Uyghur forced labor in its supply chains, but Amazon does not disclose steps taken to address these risks across raw materials and supply chain tiers.\n- The company has partial disclosure of its first-tier supplier list and some policies like a no-fee policy and risk assessment.\n- Remedy for supply chain workers is not provided.\n- High-risk sourcing countries include China and Malaysia.\n\nOverall, Amazon's main opportunities for improvement lie in better purchasing practices, enhancing workers' rights, addressing forced labor risks transparently, and providing remedy for affected workers.",
-      "retrieved_contexts": [],
+      "question": "Extract and summarise key phrases from Amazon PDF on `Opportunities for Improvement`.",
+      "answer": "Here are the key phrases extracted from the Amazon PDF regarding \"Opportunities for Improvement\":\n\n1. **Overall Ranking**: Amazon ranks 10th out of 45 companies in the ICT Benchmark 2025.\n2. **Disclosure of Grievance Process**: Since 2022, Amazon has begun disclosing some information on its process for responding to grievances and providing remedy.\n3. **Performance Issues**: The company did not improve across various themes, particularly performing poorly in:\n   - **Purchasing Practices**\n   - **Enabling Workers' Rights**\n4. **Rank Drop**: Amazon's rank has dropped by 2 places since the previous year.\n5. **Forced Labour Allegation**: There is one identified allegation of forced labour in Amazon's supply chains related to alleged Uyghur forced labour.\n6. **Lack of Disclosure**: The company does not disclose the steps taken to address the risks associated with alleged Uyghur forced labour across raw materials and supply chain tiers.\n7. **Encouragement for Improvement**: Amazon is encouraged to enhance its performance and disclosure in the areas of:\n   - Purchasing Practices\n   - Enabling Workers' Rights\n   - Remedy\n8. **Leading Practices**: None identified.\n\nThese points highlight the areas where Amazon needs to focus on improving its practices and transparency, particularly concerning worker rights and supply chain management.",
+      "retrieved_contexts": [
+        "ICT Benchmark \nCOMPANY SCORECARD 2025  \nSUMMARY \nAmazon.com Inc. (Amazon) the world’s largest online retailer,4 ranks 10th out of 45 companies. \nSince 2022, the company began disclosing some information on its process for responding to \ngrievances and providing remedy.  However, the company did not improve across other \nthemes. The company performed particularly poorly on the themes of Purchasing Practices \nand Enabling Workers ’ Rights. As such, the company’s rank has dropped by 2 places.  \nKnowTheChain identified one allegation of forced labour in the company’s supply chains, \nrelated to alleged Uyghur forced labour.  However, the company does not disclose the steps \nit has taken to address the risks of alleged Uyghur forced labour across raw materials and \nsupply chain tiers. The company is encouraged to improve its performance and disclosure on \nthe themes of Purchasing Practices, Enabling Workers’ Rights, and Remedy.  \nLEADING PRACTICES \nNone.  \nOPPORTUNITIES FOR IMPROVEMENT",
+        "ICT Benchmark \nCOMPANY SCORECARD 2025  \nAmazon.com Inc. (Amazon) \n \nTICKER \nAMZN \nMARKET CAPITALISATION \nUS$1393.9 billion  \nHEADQUARTERS \nUnited States \nDISCLOSURES \nUK Modern Slavery Act:  Yes \nCalifornia Transparency in Supply Chains Act:  Yes \n \n \n \nAustralia Modern \nSlavery Act:  Yes \nOVERALL RANKING \n10 out of 45 \n2022 Rank: 8 out of 601 \n OVERALL SCORE \n27 out of 100 \n \nTHEME-LEVEL SCORES \n \n \nKEY DATA POINTS \n \nFIRST-TIER SUPPLIER LIST \nYes (Partial information) \n \nNO-FEE POLICY \nYes (Employer Pays Principle) \nRISK ASSESSMENT \nYes \n \nREMEDY FOR SUPPLY CHAIN WORKERS \n No \nENGAGED WITH KNOWTHECHAIN2  \nYes  \nHIGH-RISK SOURCING COUNTRIES3   \n China and Malaysia \n \n55\n33\n0\n45\n3\n20\n8\n52\n21\n5\n20\n5\n15\n7\n0 10 20 30 40 50 60 70 80 90 100\nCommitment & Governance\nTraceability & Risk Assessment\nPurchasing Practices\nRecruitment\nEnabling Workers' Rights\nMonitoring\nRemedy\nCompany score Industry average",
+        "ICT Benchmark \nCOMPANY SCORECARD 2025  \nSUMMARY \nWalmart Inc. (Walmart), a US retail corporation, ranks joint 24th out of 45 companies. Since \n2022, the company improved on the themes of Commitment & Governance and Traceability \n& Risk Assessment , disclosing board oversight of its responsible sourcing programme, \nincluding forced labour risks in its supply chains, and more detail on its human rights risk \nassessment process . However, the company did not improve across other themes. The \ncompany performed particularly poorly on the themes of Purchasing Practices, Recruitment \nand Remedy. As such, the company’s rank has dropped by 6 places.  It scores higher than \naverage on the themes of Enabling Workers’ Rights and Monitoring, and lower than average \non all remaining themes.The company is encouraged to improve its performance and \ndisclosure on the themes of Purchasing Practices, Recruitment and Remedy.   \nLEADING PRACTICES \nNone.  \nOPPORTUNITIES FOR IMPROVEMENT"
+      ],
       "details": {
         "claim_eval": {
-          "claim_score": 1.0,
-          "completeness": 1.0,
-          "covered_claims": 7,
+          "claim_score": 0.714,
+          "completeness": 0.714,
+          "covered_claims": 5,
           "total_claims": 7,
           "claim_results": [
             {
@@ -2909,7 +3408,7 @@
               "required_claim": "Amazon disclosed some grievance response/remedy processes but did not improve in other themes.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 0.889
+              "keyword_overlap": 0.667
             },
             {
               "claim_id": "T1-C3",
@@ -2923,46 +3422,118 @@
               "required_claim": "There is one known Uyghur forced-labour allegation.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.833
             },
             {
               "claim_id": "T1-C5",
               "required_claim": "Amazon has partial first-tier supplier list, no-fee policy, and risk-assessment disclosure.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 1.0
+              "covered_auto": false,
+              "keyword_overlap": 0.364
             },
             {
               "claim_id": "T1-C6",
               "required_claim": "Amazon does not provide remedy for supply-chain workers.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.833
             },
             {
               "claim_id": "T1-C7",
               "required_claim": "High-risk sourcing countries include China and Malaysia.",
               "weight": 1.0,
-              "covered_auto": true,
-              "keyword_overlap": 1.0
+              "covered_auto": false,
+              "keyword_overlap": 0.333
             }
           ]
         },
         "rag_eval": {
           "is_rag_related": true,
-          "contexts_available": false,
-          "num_contexts": 0,
-          "context_precision": null,
-          "context_recall": null,
-          "answer_relevance": 0.799,
-          "faithfulness": null,
-          "faithfulness_details": null,
-          "answer_correctness": 0.946,
-          "completeness": 1.0,
-          "unsupported_claim_rate": null,
-          "context_sufficiency": null,
-          "rag_composite": 0.946,
-          "rag_note": "retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."
+          "contexts_available": true,
+          "num_contexts": 3,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "answer_relevance": 0.632,
+          "faithfulness": 1.0,
+          "faithfulness_details": {
+            "faithfulness": 1.0,
+            "supported_answer_claims": 13,
+            "total_answer_claims": 13,
+            "support_source": "retrieved_contexts",
+            "claim_support": [
+              {
+                "answer_claim": "Here are the key phrases extracted from the Amazon PDF regarding \"Opportunities for Improvement\":",
+                "support_overlap": 0.444,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Overall Ranking**: Amazon ranks 10th out of 45 companies in the ICT Benchmark 2025.",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Disclosure of Grievance Process**: Since 2022, Amazon has begun disclosing some information on its process for responding to grievances and providing remedy.",
+                "support_overlap": 0.867,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Performance Issues**: The company did not improve across various themes, particularly performing poorly in:",
+                "support_overlap": 0.625,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Purchasing Practices**",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Enabling Workers' Rights**",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Rank Drop**: Amazon's rank has dropped by 2 places since the previous year.",
+                "support_overlap": 0.625,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Forced Labour Allegation**: There is one identified allegation of forced labour in Amazon's supply chains related to alleged Uyghur forced labour.",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Lack of Disclosure**: The company does not disclose the steps taken to address the risks associated with alleged Uyghur forced labour across raw materials and supply chain tiers.",
+                "support_overlap": 0.882,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Encouragement for Improvement**: Amazon is encouraged to enhance its performance and disclosure in the areas of:",
+                "support_overlap": 0.667,
+                "supported": true
+              },
+              {
+                "answer_claim": "Enabling Workers' Rights",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Leading Practices**: None identified.",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "These points highlight the areas where Amazon needs to focus on improving its practices and transparency, particularly concerning worker rights and supply chain management.",
+                "support_overlap": 0.529,
+                "supported": true
+              }
+            ]
+          },
+          "answer_correctness": 0.769,
+          "completeness": 0.714,
+          "unsupported_claim_rate": 0.0,
+          "context_sufficiency": 1.0,
+          "rag_composite": 0.815,
+          "rag_note": "RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics."
         }
       }
     },
@@ -2974,13 +3545,13 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Numeric + interpretation",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.904,
-      "verdict": "PASS",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 38.108,
+      "score": 0.0,
+      "verdict": "FAIL",
       "notes": "",
       "question": "Perform sentiment analysis on the Detailed Scoring & Research comments for Samsung.",
-      "answer": "The sentiment analysis of the Detailed Scoring & Research comments for Samsung shows a neutral and largely objective tone. The polarity score is 0.061, indicating a balanced, factual presentation without strong positive or negative bias. The subjectivity score is 0.339, reflecting that the text is mostly factual with some interpretative elements. The comments provide detailed disclosures on Samsung's policies, training, audits, grievance mechanisms, and responses to allegations, while also noting some areas where clarity or detail is limited.",
+      "answer": "The sentiment analysis of Samsung's Detailed Scoring & Research comments yielded the following results:\n\n- **Sentiment**: Neutral (Polarity Score: 0.089)\n- **Nature**: Objective (Factual) (Subjectivity Score: 0.357)\n\nThis indicates that the comments are primarily factual and neutral in tone, with a slight positive inclination. The analysis reflects a focus on the company's policies and practices without strong emotional language or subjective opinions.",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -2990,19 +3561,22 @@
               0.339
             ],
             "answer_numbers": [
+              0.089,
+              0.357
+            ],
+            "numeric_found": [],
+            "numeric_missing": [
               0.061,
               0.339
             ],
-            "numeric_found": [
-              0.061,
-              0.339
+            "numeric_extra": [
+              0.089,
+              0.357
             ],
-            "numeric_missing": [],
-            "numeric_extra": [],
-            "numeric_precision": 1.0,
-            "numeric_recall": 1.0,
-            "numeric_f1": 1.0,
-            "mean_absolute_error_nearest": 0.0,
+            "numeric_precision": 0.0,
+            "numeric_recall": 0.0,
+            "numeric_f1": 0.0,
+            "mean_absolute_error_nearest": 0.023,
             "numeric_tolerance": 0.005
           },
           "entity_metrics": {
@@ -3042,14 +3616,14 @@
           "num_contexts": 0,
           "context_precision": null,
           "context_recall": null,
-          "answer_relevance": 0.904,
+          "answer_relevance": 0.627,
           "faithfulness": null,
           "faithfulness_details": null,
-          "answer_correctness": 0.957,
+          "answer_correctness": 0.279,
           "completeness": null,
           "unsupported_claim_rate": null,
           "context_sufficiency": null,
-          "rag_composite": 0.904,
+          "rag_composite": 0.627,
           "rag_note": "retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."
         }
       }
@@ -3062,14 +3636,18 @@
       "included_in_final_accuracy": true,
       "adjudication_scope": "FINAL",
       "evaluation_type": "Claim/theme-level RAG",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.973,
+      "mas_status": "SUCCESS",
+      "latency_seconds": 16.506,
+      "score": 0.937,
       "verdict": "PASS",
       "notes": "",
       "question": "Mine the Amazon PDF for mentions of `forced labour` and categorise themes.",
-      "answer": "From the Amazon PDF related to \"forced labour,\" the mentions and themes can be categorized as follows:\n\n1. Allegations and Risks:\n   - There is one identified allegation of forced labour in Amazon's supply chains, specifically related to alleged Uyghur forced labour.\n   - The company does not disclose the steps it has taken to address the risks of alleged Uyghur forced labour across raw materials and supply chain tiers.\n\n2. Performance and Disclosure:\n   - Amazon ranks 10th out of 45 companies with an overall score of 27 out of 100.\n   - The company performed poorly on the themes of Purchasing Practices and Enabling Workers’ Rights.\n   - Since 2022, Amazon began disclosing some information on its grievance response and remedy processes but did not improve across other themes.\n   - Amazon discloses partial information on its first-tier supplier list and has a no-fee policy (Employer Pays Principle).\n   - It discloses risk assessment but does not provide remedy for supply chain workers.\n\n3. Opportunities for Improvement:\n   - Amazon is encouraged to adopt purchasing practices that reduce forced labour risks, such as improving planning, forecasting, and prompt payment.\n   - The company should disclose quantitative data evidencing responsible purchasing practices.\n   - There is a need to improve performance and disclosure on Purchasing Practices, Enabling Workers’ Rights, and Remedy themes.\n\n4. Regulatory Disclosures:\n   - Amazon complies with UK Modern Slavery Act, California Transparency in Supply Chains Act, and Australia Modern Slavery Act.\n\nIn summary, the main themes around forced labour for Amazon are allegations of Uyghur forced labour, insufficient disclosure and action on these risks, poor performance in purchasing practices and workers' rights, and some compliance with modern slavery legislation but lacking remedy provisions.\n\nWould you like me to analyze sentiment or provide more detailed comments on any specific theme?",
-      "retrieved_contexts": [],
+      "answer": "The analysis of the Amazon PDF regarding mentions of \"forced labour\" reveals several key themes and insights:\n\n1. **Allegations of Forced Labour**:\n   - KnowTheChain identified allegations of forced labour in Amazon's supply chains, specifically related to **Uyghur forced labour**. However, the company has not disclosed the steps it has taken to address these risks across its raw materials and supply chain tiers.\n\n2. **Performance Across Themes**:\n   - Amazon has been noted to perform poorly in the themes of **Purchasing Practices** and **Enabling Workers' Rights**. This lack of improvement has contributed to a drop in its ranking among peers.\n\n3. **Grievance Mechanisms**:\n   - Since 2022, Amazon has begun disclosing some information about its processes for responding to grievances and providing remedies. However, the overall performance in this area remains inadequate.\n\n4. **Opportunities for Improvement**:\n   - The report encourages Amazon to enhance its performance and disclosure specifically in the areas of **Purchasing Practices**, **Enabling Workers' Rights**, and **Remedy**.\n\n5. **Lack of Leading Practices**:\n   - The report indicates that there are no leading practices currently identified for Amazon in relation to forced labour.\n\nThese themes highlight significant areas where Amazon can improve its practices and transparency regarding forced labour risks in its supply chain. The lack of effective grievance mechanisms and the need for better engagement with affected stakeholders are critical points for consideration.",
+      "retrieved_contexts": [
+        "ICT Benchmark \nCOMPANY SCORECARD 2025  \nSUMMARY \nAmazon.com Inc. (Amazon) the world’s largest online retailer,4 ranks 10th out of 45 companies. \nSince 2022, the company began disclosing some information on its process for responding to \ngrievances and providing remedy.  However, the company did not improve across other \nthemes. The company performed particularly poorly on the themes of Purchasing Practices \nand Enabling Workers ’ Rights. As such, the company’s rank has dropped by 2 places.  \nKnowTheChain identified one allegation of forced labour in the company’s supply chains, \nrelated to alleged Uyghur forced labour.  However, the company does not disclose the steps \nit has taken to address the risks of alleged Uyghur forced labour across raw materials and \nsupply chain tiers. The company is encouraged to improve its performance and disclosure on \nthe themes of Purchasing Practices, Enabling Workers’ Rights, and Remedy.  \nLEADING PRACTICES \nNone.  \nOPPORTUNITIES FOR IMPROVEMENT",
+        "company has the second-highest score on the theme  of Recruitment . KnowTheChain \nidentified 3 allegations  of forced labour in the company’s supply chains.  However, the \ncompany neither discloses engagement with affected stakeholders, nor remedy outcomes for \nworkers. The company has an opportunity to improve its performance and disclosure on the \nthemes of Purchasing Practices, Enabling Workers’ Rights, and Remedy. \nLEADING PRACTICES \nRecruitment: Apple discloses a strong tracing process for labour recruiters used by its \nsuppliers and reports mapping more than 2,100 labour recruiters in 40 countries and regions. \nThe company states it maps labour recruiters regardless of whether they are recruiting \ndomestic or foreign contract workers. Apple also discloses training more than 228 labour agents \nworking for more than 90 labour agencies on its Responsible Labour Recruitment Due \nDiligence Toolkit. The company discloses monitoring suppliers’ labour hiring plans particularly",
+        "the theme of Recruitment. However, with a score of 61/100, the company continues to have \nsubstantial scope for improvement on its prevention and management of forced labour risks. \nKnowTheChain identified two allegations of forced labour in the company’s supply chains , \nrelated to Uyghur forced labour. Of these, Samsung Electronics denied the sourcing link for \nallegation, involving four alleged suppliers. However, the company does not disclose the steps \nit has taken to address the risks of alleged Uyghur forced labour across raw materials and \nsupply chain tiers. 4 The company has an opportunity to further improve its performance and \ndisclosure on the themes of Purchasing Practices, Enabling Workers’ Rights, and Monitoring.  \nLEADING PRACTICES \nTraceability and supply chain transparency: In addition to the legally mandated disclosure \nof 3TG smelters and operators, Samsung discloses full lists of cobalt smelters, mica operators,"
+      ],
       "details": {
         "claim_eval": {
           "claim_score": 1.0,
@@ -3103,25 +3681,112 @@
               "required_claim": "Forced-labour mentions include regulatory disclosure theme.",
               "weight": 1.0,
               "covered_auto": true,
-              "keyword_overlap": 1.0
+              "keyword_overlap": 0.833
             }
           ]
         },
         "rag_eval": {
           "is_rag_related": true,
-          "contexts_available": false,
-          "num_contexts": 0,
-          "context_precision": null,
-          "context_recall": null,
-          "answer_relevance": 0.9,
-          "faithfulness": null,
-          "faithfulness_details": null,
-          "answer_correctness": 0.973,
+          "contexts_available": true,
+          "num_contexts": 3,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "answer_relevance": 0.682,
+          "faithfulness": 0.938,
+          "faithfulness_details": {
+            "faithfulness": 0.938,
+            "supported_answer_claims": 15,
+            "total_answer_claims": 16,
+            "support_source": "retrieved_contexts",
+            "claim_support": [
+              {
+                "answer_claim": "The analysis of the Amazon PDF regarding mentions of \"forced labour\" reveals several key themes and insights:",
+                "support_overlap": 0.333,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Allegations of Forced Labour**:",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "KnowTheChain identified allegations of forced labour in Amazon's supply chains, specifically related to **Uyghur forced labour**.",
+                "support_overlap": 0.909,
+                "supported": true
+              },
+              {
+                "answer_claim": "However, the company has not disclosed the steps it has taken to address these risks across its raw materials and supply chain tiers.",
+                "support_overlap": 0.917,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Performance Across Themes**:",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "Amazon has been noted to perform poorly in the themes of **Purchasing Practices** and **Enabling Workers' Rights**.",
+                "support_overlap": 0.727,
+                "supported": true
+              },
+              {
+                "answer_claim": "This lack of improvement has contributed to a drop in its ranking among peers.",
+                "support_overlap": 0.25,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Grievance Mechanisms**:",
+                "support_overlap": 0.0,
+                "supported": false
+              },
+              {
+                "answer_claim": "Since 2022, Amazon has begun disclosing some information about its processes for responding to grievances and providing remedies.",
+                "support_overlap": 0.769,
+                "supported": true
+              },
+              {
+                "answer_claim": "However, the overall performance in this area remains inadequate.",
+                "support_overlap": 0.4,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Opportunities for Improvement**:",
+                "support_overlap": 1.0,
+                "supported": true
+              },
+              {
+                "answer_claim": "The report encourages Amazon to enhance its performance and disclosure specifically in the areas of **Purchasing Practices**, **Enabling Workers' Rights**, and **Remedy**.",
+                "support_overlap": 0.667,
+                "supported": true
+              },
+              {
+                "answer_claim": "**Lack of Leading Practices**:",
+                "support_overlap": 0.667,
+                "supported": true
+              },
+              {
+                "answer_claim": "The report indicates that there are no leading practices currently identified for Amazon in relation to forced labour.",
+                "support_overlap": 0.6,
+                "supported": true
+              },
+              {
+                "answer_claim": "These themes highlight significant areas where Amazon can improve its practices and transparency regarding forced labour risks in its supply chain.",
+                "support_overlap": 0.733,
+                "supported": true
+              },
+              {
+                "answer_claim": "The lack of effective grievance mechanisms and the need for better engagement with affected stakeholders are critical points for consideration.",
+                "support_overlap": 0.25,
+                "supported": true
+              }
+            ]
+          },
+          "answer_correctness": 0.921,
           "completeness": 1.0,
-          "unsupported_claim_rate": null,
-          "context_sufficiency": null,
-          "rag_composite": 0.973,
-          "rag_note": "retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."
+          "unsupported_claim_rate": 0.062,
+          "context_sufficiency": 1.0,
+          "rag_composite": 0.937,
+          "rag_note": "RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics."
         }
       }
     },
@@ -3133,13 +3798,13 @@
       "included_in_final_accuracy": false,
       "adjudication_scope": "DIAGNOSTIC_ONLY",
       "evaluation_type": "Group proportion exact match + interpretation",
-      "mas_status": "UNKNOWN",
-      "latency_seconds": null,
-      "score": 0.95,
-      "verdict": "PASS",
-      "notes": "Diagnostic match for current UK MSA regional pattern; row remains NEEDS_VALIDATION. Answer-key status is NEEDS_VALIDATION; this row is diagnostic only and excluded from final accuracy.",
+      "mas_status": "SUCCESS",
+      "latency_seconds": 3.522,
+      "score": 0.0,
+      "verdict": "NOT_ADJUDICATED",
+      "notes": "Failed to locate/parse UK MSA field; answer key expects regional UK MSA pattern. Answer-key status is NEEDS_VALIDATION; this row is diagnostic only and excluded from final accuracy.",
       "question": "Analyse text from Non-Scored Research on UK MSA compliance and identify patterns.",
-      "answer": "The analysis of UK Modern Slavery Act (MSA) compliance from the Non-Scored Research data reveals regional patterns in companies' responses:\n\n- In Asia, 25% of companies reported compliance with the UK MSA.\n- In Europe, none of the companies reported compliance with the UK MSA.\n- In North America, none of the companies reported compliance with the UK MSA.\n\nThis suggests that UK MSA compliance disclosures are primarily found among Asian companies in this dataset, with no reported compliance from companies in Europe or North America.",
+      "answer": "It seems that there is no data available regarding \"UK MSA compliance\" in the dataset. Therefore, I cannot analyze text or identify patterns related to this topic. If you have any other specific requests or topics you'd like to explore, please let me know!",
       "retrieved_contexts": [],
       "details": {
         "deterministic_eval": {
@@ -3149,21 +3814,18 @@
               0.0,
               0.0
             ],
-            "answer_numbers": [
-              25.0
-            ],
-            "numeric_found": [
-              25.0
-            ],
+            "answer_numbers": [],
+            "numeric_found": [],
             "numeric_missing": [
+              25.0,
               0.0,
               0.0
             ],
             "numeric_extra": [],
-            "numeric_precision": 1.0,
-            "numeric_recall": 0.333,
-            "numeric_f1": 0.5,
-            "mean_absolute_error_nearest": 16.6667,
+            "numeric_precision": null,
+            "numeric_recall": 0.0,
+            "numeric_f1": null,
+            "mean_absolute_error_nearest": null,
             "numeric_tolerance": 0.01
           },
           "entity_metrics": {
@@ -3199,14 +3861,14 @@
           "num_contexts": 0,
           "context_precision": null,
           "context_recall": null,
-          "answer_relevance": 0.728,
+          "answer_relevance": 0.315,
           "faithfulness": null,
           "faithfulness_details": null,
-          "answer_correctness": 0.509,
+          "answer_correctness": 0.14,
           "completeness": null,
           "unsupported_claim_rate": null,
           "context_sufficiency": null,
-          "rag_composite": 0.728,
+          "rag_composite": 0.315,
           "rag_note": "retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."
         }
       }

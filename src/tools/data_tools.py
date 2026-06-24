@@ -1,3 +1,5 @@
+import operator
+
 import pandas as pd
 from langchain_core.tools import tool
 

@@ -95,6 +95,9 @@ def build_ktc_react_agent() -> AgentExecutor:
     - Decide which tools (if any) are relevant and call them with appropriate arguments.
     - Prefer calling 1–3 tools per question instead of all of them.
     - NEVER invent numeric values; use only numbers returned from tools.
+    - If a tool returns JSON, read its `display` field for the final answer. Do not expose raw JSON to the user.
+    - For prediction/scenario questions, always state the formula, assumptions, coefficient source, and uncertainty.
+    - Do not predict a future rank unless the current score and future score distribution/ranking assumptions are available.
     
     [!!! POLICY ADDITIONS START HERE !!!]
     - **ETHICS POLICY:** When discussing ethical topics, proactively provide a high-level ethical reflection. Consider how low scores in areas like Remedy, Monitoring, or Purchasing Practices might translate into real-world risks for workers, such as lack of effective grievance mechanisms, weak oversight, or incentives that push costs and risks down the supply chain. Interpret quantitative patterns alongside these lived experiences of workers.
@@ -113,8 +116,10 @@ def build_ktc_react_agent() -> AgentExecutor:
       * 'top 5 companies in Traceability' -> get_top_companies_by_metric(column_name='Traceability', n=5).
       * 'which companies have 0 in Remedy' -> filter_companies_by_score(column_name='Remedy', operator_str='==', threshold=0.0).
       * 'k-means on Total Benchmark and Purchasing Practices' -> perform_clustering(features=['Total_Benchmark','Purchasing_Practices'], k=3).
-      * 'Asian companies match NA Purchasing Practices 45' -> model_improvement_impact(region_name='Asia', indicator_name='Purchasing_Practices', target_score=45).
-      * 'impact on Apple's score via Uyghur forced labour allegations' -> regression_indicator_impact(indicator_name='Traceability_Risk', company_keyword='Apple').
+      * 'Project industry average Total Benchmark Score for 2027 with 5% annual growth' -> project_metric_growth(column_name='Total_Benchmark', annual_growth_rate=0.05, current_year=2025, target_year=2027).
+      * 'Amazon improves Remedy by 10 points / predict 2027 rank' -> regression_indicator_impact(indicator_name='Remedy', company_keyword='Amazon', delta_points=10, coefficient_source='article_table8'), then state that rank cannot be predicted without a future score distribution.
+      * 'Asian companies match North America Purchasing Practices average' -> model_improvement_impact(region_name='Asia', indicator_name='Purchasing_Practices', target_region='North America', coefficient_source='article_table8').
+      * 'impact on Apple's score via Uyghur forced labour allegations' -> regression_indicator_impact(indicator_name='Traceability_Risk', company_keyword='Apple', delta_points=None, coefficient_source='article_table8'), then state that a numerical impact requires a defined ΔTraceability_Risk.
       * 'latest ILO report on forced labour in ICT' -> duckduckgo_web_search(query='latest ILO report on forced labour in ICT sector', max_results=5), then compare results with get_column_stats('Remedy') and/or compute_grouped_average('Remedy', 'Region').
       * 'Amazon opportunities for improvement from PDF' -> company_pdf_rag(company_name='Amazon.com Inc.', question='opportunities for improvement').
       * 'Sentiment of Samsung comments' -> get_indicator_comment(company_keyword='Samsung', indicator_code=''), then analyze_sentiment(text=...).

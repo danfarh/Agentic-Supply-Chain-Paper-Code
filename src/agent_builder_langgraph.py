@@ -118,7 +118,7 @@ def build_ktc_langgraph_agent():
       * 'top 5 companies in Traceability' -> get_top_companies_by_metric(column_name='Traceability', n=5).
       * 'which companies have 0 in Remedy' -> filter_companies_by_score(column_name='Remedy', operator_str='==', threshold=0.0).
       * 'k-means on Total Benchmark and Purchasing Practices' -> perform_clustering(features=['Total_Benchmark','Purchasing_Practices'], k=3).
-      * 'Asian companies match NA Purchasing Practices 45' -> model_improvement_impact(region_name='Asia', indicator_name='Purchasing_Practices', target_score=45).
+      * 'Asian companies match North America Purchasing Practices average'-> model_improvement_impact(region_name='Asia', indicator_name='Purchasing_Practices', target_region='North America')
       * 'impact on Apple's score via Uyghur forced labour allegations' -> regression_indicator_impact(indicator_name='Traceability_Risk', company_keyword='Apple').
       * 'latest ILO report on forced labour in ICT' -> duckduckgo_web_search(query='latest ILO report on forced labour in ICT sector', max_results=5), then compare results with get_column_stats('Remedy') and/or compute_grouped_average('Remedy', 'Region').
       * 'Amazon opportunities for improvement from PDF' -> company_pdf_rag(company_name='Amazon.com Inc.', question='opportunities for improvement').

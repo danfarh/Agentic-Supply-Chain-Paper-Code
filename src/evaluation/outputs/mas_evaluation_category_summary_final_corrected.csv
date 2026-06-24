@@ -1,8 +1,8 @@
 agent_category,n,pass,partial,fail,missing,strict_pass_rate,pass_or_partial_rate,mean_score,mean_latency_seconds,median_latency_seconds,p95_latency_seconds
-Analysis Agent,4,3,0,1,0,0.75,0.75,0.825,,,
-Data Agent,4,4,0,0,0,1.0,1.0,1.0,,,
-Ethics Agent,4,4,0,0,0,1.0,1.0,0.988,,,
-Prediction Agent,4,0,0,4,0,0.0,0.0,0.017,,,
-Research Agent,4,0,2,2,0,0.0,0.5,0.487,,,
-Synthesis Agent,4,4,0,0,0,1.0,1.0,0.993,,,
-Text Mining Agent,4,4,0,0,0,1.0,1.0,0.943,,,
+Analysis Agent,4,3,0,0,0,0.75,0.75,0.771,7.162,7.457,10.5
+Data Agent,4,3,1,0,0,0.75,1.0,0.94,13.426,13.486,17.6
+Ethics Agent,4,0,0,3,0,0.0,0.0,0.188,7.048,7.175,7.431
+Prediction Agent,4,2,1,1,0,0.5,0.75,0.75,5.06,5.088,7.544
+Research Agent,4,0,0,0,0,0.0,0.0,0.654,21.828,9.945,58.971
+Synthesis Agent,4,2,2,0,0,0.5,1.0,0.882,18.782,13.683,38.356
+Text Mining Agent,4,1,1,1,0,0.25,0.5,0.413,16.606,12.397,38.108
