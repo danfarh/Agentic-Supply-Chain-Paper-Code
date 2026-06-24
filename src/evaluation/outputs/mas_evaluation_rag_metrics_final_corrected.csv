@@ -1,9 +1,0 @@
-query_id,agent_category,answer_key_status,contexts_available,num_contexts,context_precision,context_recall,answer_relevance,faithfulness,answer_correctness,completeness,unsupported_claim_rate,context_sufficiency,rag_composite,rag_note
-R2,Research Agent,NEEDS_SOURCE_SNAPSHOT,True,5,0.679,0.333,0.719,0.765,0.841,1.0,0.235,0.471,0.802,RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics.
-R3,Research Agent,NEEDS_SOURCE_SNAPSHOT,True,5,0.756,0.667,0.627,0.818,0.697,0.667,0.182,0.703,0.698,RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics.
-R4,Research Agent,NEEDS_SOURCE_SNAPSHOT,True,5,0.478,0.5,0.52,1.0,0.863,,0.0,0.491,0.681,RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics.
-S3,Synthesis Agent,CLEAN_WITH_RUBRIC,True,3,1.0,1.0,0.669,1.0,0.934,1.0,0.0,1.0,0.947,RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics.
-T1,Text Mining Agent,CLEAN_WITH_RUBRIC,True,3,1.0,1.0,0.632,1.0,0.769,0.714,0.0,1.0,0.815,RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics.
-T2,Text Mining Agent,CLEAN_WITH_METHOD_NOTE,False,0,,,0.627,,0.279,,,,0.627,"retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."
-T3,Text Mining Agent,CLEAN_WITH_RUBRIC,True,3,1.0,1.0,0.682,0.938,0.921,1.0,0.062,1.0,0.937,RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics.
-T4,Text Mining Agent,NEEDS_VALIDATION,False,0,,,0.315,,0.14,,,,0.315,"retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are unavailable for this row."

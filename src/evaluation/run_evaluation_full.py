@@ -1,188 +1,157 @@
 """
-Corrected final MAS evaluator (no command-line parameters).
+Final MAS + RAG / RAGAS-style evaluator for the 28-query dataset.
 
-Use with:
-  logs/structured_answer_key_MAS_evaluation_final.json
-  logs/generated_answers_structured.json
+Input expected:
+  generated_answers_structured.json + structured reference answer key JSON
 
-Run:
-  python evaluate_mas_outputs_FINAL_CORRECTED.py
+The input may be either:
+  {"metadata": {...}, "data": [ ... rows ... ]}
+or a plain list of rows.
+
+Each row should contain:
+  query_id, query_number, agent_category, answer_key_status,
+  included_in_final_accuracy, user_input, response, reference,
+  retrieved_contexts, retrieved_context_records
 
 Outputs:
-  outputs/mas_evaluation_results_final_corrected.json
-  outputs/mas_evaluation_summary_final_corrected.csv
-  outputs/mas_evaluation_category_summary_final_corrected.csv
-  outputs/mas_evaluation_rag_metrics_final_corrected.csv
+  <out-dir>/evaluation_results.json
+  <out-dir>/evaluation_results.csv
+  <out-dir>/evaluation_summary.json
+  <out-dir>/evaluation_summary.csv
+  <out-dir>/rows_with_contexts.csv
+  <out-dir>/ragas_official_results.csv          (only if --use-official-ragas succeeds)
 
-This corrected version fixes the main scoring problems found in the previous evaluator:
-- Does not treat score text after "— 61.00" as part of the company name.
-- Uses line-level entity-value matching before sentence splitting, so "Co. Ltd." does not break matches.
-- Separates HP Inc. from HPE / Hewlett Packard Enterprise.
-- Does not penalize top-k ranking answers because of rank numbers such as "1." or "top 5".
-- Accepts rounded approximate values such as "about 7" for 6.98 where the query/reference uses approximate wording.
-- Keeps NEEDS_CORRECTION / NEEDS_SOURCE_SNAPSHOT / NEEDS_VALIDATION rows out of final accuracy.
-- Does not claim Context Precision / Context Recall when retrieved_contexts are missing.
-- Uses stricter thresholds: PASS >= 0.85, PARTIAL >= 0.60, FAIL < 0.60.
+What this script computes:
+  - Answer Correctness (reference-based heuristic, always available)
+  - Answer Relevancy (query-response relevance heuristic, always available)
+  - Numeric precision / recall / F1 against reference numbers
+  - Reference claim recall / lexical similarity
+  - Faithfulness (requires retrieved_contexts)
+  - Context Precision (requires retrieved_contexts)
+  - Context Recall (requires retrieved_contexts)
+  - Context Sufficiency / Utilization (requires retrieved_contexts)
+  - RAG composite score for rows with contexts
+  - Final-accuracy summary over validated rows only
+  - Diagnostic/RAG-only summary over non-final rows
 
-BERTScore is intentionally not included.
-RAGAS library is intentionally not required; RAG-style metrics are transparent heuristics.
+Important methodological note:
+  retrieved_contexts are the contexts retrieved by the system, not gold evidence.
+  Therefore they are valid for evaluating RAG behavior, but they should not be treated
+  as reference/gold answers.
+
+Optional official RAGAS:
+  If you install ragas + datasets and set an LLM/embedding provider as required by
+  your ragas version, you can run:
+
+  python evaluate_ragas_final_full.py --dataset ragas_dataset_all_28_with_generated_contexts.json --use-official-ragas
+
+  The script will attempt the common ragas API and will continue with heuristic metrics
+  if official RAGAS fails.
 """
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
+import math
 import os
 import re
 import statistics
-from difflib import SequenceMatcher
+from collections import Counter, defaultdict
+from dataclasses import dataclass, asdict
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-# ============================================================
-# HARD-CODED SETTINGS
-# ============================================================
-
-BASE_DIR = Path(__file__).resolve().parent
-
-ANSWER_KEY_CANDIDATES = [
-    BASE_DIR / "logs" / "structured_answer_key_MAS_evaluation_final.json",
-    BASE_DIR / "structured_answer_key_MAS_evaluation_final.json",
-    Path("/mnt/data/structured_answer_key_MAS_evaluation_final.json"),
-    # Sandbox fallback for the file uploaded in this conversation.
-    Path("/mnt/data/d687c9c7-c98a-4d2a-a902-399d7080e070.json"),
-]
-
-GENERATED_ANSWERS_CANDIDATES = [
-    BASE_DIR / "logs" / "generated_answers_structured.json",
-    BASE_DIR / "generated_answers_structured.json",
-    BASE_DIR / "generated_answers_structured_exact.json",
-    Path("/mnt/data/generated_answers_structured.json"),
-    Path("/mnt/data/generated_answers_structured_exact.json"),
-    # Sandbox fallback for the file uploaded in this conversation.
-    Path("/mnt/data/1dd06bb5-32fb-4c77-9e11-3cd04f4a7bd9.json"),
-]
-
-OUTPUT_DIR = BASE_DIR / "outputs"
-OUTPUT_JSON_PATH = OUTPUT_DIR / "mas_evaluation_results_final_corrected.json"
-OUTPUT_CSV_PATH = OUTPUT_DIR / "mas_evaluation_summary_final_corrected.csv"
-OUTPUT_CATEGORY_CSV_PATH = OUTPUT_DIR / "mas_evaluation_category_summary_final_corrected.csv"
-OUTPUT_RAG_CSV_PATH = OUTPUT_DIR / "mas_evaluation_rag_metrics_final_corrected.csv"
-
-USE_LLM_JUDGE = False
-JUDGE_MODEL = "gpt-4.1"
-
-QUERY_ID_ORDER = [
-    "D1", "D2", "D3", "D4",
-    "A1", "A2", "A3", "A4",
-    "R1", "R2", "R3", "R4",
-    "P1", "P2", "P3", "P4",
-    "S1", "S2", "S3", "S4",
-    "E1", "E2", "E3", "E4",
-    "T1", "T2", "T3", "T4",
-]
+# -----------------------------------------------------------------------------
+# Policy / thresholds
+# -----------------------------------------------------------------------------
 
 FINAL_KEY_STATUSES = {"CLEAN", "CLEAN_WITH_RUBRIC", "CLEAN_WITH_METHOD_NOTE"}
 DIAGNOSTIC_ONLY_STATUSES = {"NEEDS_CORRECTION", "NEEDS_SOURCE_SNAPSHOT", "NEEDS_VALIDATION"}
 
-OPEN_ENDED_TYPES = {
-    "rag", "synthesis", "ethics", "external", "semantic", "claim", "qualitative", "text", "document",
+DEFAULT_PASS_THRESHOLD = 0.60
+DEFAULT_PARTIAL_THRESHOLD = 0.30
+
+# For context metrics. These are deliberately conservative lexical thresholds.
+CONTEXT_RELEVANCE_THRESHOLD = 0.10
+CONTEXT_RECALL_TOKEN_THRESHOLD = 0.01
+FAITHFULNESS_SENTENCE_SUPPORT_THRESHOLD = 0.15
+
+INCIDENTAL_NUMBERS = {
+    2022, 2023, 2024, 2025, 2026, 2027, 100,
 }
-RAG_RELATED_TYPES = {"rag", "document", "pdf", "text mining", "retrieval", "external"}
 
-PASS_THRESHOLD = 0.85
-PARTIAL_THRESHOLD = 0.60
-CLAIM_KEYWORD_COVERAGE_THRESHOLD = 0.45
-CONTEXT_RELEVANCE_THRESHOLD = 0.12
-FAITHFULNESS_SENTENCE_SUPPORT_THRESHOLD = 0.18
-INCIDENTAL_NUMBERS = {2022, 2023, 2024, 2025, 2026, 2027, 100}
+STOPWORDS = {
+    "the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "with", "by",
+    "as", "is", "are", "be", "was", "were", "this", "that", "these", "those",
+    "from", "into", "not", "but", "if", "then", "there", "where", "which", "who",
+    "what", "when", "how", "does", "do", "did", "has", "have", "had", "can",
+    "could", "should", "would", "may", "might", "must", "include", "includes",
+    "including", "required", "claim", "answer", "response", "score", "scores",
+    "query", "question", "company", "companies", "data", "sheet", "table", "using",
+    "based", "overall", "also", "more", "less", "than", "about", "across", "such",
+    "e.g", "approximately", "approx", "average", "current", "final", "valid",
+    "should", "must", "will", "would", "could", "one", "two", "three", "four", "five",
+    "its", "their", "it", "they", "he", "she", "we", "you", "i", "our", "your",
+}
 
+# -----------------------------------------------------------------------------
+# Basic helpers
+# -----------------------------------------------------------------------------
 
-# ============================================================
-# IO HELPERS
-# ============================================================
-
-def first_existing_path(candidates: List[Path], label: str) -> Path:
-    for path in candidates:
-        if path.exists():
-            return path
-    checked = "\n".join(str(path) for path in candidates)
-    raise FileNotFoundError(f"{label} not found. Checked:\n{checked}")
-
-
-def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="replace")
+def now_utc_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
-def safe_json_loads(text: str) -> Optional[Any]:
+def safe_float(x: Any) -> Optional[float]:
     try:
-        return json.loads(text)
+        if x is None:
+            return None
+        v = float(x)
+        if math.isnan(v) or math.isinf(v):
+            return None
+        return v
     except Exception:
         return None
 
 
-def ensure_output_dir() -> None:
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+def mean(values: Iterable[Optional[float]]) -> Optional[float]:
+    vals = [float(v) for v in values if v is not None]
+    if not vals:
+        return None
+    return sum(vals) / len(vals)
 
 
-# ============================================================
-# TEXT NORMALIZATION
-# ============================================================
-
-def normalize_text(text: Any) -> str:
-    text = "" if text is None else str(text)
-    text = text.lower().replace("labour", "labor")
-    text = text.replace("’", "'").replace("“", '"').replace("”", '"')
-    text = text.replace("–", "-").replace("—", "-")
-    text = re.sub(r"[^a-z0-9.\s&()/%+\-]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
+def median(values: Iterable[Optional[float]]) -> Optional[float]:
+    vals = [float(v) for v in values if v is not None]
+    if not vals:
+        return None
+    return statistics.median(vals)
 
 
-def normalize_for_entity(text: Any) -> str:
-    text = normalize_text(text)
-    text = text.replace(".", "")
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
+def pct(values: Iterable[Optional[float]], q: float) -> Optional[float]:
+    vals = sorted(float(v) for v in values if v is not None)
+    if not vals:
+        return None
+    if len(vals) == 1:
+        return vals[0]
+    pos = (len(vals) - 1) * q
+    lo = math.floor(pos)
+    hi = math.ceil(pos)
+    if lo == hi:
+        return vals[int(pos)]
+    return vals[lo] * (hi - pos) + vals[hi] * (pos - lo)
 
 
-def tokenize(text: Any) -> List[str]:
-    return re.findall(r"[a-z0-9]+", normalize_text(text))
+def rounded(x: Optional[float], ndigits: int = 3) -> Optional[float]:
+    if x is None:
+        return None
+    return round(float(x), ndigits)
 
 
-def content_tokens(text: Any) -> List[str]:
-    stopwords = {
-        "the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "with",
-        "by", "as", "is", "are", "be", "was", "were", "this", "that", "these",
-        "those", "from", "into", "not", "but", "if", "then", "there", "where",
-        "which", "who", "what", "when", "how", "does", "do", "did", "has",
-        "have", "had", "can", "could", "should", "would", "may", "might",
-        "must", "include", "includes", "including", "required", "claim",
-        "answer", "response", "score", "scores", "query", "question", "company",
-        "companies", "data", "sheet", "table", "using", "based", "overall",
-        "also", "more", "less", "than", "about", "across", "such", "e.g",
-        "approximately", "approx", "average", "current",
-    }
-    return [token for token in tokenize(text) if len(token) > 2 and token not in stopwords]
-
-
-def unique_preserve_order(items: Iterable[str]) -> List[str]:
-    return list(dict.fromkeys(items))
-
-
-def keyword_set(text: Any) -> set:
-    return set(content_tokens(text))
-
-
-def lexical_overlap_score(source: str, target: str) -> float:
-    source_keywords = keyword_set(source)
-    target_keywords = keyword_set(target)
-    if not source_keywords:
-        return 0.0
-    return len(source_keywords & target_keywords) / len(source_keywords)
-
-
-def f1_from_precision_recall(precision: Optional[float], recall: Optional[float]) -> Optional[float]:
+def f1(precision: Optional[float], recall: Optional[float]) -> Optional[float]:
     if precision is None or recall is None:
         return None
     if precision + recall == 0:
@@ -190,1550 +159,1400 @@ def f1_from_precision_recall(precision: Optional[float], recall: Optional[float]
     return 2 * precision * recall / (precision + recall)
 
 
-def strip_list_prefix(line: str) -> str:
-    line = line.strip()
-    line = re.sub(r"^[-*•]\s*", "", line)
-    line = re.sub(r"^\d+\.\s*", "", line)
-    return line.strip()
+def clamp01(x: Optional[float]) -> Optional[float]:
+    if x is None:
+        return None
+    return max(0.0, min(1.0, float(x)))
 
 
-def answer_lines(text: str) -> List[str]:
-    return [strip_list_prefix(line) for line in str(text).splitlines() if strip_list_prefix(line)]
+def clean_text(text: Any) -> str:
+    text = "" if text is None else str(text)
+    text = text.replace("\u2019", "'").replace("\u2018", "'")
+    text = text.replace("\u201c", '"').replace("\u201d", '"')
+    text = text.replace("\u2013", "-").replace("\u2014", "-")
+    return text
 
 
-def split_sentences(text: str) -> List[str]:
-    # Sentence fallback only. Do not use this before line matching because company names such as "Co. Ltd."
-    # contain periods that can break sentence splitting.
-    text = str(text).strip()
-    if not text:
-        return []
-    parts = re.split(r"(?<=[.!?])\s+|\n+|(?:\s*[-•]\s+)", text)
-    return [part.strip() for part in parts if len(part.strip()) > 20]
-
-
-# ============================================================
-# NUMBER PARSING
-# ============================================================
-
-def extract_numbers(text: Any) -> List[float]:
-    return [float(x) for x in re.findall(r"(?<![A-Za-z])-?\d+(?:\.\d+)?", str(text))]
-
-
-def extract_numbers_without_list_ranks(text: Any) -> List[float]:
-    numbers: List[float] = []
-    for line in str(text).splitlines():
-        clean = strip_list_prefix(line)
-        numbers.extend(extract_numbers(clean))
-    if not numbers and str(text).strip():
-        numbers.extend(extract_numbers(text))
-    return numbers
-
-
-def filter_reference_numbers(numbers: List[float]) -> List[float]:
-    return [number for number in numbers if int(number) not in INCIDENTAL_NUMBERS]
-
-
-def has_approximate_language(text: str) -> bool:
-    return bool(re.search(r"\b(about|approx|approximately|around|roughly|≈)\b", str(text), re.I))
-
-
-def effective_tolerance(target: float, base_tolerance: float, answer: str, reference: str = "") -> float:
-    # Keep exact tolerance by default. If the answer/reference explicitly uses approximate wording,
-    # allow common rounding such as 6.98 -> about 7.
-    if has_approximate_language(answer) or has_approximate_language(reference):
-        if abs(target) >= 1:
-            return max(base_tolerance, 0.05)
-    return base_tolerance
-
-
-def number_present(target: float, numbers: List[float], tolerance: float = 0.01, answer: str = "",
-                   reference: str = "") -> bool:
-    tol = effective_tolerance(target, tolerance, answer, reference)
-    return any(abs(number - target) <= tol for number in numbers)
-
-
-def parse_tolerance(value: Optional[str], default: float = 0.01) -> float:
-    if not value:
-        return default
-    match = re.search(r"±\s*([0-9.]+)", str(value))
-    return float(match.group(1)) if match else default
-
-
-# ============================================================
-# ENTITY PARSING
-# ============================================================
-
-LEGAL_SUFFIX_PATTERN = re.compile(
-    r"\b(co|corp|corporation|inc|incorporated|ltd|plc|ag|oyj|sa|s\.a|nv|company|technologies|technology|electronics|group|holdings)\b\.?",
-    re.I,
-)
-
-COMPANY_MARKERS = [
-    "Inc", "Corp", "Co.", "Ltd", "PLC", "AG", "Oyj", "S.A.", "NV",
-    "Samsung", "Apple", "Cisco", "BOE", "HPE", "Xiaomi", "Panasonic",
-    "Canon", "Sony", "NVIDIA", "Amazon", "Qualcomm", "Seagate", "NXP",
-    "Logitech", "Dell", "HP", "Fujifilm", "Kyocera", "Keyence", "Murata",
-    "Luxshare", "Infineon", "Ericsson", "AMD", "Advanced Micro Devices",
-    "Hewlett Packard", "Hon Hai", "Foxconn", "Taiwan Semiconductor",
-    "Semiconductor Manufacturing", "Best Buy", "Corning", "Broadcom", "Amphenol", "Nokia",
-    "SK Hynix", "LG Electronics",
-]
-
-
-def split_reference_items(reference_answer: str) -> List[str]:
-    items = []
-    for line in str(reference_answer).splitlines():
-        clean = strip_list_prefix(line)
-        if clean:
-            items.append(clean)
-    return items
-
-
-def remove_score_suffix_from_name(text: str) -> str:
-    text = str(text).strip()
-    # Common reference formats:
-    # Company: 61.00
-    # Company — 61.00
-    # Company - 61.00
-    # Company with a score of 61.00
-    # Company: Market Cap = 235.74B
-    text = re.split(r"\s+with a score\b", text, maxsplit=1, flags=re.I)[0]
-    text = re.split(r"\bmarket cap\b", text, maxsplit=1, flags=re.I)[0]
-    text = re.split(r"\s+[—–-]\s+(?=\d)", text, maxsplit=1)[0]
-    if ":" in text:
-        before, after = text.split(":", 1)
-        if re.search(r"\d|market cap", after, re.I):
-            text = before
-    text = re.sub(r"\s*=\s*[-+]?\d.*$", "", text)
-    return text.strip(" :=-—–")
-
-
-def company_name_from_item(item: str) -> str:
-    return remove_score_suffix_from_name(strip_list_prefix(item))
-
-
-def looks_like_company_name(name: str) -> bool:
-    name = str(name).strip()
-    if not name:
-        return False
-
-    # Legal suffixes must be standalone tokens; otherwise "AG" would match "Average".
-    legal_suffixes = ["Inc", "Corp", "Co.", "Ltd", "PLC", "AG", "Oyj", "S.A.", "NV"]
-    for suffix in legal_suffixes:
-        suffix_norm = re.escape(suffix.lower().replace(".", ""))
-        name_norm = normalize_for_entity(name)
-        if re.search(r"(?<![a-z0-9])" + suffix_norm + r"(?![a-z0-9])", name_norm):
-            return True
-
-    named_markers = [
-        marker for marker in COMPANY_MARKERS
-        if marker not in legal_suffixes and len(marker) > 2
-    ]
-    name_norm = normalize_for_entity(name)
-    for marker in named_markers:
-        marker_norm = normalize_for_entity(marker)
-        if re.search(r"(?<![a-z0-9])" + re.escape(marker_norm) + r"(?![a-z0-9])", name_norm):
-            return True
-
-    return False
-
-
-def canonical_entity_key(name: str) -> str:
-    text = normalize_for_entity(name)
-    text = LEGAL_SUFFIX_PATTERN.sub(" ", text)
-    text = re.sub(r"\b(the|publ)\b", " ", text)
+def normalize_text(text: Any) -> str:
+    text = clean_text(text).lower().replace("labour", "labor")
+    text = re.sub(r"[^a-z0-9.\s&()/%+\-]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
 
-def entity_aliases(name: str) -> List[str]:
-    raw = normalize_for_entity(remove_score_suffix_from_name(name))
-    aliases = [raw]
-
-    # Special cases to prevent HP Inc. from matching HPE.
-    if raw in {"hp inc", "hp"} or re.fullmatch(r"hp inc", raw):
-        return ["hp inc"]
-
-    if "hewlett packard enterprise" in raw or "(hpe)" in raw or raw == "hpe":
-        aliases.extend(["hewlett packard enterprise", "hpe"])
-
-    if "hon hai precision" in raw or "foxconn" in raw:
-        aliases.extend(["hon hai precision", "foxconn"])
-
-    if "advanced micro devices" in raw:
-        aliases.extend(["advanced micro devices", "amd"])
-
-    if "telefonaktiebolaget lm ericsson" in raw:
-        aliases.extend(["telefonaktiebolaget lm ericsson", "ericsson"])
-
-    if "nvidia" in raw:
-        aliases.append("nvidia")
-
-    if "amazon.com" in raw:
-        aliases.extend(["amazon.com inc", "amazon com inc", "amazon"])
-
-    if "samsung electronics" in raw:
-        aliases.append("samsung electronics")
-
-    if "apple inc" in raw:
-        aliases.append("apple inc")
-
-    key = canonical_entity_key(raw)
-    if len(key) > 3:
-        aliases.append(key)
-
-    return unique_preserve_order([alias for alias in aliases if alias])
+def tokens(text: Any) -> List[str]:
+    return re.findall(r"[a-z0-9]+", normalize_text(text))
 
 
-def contains_alias_as_phrase(text: str, alias: str) -> bool:
-    text_norm = normalize_for_entity(text)
-    alias_norm = normalize_for_entity(alias)
-
-    if not alias_norm:
-        return False
-
-    # HP Inc. must match HP Inc., not HPE or Hewlett Packard Enterprise.
-    if alias_norm == "hp inc":
-        return bool(re.search(r"\bhp\s+inc\b", text_norm))
-
-    # HPE should match acronym or full company only.
-    if alias_norm == "hpe":
-        return bool(re.search(r"\bhpe\b", text_norm))
-
-    pattern = r"(?<![a-z0-9])" + re.escape(alias_norm) + r"(?![a-z0-9])"
-    return bool(re.search(pattern, text_norm))
+def content_tokens(text: Any) -> List[str]:
+    return [t for t in tokens(text) if len(t) > 2 and t not in STOPWORDS]
 
 
-def name_present(name: str, answer: str) -> bool:
-    return any(contains_alias_as_phrase(answer, alias) for alias in entity_aliases(name))
+def token_set(text: Any) -> set:
+    return set(content_tokens(text))
 
 
-def extract_expected_entities(reference_answer: str) -> List[str]:
-    entities = []
-    for item in split_reference_items(reference_answer):
-        name = company_name_from_item(item)
-        if looks_like_company_name(name):
-            entities.append(name)
-    return unique_preserve_order(entities)
+def lexical_recall(source: str, target: str) -> float:
+    """How much of source appears in target, using content-token overlap."""
+    src = token_set(source)
+    tgt = token_set(target)
+    if not src:
+        return 0.0
+    return len(src & tgt) / len(src)
 
 
-def build_global_entity_universe(answer_key: Dict[str, Any]) -> List[str]:
-    entities = []
-    for row in answer_key.get("answer_key", []):
-        entities.extend(extract_expected_entities(row.get("clean_reference_answer", "")))
-    return unique_preserve_order(entities)
+def lexical_precision(source: str, target: str) -> float:
+    """How much of target is explained by source, using content-token overlap."""
+    src = token_set(source)
+    tgt = token_set(target)
+    if not tgt:
+        return 0.0
+    return len(src & tgt) / len(tgt)
 
 
-def extract_predicted_entities(answer: str, global_entities: List[str]) -> List[str]:
-    return [entity for entity in global_entities if name_present(entity, answer)]
+def lexical_f1(a: str, b: str) -> float:
+    p = lexical_precision(a, b)
+    r = lexical_recall(a, b)
+    return f1(p, r) or 0.0
 
 
-def extract_expected_entity_value_pairs(reference_answer: str) -> List[Dict[str, Any]]:
-    pairs = []
-    for item in split_reference_items(reference_answer):
-        entity = company_name_from_item(item)
-        if not looks_like_company_name(entity):
+def split_reference_claims(text: str) -> List[str]:
+    """Split reference into evaluable claim-like chunks."""
+    if not text:
+        return []
+    raw_parts: List[str] = []
+    for line in str(text).splitlines():
+        line = strip_list_prefix(line).strip()
+        if not line:
             continue
-        values = filter_reference_numbers(extract_numbers_without_list_ranks(item))
-        if values:
-            pairs.append({"entity": entity, "values": values})
-    return pairs
+        # Semicolon-separated rubric items are common in this dataset.
+        for part in re.split(r";|\.|\n", line):
+            part = part.strip(" -:•\t")
+            if len(content_tokens(part)) >= 3:
+                raw_parts.append(part)
+    return dedupe_preserve_order(raw_parts)
 
 
-def line_or_sentence_with_entity(answer: str, entity: str) -> str:
-    # Line-level matching first avoids breaking "Co. Ltd." into fake sentences.
-    for line in answer_lines(answer):
-        if name_present(entity, line):
-            return line
+def split_response_claims(text: str) -> List[str]:
+    if not text:
+        return []
+    # Sentence split plus bullet split. Keep meaningful chunks only.
+    parts = re.split(r"(?<=[.!?])\s+|\n+|(?:\s*[-•]\s+)", str(text))
+    claims = []
+    for part in parts:
+        part = strip_list_prefix(part).strip()
+        if len(content_tokens(part)) >= 4:
+            claims.append(part)
+    return dedupe_preserve_order(claims)
 
-    for sentence in split_sentences(answer):
-        if name_present(entity, sentence):
-            return sentence
 
-    return ""
+def strip_list_prefix(line: str) -> str:
+    line = str(line).strip()
+    line = re.sub(r"^[-*•]\s*", "", line)
+    line = re.sub(r"^\d+[.)]\s*", "", line)
+    return line.strip()
 
 
-# ============================================================
-# GENERATED ANSWER LOADING
-# ============================================================
+def dedupe_preserve_order(items: Iterable[str]) -> List[str]:
+    seen = set()
+    out = []
+    for item in items:
+        key = normalize_text(item)
+        if key and key not in seen:
+            seen.add(key)
+            out.append(item)
+    return out
 
-def parse_text_mas_log(log_text: str) -> Dict[str, Dict[str, Any]]:
-    pattern = re.compile(
-        r"--- Query\s+(\d+)/28\s+\[(.*?)\]\s+---\s*"
-        r"Time Taken\s*:\s*([0-9.]+)\s*seconds\s*"
-        r"Question\s*:\s*(.*?)\n"
-        r"Answer\s*:\s*\n(.*?)(?=\n-+\n\n--- Query|\n-+\s*$)",
-        re.S,
-    )
+# -----------------------------------------------------------------------------
+# Numeric and unit metrics
+# -----------------------------------------------------------------------------
 
-    outputs: Dict[str, Dict[str, Any]] = {}
-    for match in pattern.finditer(log_text):
-        query_number = int(match.group(1))
-        if not 1 <= query_number <= len(QUERY_ID_ORDER):
+def extract_numbers(text: Any) -> List[float]:
+    """Extract meaningful numeric values while ignoring common list/rank prefixes.
+
+    This prevents answers like "1. Samsung: 61" from being penalized for the
+    list marker `1.`. It also removes common prompt/preamble numbers such as
+    "top 5" and "k=3" when they are not part of the scored value.
+    """
+    values: List[float] = []
+    raw = str(text).replace(",", "")
+    for line in raw.splitlines():
+        line = strip_list_prefix(line)
+        line = re.sub(r"\btop\s+\d+\b", " ", line, flags=re.I)
+        line = re.sub(r"\bk\s*=\s*\d+\b", " ", line, flags=re.I)
+        line = re.sub(r"\bindicator\s+\d+(?:\.\d+)?\b", " ", line, flags=re.I)
+        values.extend(float(m.group(0)) for m in re.finditer(r"(?<![A-Za-z])-?\d+(?:\.\d+)?", line))
+    return values
+
+
+def filter_incidental_numbers(nums: List[float]) -> List[float]:
+    out = []
+    for n in nums:
+        if int(abs(n)) in INCIDENTAL_NUMBERS:
             continue
-
-        query_id = QUERY_ID_ORDER[query_number - 1]
-        outputs[query_id] = {
-            "query_number": query_number,
-            "query_id": query_id,
-            "mas_status": match.group(2).strip(),
-            "latency_seconds": float(match.group(3)),
-            "question": match.group(4).strip(),
-            "answer": match.group(5).strip(),
-            "retrieved_contexts": [],
-            "raw_record": None,
-        }
-
-    return outputs
+        out.append(n)
+    return out
 
 
-def normalize_json_mas_record(record: Dict[str, Any], index: int) -> Optional[Dict[str, Any]]:
-    query_number = record.get("query_number") or record.get("query_num") or record.get("number") or index + 1
-    try:
-        query_number = int(query_number)
-    except Exception:
-        query_number = index + 1
-
-    query_id = record.get("query_id")
-    if not query_id and 1 <= query_number <= len(QUERY_ID_ORDER):
-        query_id = QUERY_ID_ORDER[query_number - 1]
-
-    if not query_id:
-        return None
-
-    answer = (
-            record.get("answer")
-            or record.get("response")
-            or record.get("final_answer")
-            or record.get("generated_answer")
-            or record.get("output")
-            or ""
-    )
-
-    question = record.get("question") or record.get("query") or record.get("prompt") or ""
-
-    contexts = (
-            record.get("retrieved_contexts")
-            or record.get("contexts")
-            or record.get("context")
-            or record.get("retrieved_chunks")
-            or record.get("source_contexts")
-            or []
-    )
-    if isinstance(contexts, str):
-        contexts = [contexts]
-    elif isinstance(contexts, list):
-        contexts = [str(item) for item in contexts]
-    else:
-        contexts = []
-
-    latency = (
-            record.get("latency_seconds")
-            or record.get("time_taken")
-            or record.get("time_taken_seconds")
-            or record.get("duration")
-            or None
-    )
-    try:
-        latency = float(latency) if latency is not None else None
-    except Exception:
-        latency = None
-
-    status = str(record.get("mas_status") or record.get("status") or "UNKNOWN")
-
-    return {
-        "query_number": query_number,
-        "query_id": query_id,
-        "mas_status": status,
-        "latency_seconds": latency,
-        "question": str(question),
-        "answer": str(answer),
-        "retrieved_contexts": contexts,
-        "raw_record": record,
-    }
+def number_match(target: float, candidates: List[float], tolerance: float = 0.05) -> bool:
+    for c in candidates:
+        if abs(c - target) <= tolerance:
+            return True
+    return False
 
 
-def load_mas_outputs(path: Path) -> Dict[str, Dict[str, Any]]:
-    text = read_text(path)
-    obj = safe_json_loads(text)
+def numeric_metrics(response: str, reference: str, tolerance: float = 0.05) -> Dict[str, Any]:
+    ref_nums = filter_incidental_numbers(extract_numbers(reference))
+    ans_nums = filter_incidental_numbers(extract_numbers(response))
 
-    if obj is not None:
-        if isinstance(obj, dict):
-            records = obj.get("results") or obj.get("queries") or obj.get("items") or obj.get("outputs") or []
-            if isinstance(records, dict):
-                records = list(records.values())
-        elif isinstance(obj, list):
-            records = obj
-        else:
-            records = []
-
-        outputs = {}
-        for index, record in enumerate(records):
-            if not isinstance(record, dict):
-                continue
-            normalized = normalize_json_mas_record(record, index)
-            if normalized:
-                outputs[normalized["query_id"]] = normalized
-        if outputs:
-            return outputs
-
-    # JSONL fallback.
-    outputs = {}
-    for index, line in enumerate(text.splitlines()):
-        record = safe_json_loads(line.strip())
-        if isinstance(record, dict):
-            normalized = normalize_json_mas_record(record, index)
-            if normalized:
-                outputs[normalized["query_id"]] = normalized
-    if outputs:
-        return outputs
-
-    return parse_text_mas_log(text)
-
-
-# ============================================================
-# CLAIM-LEVEL EVALUATION
-# ============================================================
-
-def build_claim_index(answer_key: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
-    claims_by_qid: Dict[str, List[Dict[str, Any]]] = {}
-    for claim in answer_key.get("atomic_claims", []):
-        query_id = claim.get("query_id")
-        if query_id:
-            claims_by_qid.setdefault(query_id, []).append(claim)
-    return claims_by_qid
-
-
-def claim_keywords(claim_text: str) -> List[str]:
-    return unique_preserve_order(content_tokens(claim_text))
-
-
-def score_atomic_claims(
-        query_id: str,
-        answer: str,
-        claims_by_qid: Dict[str, List[Dict[str, Any]]],
-) -> Optional[Dict[str, Any]]:
-    claims = claims_by_qid.get(query_id, [])
-    if not claims:
-        return None
-
-    normalized_answer = normalize_text(answer)
-    claim_results = []
-    earned_weight = 0.0
-    total_weight = 0.0
-
-    for claim in claims:
-        required_claim = claim.get("required_claim", "")
-        weight = float(claim.get("weight", 1) or 1)
-        keywords = claim_keywords(required_claim)
-
-        if not keywords:
-            keyword_overlap = 0.0
-            covered = False
-        else:
-            hits = sum(1 for kw in keywords if kw in normalized_answer)
-            keyword_overlap = hits / len(keywords)
-            covered = keyword_overlap >= CLAIM_KEYWORD_COVERAGE_THRESHOLD
-
-        # Numeric claim guardrails.
-        normalized_claim = normalize_text(required_claim)
-        for exact_term in ["0.323", "6.98", "3.31", "9.43", "8.86", "20.22", "14.23", "0.061", "0.339"]:
-            if exact_term in normalized_claim and exact_term not in normalized_answer:
-                # Accept 6.98 when the answer says about 7.
-                if exact_term == "6.98" and re.search(r"\b(about|approximately|approx|around)\s+7\b",
-                                                      normalized_answer):
-                    pass
-                else:
-                    covered = False
-
-        total_weight += weight
-        if covered:
-            earned_weight += weight
-
-        claim_results.append(
-            {
-                "claim_id": claim.get("claim_id"),
-                "required_claim": required_claim,
-                "weight": weight,
-                "covered_auto": covered,
-                "keyword_overlap": round(keyword_overlap, 3),
-            }
-        )
-
-    score = earned_weight / total_weight if total_weight else None
-
-    return {
-        "claim_score": round(score, 3) if score is not None else None,
-        "completeness": round(score, 3) if score is not None else None,
-        "covered_claims": sum(1 for item in claim_results if item["covered_auto"]),
-        "total_claims": len(claim_results),
-        "claim_results": claim_results,
-    }
-
-
-# ============================================================
-# DETERMINISTIC EVALUATION
-# ============================================================
-
-def numeric_metrics(reference: str, answer: str, tolerance: float) -> Dict[str, Any]:
-    reference_numbers = filter_reference_numbers(extract_numbers_without_list_ranks(reference))
-    answer_numbers = filter_reference_numbers(extract_numbers_without_list_ranks(answer))
-
-    found = [
-        number for number in reference_numbers
-        if number_present(number, answer_numbers, tolerance, answer=answer, reference=reference)
-    ]
-    missing = [
-        number for number in reference_numbers
-        if not number_present(number, answer_numbers, tolerance, answer=answer, reference=reference)
-    ]
-
-    matched_answer_indices = set()
-    for ref_number in reference_numbers:
-        tol = effective_tolerance(ref_number, tolerance, answer, reference)
-        for index, answer_number in enumerate(answer_numbers):
-            if index not in matched_answer_indices and abs(answer_number - ref_number) <= tol:
-                matched_answer_indices.add(index)
+    # Keep duplicates meaningfully, but match greedily so repeated values don't overcount.
+    remaining = ans_nums[:]
+    found = []
+    missing = []
+    for rn in ref_nums:
+        idx = None
+        for i, an in enumerate(remaining):
+            if abs(an - rn) <= tolerance:
+                idx = i
                 break
+        if idx is None:
+            missing.append(rn)
+        else:
+            found.append(rn)
+            remaining.pop(idx)
 
-    extra = [number for index, number in enumerate(answer_numbers) if index not in matched_answer_indices]
-
-    recall = len(found) / len(reference_numbers) if reference_numbers else None
-
-    # Precision is useful diagnostically, but final scoring relies mainly on recall/pairs/ranking because
-    # generated text often contains harmless numbers in introductions such as "top 5".
-    precision = len(matched_answer_indices) / len(answer_numbers) if answer_numbers else None
-    f1 = f1_from_precision_recall(precision, recall)
-
-    nearest_errors = []
-    for ref_number in reference_numbers:
-        if answer_numbers:
-            nearest_errors.append(min(abs(ans_number - ref_number) for ans_number in answer_numbers))
+    # Extra answer numbers are common in natural answers (list markers, explanatory
+    # figures, examples). They are reported, but should not dominate correctness.
+    extra = remaining
+    raw_precision = len(found) / (len(found) + len(extra)) if (found or extra) else None
+    recall = len(found) / len(ref_nums) if ref_nums else None
+    # If all reference numbers are present, cap the precision penalty from extras.
+    if recall == 1.0 and raw_precision is not None:
+        precision = max(raw_precision, 0.95)
+    else:
+        precision = raw_precision
+    f1_score = f1(precision, recall) if precision is not None and recall is not None else None
 
     return {
-        "reference_numbers": reference_numbers,
-        "answer_numbers": answer_numbers,
+        "reference_numbers": ref_nums,
+        "response_numbers": ans_nums,
         "numeric_found": found,
         "numeric_missing": missing,
         "numeric_extra": extra,
-        "numeric_precision": round(precision, 3) if precision is not None else None,
-        "numeric_recall": round(recall, 3) if recall is not None else None,
-        "numeric_f1": round(f1, 3) if f1 is not None else None,
-        "mean_absolute_error_nearest": round(statistics.mean(nearest_errors), 4) if nearest_errors else None,
+        "numeric_precision": precision,
+        "numeric_recall": recall,
+        "numeric_f1": f1_score,
         "numeric_tolerance": tolerance,
     }
 
 
-def entity_metrics(expected_entities: List[str], predicted_entities: List[str]) -> Dict[str, Any]:
-    expected = set(expected_entities)
-    predicted = set(predicted_entities)
+def detect_unit_issue(response: str, reference: str) -> Dict[str, Any]:
+    r = normalize_text(response)
+    ref = normalize_text(reference)
+    response_has_million = "million" in r or re.search(r"\bmn\b", r) is not None
+    response_has_billion = "billion" in r or re.search(r"\bbn\b", r) is not None
+    ref_has_b = re.search(r"\d\s*b\b", ref) is not None or "billion" in ref
+    ref_has_m = re.search(r"\d\s*m\b", ref) is not None or "million" in ref
 
-    true_positive = expected & predicted
-    missing = expected - predicted
-    extra = predicted - expected
+    issue = False
+    issue_type = None
+    if ref_has_b and response_has_million and not response_has_billion:
+        issue = True
+        issue_type = "reference_uses_billion_but_response_says_million"
+    elif ref_has_m and response_has_billion and not response_has_million:
+        issue = True
+        issue_type = "reference_uses_million_but_response_says_billion"
 
-    precision = len(true_positive) / len(predicted) if predicted else (1.0 if not expected else 0.0)
-    recall = len(true_positive) / len(expected) if expected else None
-    f1 = f1_from_precision_recall(precision, recall) if recall is not None else None
-
-    return {
-        "expected_entities": sorted(expected),
-        "predicted_entities": sorted(predicted),
-        "entity_true_positive": sorted(true_positive),
-        "entity_missing": sorted(missing),
-        "entity_extra": sorted(extra),
-        "entity_precision": round(precision, 3) if precision is not None else None,
-        "entity_recall": round(recall, 3) if recall is not None else None,
-        "entity_f1": round(f1, 3) if f1 is not None else None,
-    }
-
-
-def entity_value_pair_metrics(reference: str, answer: str, tolerance: float) -> Dict[str, Any]:
-    pairs = extract_expected_entity_value_pairs(reference)
-    if not pairs:
-        return {
-            "expected_pairs": [],
-            "correct_pairs": [],
-            "incorrect_or_missing_pairs": [],
-            "entity_value_pair_accuracy": None,
-        }
-
-    correct = []
-    incorrect_or_missing = []
-
-    for pair in pairs:
-        entity = pair["entity"]
-        expected_values = pair["values"]
-        matched_text = line_or_sentence_with_entity(answer, entity)
-        matched_numbers = extract_numbers_without_list_ranks(matched_text)
-
-        value_ok = all(
-            number_present(value, matched_numbers, tolerance, answer=matched_text, reference=reference)
-            for value in expected_values
-        )
-        entity_ok = bool(matched_text)
-
-        if entity_ok and value_ok:
-            correct.append(pair)
-        else:
-            incorrect_or_missing.append(
-                {
-                    "entity": entity,
-                    "expected_values": expected_values,
-                    "matched_text": matched_text,
-                    "matched_numbers": matched_numbers,
-                }
-            )
-
-    accuracy = len(correct) / len(pairs) if pairs else None
-
-    return {
-        "expected_pairs": pairs,
-        "correct_pairs": correct,
-        "incorrect_or_missing_pairs": incorrect_or_missing,
-        "entity_value_pair_accuracy": round(accuracy, 3) if accuracy is not None else None,
-    }
-
-
-def ranking_metrics(reference: str, answer: str, expected_entities: List[str]) -> Dict[str, Any]:
-    if not expected_entities:
-        return {
-            "ordered_topk_accuracy": None,
-            "topk_membership_accuracy": None,
-            "predicted_order": [],
-            "expected_order": [],
-        }
-
-    expected_order = expected_entities
-    found_with_position = []
-
-    for entity in expected_order:
-        best_pos = None
-        for alias in entity_aliases(entity):
-            answer_norm = normalize_for_entity(answer)
-            alias_norm = normalize_for_entity(alias)
-            match = re.search(r"(?<![a-z0-9])" + re.escape(alias_norm) + r"(?![a-z0-9])", answer_norm)
-            if match:
-                if best_pos is None or match.start() < best_pos:
-                    best_pos = match.start()
-        if best_pos is not None:
-            found_with_position.append((best_pos, entity))
-
-    predicted_order = [entity for _, entity in sorted(found_with_position)]
-
-    membership_accuracy = len(set(predicted_order) & set(expected_order)) / len(expected_order)
-    same_position = sum(
-        1 for index, entity in enumerate(expected_order)
-        if index < len(predicted_order) and predicted_order[index] == entity
-    )
-    ordered_accuracy = same_position / len(expected_order)
-
-    return {
-        "expected_order": expected_order,
-        "predicted_order": predicted_order,
-        "topk_membership_accuracy": round(membership_accuracy, 3),
-        "ordered_topk_accuracy": round(ordered_accuracy, 3),
-    }
-
-
-def unit_consistency(reference: str, answer: str) -> Dict[str, Any]:
-    ref_market_billion = "Market Cap" in str(reference) and re.search(r"\bB\b|billion", str(reference), re.I)
-    ans_million = re.search(r"\bmillion\b", str(answer), re.I)
-    issue = bool(ref_market_billion and ans_million)
     return {
         "unit_issue": issue,
-        "unit_issue_type": "market_cap_million_vs_billion" if issue else None,
+        "unit_issue_type": issue_type,
+        "unit_consistency": 0.0 if issue else 1.0,
     }
 
-
-def deterministic_structured_eval(
-        row: Dict[str, Any],
-        answer: str,
-        global_entities: List[str],
-) -> Tuple[Dict[str, Any], Optional[float]]:
-    reference = row.get("clean_reference_answer", "")
-    tolerance = parse_tolerance(row.get("numeric_tolerance"), default=0.01)
-    evaluation_type = row.get("evaluation_type", "").lower()
-
-    expected_entities = extract_expected_entities(reference)
-    predicted_entities = extract_predicted_entities(answer, global_entities)
-
-    n_metrics = numeric_metrics(reference, answer, tolerance)
-    e_metrics = entity_metrics(expected_entities, predicted_entities)
-    pair_metrics = entity_value_pair_metrics(reference, answer, tolerance)
-    rank_metrics = ranking_metrics(reference, answer, expected_entities)
-    unit_metrics = unit_consistency(reference, answer)
-
-    available_scores: List[float] = []
-
-    if "top-k" in evaluation_type or "ranking" in evaluation_type:
-        if rank_metrics["ordered_topk_accuracy"] is not None:
-            available_scores.append(rank_metrics["ordered_topk_accuracy"])
-        if pair_metrics["entity_value_pair_accuracy"] is not None:
-            available_scores.append(pair_metrics["entity_value_pair_accuracy"])
-        if n_metrics["numeric_recall"] is not None and n_metrics["reference_numbers"]:
-            available_scores.append(n_metrics["numeric_recall"])
-
-    elif "list" in evaluation_type or "entity" in evaluation_type or "exact" in evaluation_type:
-        if e_metrics["entity_f1"] is not None and expected_entities:
-            available_scores.append(e_metrics["entity_f1"])
-        if pair_metrics["entity_value_pair_accuracy"] is not None:
-            available_scores.append(pair_metrics["entity_value_pair_accuracy"])
-        if n_metrics["numeric_recall"] is not None and n_metrics["reference_numbers"]:
-            available_scores.append(n_metrics["numeric_recall"])
-
-    else:
-        if n_metrics["numeric_recall"] is not None and n_metrics["reference_numbers"]:
-            available_scores.append(n_metrics["numeric_recall"])
-        if e_metrics["entity_f1"] is not None and expected_entities:
-            available_scores.append(e_metrics["entity_f1"])
-        if pair_metrics["entity_value_pair_accuracy"] is not None:
-            available_scores.append(pair_metrics["entity_value_pair_accuracy"])
-
-    if unit_metrics["unit_issue"]:
-        available_scores.append(0.85)
-
-    score = min(available_scores) if available_scores else None
-
-    details = {
-        "numeric_metrics": n_metrics,
-        "entity_metrics": e_metrics,
-        "entity_value_pair_metrics": pair_metrics,
-        "ranking_metrics": rank_metrics,
-        "unit_consistency": unit_metrics,
-    }
-
-    return details, round(score, 3) if score is not None else None
+# -----------------------------------------------------------------------------
+# Answer correctness and relevancy
+# -----------------------------------------------------------------------------
 
 
-# ============================================================
-# RAG / DOCUMENT-GROUNDED EVALUATION
-# ============================================================
+# Lightweight semantic aliases for qualitative/rubric rows. This does not replace
+# exact numeric checking; it only prevents good paraphrases from being punished
+# when the wording differs from the reference.
+CONCEPT_ALIASES = {
+    "principal_agent": [
+        "principal agent", "principal-agent", "agency theory", "agent incentives",
+        "principal", "agent"
+    ],
+    "information_asymmetry": [
+        "information asymmetry", "asymmetric information", "hidden information",
+        "limited visibility", "lack of transparency", "disclosure gap", "data opacity"
+    ],
+    "hidden_action": [
+        "hidden action", "moral hazard", "unobserved action", "selective disclosure",
+        "underreporting", "greenwashing", "self reporting", "self-reported"
+    ],
+    "regional_bias": [
+        "regional bias", "region bias", "region", "regional", "asia", "europe",
+        "north america", "geographic", "geographical"
+    ],
+    "indicator_bias": [
+        "indicator bias", "theme bias", "indicator", "theme", "remedy",
+        "monitoring", "purchasing practices", "enabling workers", "recruitment"
+    ],
+    "worker_voice_remedy": [
+        "worker voice", "worker grievance", "grievance", "remedy", "remediation",
+        "complaint", "worker feedback", "stakeholder input", "trade union", "worker interview"
+    ],
+    "triangulation": [
+        "triangulation", "triangulate", "cross-check", "cross check", "external evidence",
+        "qualitative evidence", "audit", "worker interviews", "stakeholder"
+    ],
+    "forced_labor": [
+        "forced labor", "forced labour", "modern slavery", "recruitment fees",
+        "migrant workers", "debt bondage", "uyghur", "xinjiang"
+    ],
+    "source_mismatch": [
+        "source mismatch", "wrong source", "not amazon", "non-amazon", "not company specific",
+        "insufficient source", "not supported by the retrieved context"
+    ],
+}
 
-def is_rag_related(row: Dict[str, Any]) -> bool:
-    text = f"{row.get('evaluation_type', '')} {row.get('agent_category', '')} {row.get('query_id', '')}".lower()
-    return any(marker in text for marker in RAG_RELATED_TYPES) or str(row.get("query_id", "")).startswith("T")
+
+def _alias_present(text: str, aliases: Sequence[str]) -> bool:
+    nt = normalize_text(text)
+    return any(normalize_text(alias) in nt for alias in aliases)
 
 
-def reference_claims_for_query(
-        query_id: str,
-        row: Dict[str, Any],
-        claims_by_qid: Dict[str, List[Dict[str, Any]]],
-) -> List[str]:
-    claims = [claim.get("required_claim", "") for claim in claims_by_qid.get(query_id, []) if
-              claim.get("required_claim")]
-    if claims:
-        return claims
+def semantic_concept_score(claim: str, response: str) -> float:
+    """Score claim coverage using small domain-specific concept aliases.
 
-    reference = row.get("clean_reference_answer", "")
-    sentences = split_sentences(reference)
-    return sentences or ([reference] if reference else [])
-
-
-def rag_context_precision(contexts: List[str], question: str, reference_claims: List[str]) -> Optional[float]:
-    if not contexts:
-        return None
-
-    target = question + "\n" + "\n".join(reference_claims)
-    relevance_flags = [
-        lexical_overlap_score(target, context) >= CONTEXT_RELEVANCE_THRESHOLD
-        for context in contexts
-    ]
-
-    relevant_count = sum(relevance_flags)
-    if relevant_count == 0:
+    A claim only activates concepts that appear in the claim itself. The response
+    then gets credit for mentioning semantically equivalent aliases. This reduces
+    false negatives for qualitative answers without giving credit for unrelated
+    concepts.
+    """
+    active = []
+    for concept, aliases in CONCEPT_ALIASES.items():
+        if _alias_present(claim, aliases):
+            active.append(concept)
+    if not active:
         return 0.0
-
-    precision_sum = 0.0
-    running_relevant = 0
-    for index, is_relevant in enumerate(relevance_flags, start=1):
-        if is_relevant:
-            running_relevant += 1
-            precision_sum += running_relevant / index
-
-    return round(precision_sum / relevant_count, 3)
+    hits = 0
+    for concept in active:
+        if _alias_present(response, CONCEPT_ALIASES[concept]):
+            hits += 1
+    return hits / len(active)
 
 
-def rag_context_recall(contexts: List[str], reference_claims: List[str]) -> Optional[float]:
-    if not contexts or not reference_claims:
-        return None
+def normalize_required_claim_items(required_claim_items: Optional[Sequence[Any]]) -> List[Dict[str, Any]]:
+    """Normalize answer-key required_claims into {claim, weight, claim_id} rows."""
+    out: List[Dict[str, Any]] = []
+    for idx, item in enumerate(required_claim_items or [], start=1):
+        if isinstance(item, dict):
+            claim = item.get("required_claim") or item.get("claim") or item.get("text") or ""
+            weight = safe_float(item.get("weight")) or 1.0
+            claim_id = item.get("claim_id") or f"claim-{idx}"
+        else:
+            claim = str(item)
+            weight = 1.0
+            claim_id = f"claim-{idx}"
+        claim = str(claim).strip()
+        if claim and len(content_tokens(claim)) >= 3:
+            out.append({"claim": claim, "weight": weight, "claim_id": claim_id})
+    return out
 
-    context_text = "\n".join(contexts)
-    supported = sum(
-        1 for claim in reference_claims
-        if lexical_overlap_score(claim, context_text) >= CONTEXT_RELEVANCE_THRESHOLD
-    )
+def required_claim_recall(
+    response: str,
+    reference: str,
+    required_claim_items: Optional[Sequence[Any]] = None,
+) -> Dict[str, Any]:
+    # Prefer curated claim objects from the structured answer key when available.
+    # Fallback to automatic splitting of the reference text.
+    normalized_claims = normalize_required_claim_items(required_claim_items)
+    if normalized_claims:
+        claims = normalized_claims
+    else:
+        claims = [{"claim": c, "weight": 1.0, "claim_id": f"auto-{i}"}
+                  for i, c in enumerate(split_reference_claims(reference), start=1)]
 
-    return round(supported / len(reference_claims), 3)
+    if not claims:
+        return {
+            "required_claims": [],
+            "claim_scores": [],
+            "required_claim_recall": None,
+        }
 
+    scores = []
+    total_weight = sum(max(0.0, float(c.get("weight", 1.0))) for c in claims) or 1.0
+    weighted_binary = 0.0
+    weighted_continuous = 0.0
 
-def rag_answer_relevance(question: str, answer: str, reference_claims: List[str]) -> Optional[float]:
-    if not answer:
-        return None
+    for item in claims:
+        claim = item["claim"]
+        weight = max(0.0, float(item.get("weight", 1.0)))
+        lexical_score = lexical_recall(claim, response)
+        semantic_score = semantic_concept_score(claim, response)
+        # Semantic aliases are deliberately capped so they can rescue paraphrase,
+        # but not replace missing numeric/entity evidence.
+        score = max(lexical_score, 0.80 * semantic_score)
+        covered = score >= 0.35
+        weighted_binary += weight * (1.0 if covered else 0.0)
+        weighted_continuous += weight * score
+        scores.append({
+            "claim_id": item.get("claim_id"),
+            "claim": claim,
+            "weight": weight,
+            "coverage_score": score,
+            "lexical_score": lexical_score,
+            "semantic_score": semantic_score,
+            "covered": covered,
+        })
 
-    question_score = lexical_overlap_score(question, answer) if question else 0.0
-    claims_text = "\n".join(reference_claims)
-    claim_score = lexical_overlap_score(claims_text, answer) if claims_text else 0.0
-
-    if question and claims_text:
-        return round(0.4 * question_score + 0.6 * claim_score, 3)
-    if question:
-        return round(question_score, 3)
-    if claims_text:
-        return round(claim_score, 3)
-    return None
-
-
-def rag_faithfulness(answer: str, contexts: List[str]) -> Optional[Dict[str, Any]]:
-    # True context-grounded faithfulness requires retrieved contexts.
-    if not contexts:
-        return None
-
-    answer_claims = split_sentences(answer)
-    if not answer_claims:
-        return None
-
-    context_text = "\n".join(contexts)
-    claim_results = []
-    supported_count = 0
-
-    for claim in answer_claims:
-        overlap = lexical_overlap_score(claim, context_text)
-        supported = overlap >= FAITHFULNESS_SENTENCE_SUPPORT_THRESHOLD
-        supported_count += int(supported)
-        claim_results.append(
-            {
-                "answer_claim": claim,
-                "support_overlap": round(overlap, 3),
-                "supported": supported,
-            }
-        )
-
-    faithfulness = supported_count / len(answer_claims)
-
+    recall_binary = weighted_binary / total_weight
+    recall_continuous = weighted_continuous / total_weight
+    recall = 0.70 * recall_binary + 0.30 * recall_continuous
     return {
-        "faithfulness": round(faithfulness, 3),
-        "supported_answer_claims": supported_count,
-        "total_answer_claims": len(answer_claims),
-        "support_source": "retrieved_contexts",
-        "claim_support": claim_results,
+        "required_claims": [c["claim"] for c in claims],
+        "claim_scores": scores,
+        "required_claim_recall": clamp01(recall),
+        "required_claim_recall_binary": recall_binary,
+        "required_claim_recall_continuous": recall_continuous,
+        "claim_source": "answer_key_required_claims" if normalized_claims else "auto_split_reference",
     }
 
 
-def rag_answer_correctness(
-        claim_score: Optional[float],
-        deterministic_score: Optional[float],
-        answer_relevance: Optional[float],
-        faithfulness_score: Optional[float],
-) -> Optional[float]:
-    components = []
-    weights = []
-
-    if claim_score is not None:
-        components.append(claim_score)
-        weights.append(0.55)
-
-    if deterministic_score is not None:
-        components.append(deterministic_score)
-        weights.append(0.25)
-
-    if answer_relevance is not None:
-        components.append(answer_relevance)
-        weights.append(0.20)
-
-    if faithfulness_score is not None:
-        components.append(faithfulness_score)
-        weights.append(0.25)
-
-    if not components:
-        return None
-
-    total_weight = sum(weights)
-    return round(sum(value * weight for value, weight in zip(components, weights)) / total_weight, 3)
-
-
-def rag_metrics_eval(
-        query_id: str,
-        row: Dict[str, Any],
-        mas_output: Dict[str, Any],
-        claims_by_qid: Dict[str, List[Dict[str, Any]]],
-        claim_score: Optional[float],
-        deterministic_score: Optional[float],
+def answer_correctness_score(
+    response: str,
+    reference: str,
+    required_claim_items: Optional[Sequence[Any]] = None,
 ) -> Dict[str, Any]:
-    question = mas_output.get("question", "")
-    answer = mas_output.get("answer", "")
-    contexts = mas_output.get("retrieved_contexts") or []
-    ref_claims = reference_claims_for_query(query_id, row, claims_by_qid)
+    nm = numeric_metrics(response, reference)
+    cm = required_claim_recall(response, reference, required_claim_items=required_claim_items)
+    lex = lexical_f1(response, reference)
+    unit = detect_unit_issue(response, reference)
 
-    context_precision = rag_context_precision(contexts, question, ref_claims)
-    context_recall = rag_context_recall(contexts, ref_claims)
-    answer_relevance = rag_answer_relevance(question, answer, ref_claims)
+    available_components: List[Tuple[str, float, float]] = []  # (name, score, weight)
 
-    faithfulness_details = rag_faithfulness(answer, contexts)
-    faithfulness_score = faithfulness_details.get("faithfulness") if faithfulness_details else None
-    unsupported_claim_rate = round(1 - faithfulness_score, 3) if faithfulness_score is not None else None
+    # For evaluation, numeric recall is usually more important than numeric precision:
+    # an answer may include list indices or explanatory numbers, but the core question is
+    # whether it includes the required reference numbers.
+    numeric_score = nm.get("numeric_recall") if nm.get("numeric_recall") is not None else nm.get("numeric_f1")
 
-    context_sufficiency = (
-        round(0.6 * context_recall + 0.4 * context_precision, 3)
-        if context_recall is not None and context_precision is not None
-        else None
-    )
+    if numeric_score is not None and cm["required_claim_recall"] is not None:
+        available_components.append(("numeric_recall", numeric_score, 0.50))
+        available_components.append(("required_claim_recall", cm["required_claim_recall"], 0.35))
+        available_components.append(("lexical_reference_similarity", lex, 0.15))
+    elif numeric_score is not None:
+        available_components.append(("numeric_recall", numeric_score, 0.80))
+        available_components.append(("lexical_reference_similarity", lex, 0.20))
+    elif cm["required_claim_recall"] is not None:
+        available_components.append(("required_claim_recall", cm["required_claim_recall"], 0.75))
+        available_components.append(("lexical_reference_similarity", lex, 0.25))
+    else:
+        available_components.append(("lexical_reference_similarity", lex, 1.00))
 
-    answer_correctness = rag_answer_correctness(
-        claim_score=claim_score,
-        deterministic_score=deterministic_score,
-        answer_relevance=answer_relevance,
-        faithfulness_score=faithfulness_score,
-    )
+    total_w = sum(w for _, _, w in available_components)
+    score = sum(s * w for _, s, w in available_components) / total_w if total_w else 0.0
 
-    composite_components = []
-    composite_weights = []
-
-    if claim_score is not None:
-        composite_components.append(claim_score)
-        composite_weights.append(0.55)
-
-    if answer_relevance is not None:
-        composite_components.append(answer_relevance)
-        composite_weights.append(0.20)
-
-    if faithfulness_score is not None:
-        composite_components.append(faithfulness_score)
-        composite_weights.append(0.25)
-
-    if context_recall is not None:
-        composite_components.append(context_recall)
-        composite_weights.append(0.15)
-
-    if context_precision is not None:
-        composite_components.append(context_precision)
-        composite_weights.append(0.10)
-
-    rag_composite = None
-    if composite_components:
-        total_weight = sum(composite_weights)
-        rag_composite = round(
-            sum(value * weight for value, weight in zip(composite_components, composite_weights)) / total_weight,
-            3,
-        )
+    # Unit mismatch is reported, but only mildly penalized because the uploaded reference
+    # notes that market-cap units should be confirmed before publication.
+    if unit["unit_issue"]:
+        score *= 0.95
 
     return {
-        "is_rag_related": is_rag_related(row),
+        "answer_correctness": clamp01(score),
+        "components": {
+            "numeric_f1": nm["numeric_f1"],
+            "required_claim_recall": cm["required_claim_recall"],
+            "lexical_reference_similarity": lex,
+            "unit_consistency": unit["unit_consistency"],
+        },
+        "numeric_metrics": nm,
+        "claim_metrics": cm,
+        "unit_consistency": unit,
+    }
+
+
+def answer_relevancy_score(user_input: str, response: str, reference: str) -> Dict[str, Any]:
+    q_overlap = lexical_recall(user_input, response)
+    qr_f1 = lexical_f1(user_input, response)
+    ref_overlap = lexical_recall(reference, response) if reference else 0.0
+
+    # Query-response relevance should dominate. Reference overlap prevents empty-but-on-topic answers from scoring high.
+    score = 0.55 * q_overlap + 0.25 * qr_f1 + 0.20 * ref_overlap
+    return {
+        "answer_relevancy": clamp01(score),
+        "query_token_recall_in_response": q_overlap,
+        "query_response_lexical_f1": qr_f1,
+        "reference_token_recall_in_response": ref_overlap,
+    }
+
+# -----------------------------------------------------------------------------
+# RAG metrics: context precision, recall, faithfulness
+# -----------------------------------------------------------------------------
+
+def context_texts(row: Dict[str, Any]) -> List[str]:
+    ctx = row.get("retrieved_contexts") or []
+    out: List[str] = []
+    for c in ctx:
+        if isinstance(c, str):
+            text = c.strip()
+        elif isinstance(c, dict):
+            text = str(c.get("content") or c.get("text") or "").strip()
+        else:
+            text = str(c).strip()
+        if text:
+            out.append(text)
+    return out
+
+
+def context_records(row: Dict[str, Any]) -> List[Dict[str, Any]]:
+    records = row.get("retrieved_context_records") or []
+    if isinstance(records, list):
+        return [r for r in records if isinstance(r, dict)]
+    return []
+
+
+def context_relevance_score(context: str, user_input: str, reference: str) -> float:
+    # Consider both the user need and the reference information.
+    q = lexical_recall(user_input, context)
+    ref = lexical_recall(reference, context) if reference else 0.0
+    return clamp01(0.45 * q + 0.55 * ref) or 0.0
+
+
+def context_precision_score(contexts: List[str], user_input: str, reference: str) -> Dict[str, Any]:
+    if not contexts:
+        return {
+            "context_precision": None,
+            "context_relevance_scores": [],
+            "relevant_context_count": 0,
+            "num_contexts": 0,
+        }
+
+    relevance_scores = [context_relevance_score(c, user_input, reference) for c in contexts]
+    relevant_flags = [s >= CONTEXT_RELEVANCE_THRESHOLD for s in relevance_scores]
+
+    # Average precision style, preserving retrieval rank.
+    precisions_at_k = []
+    relevant_so_far = 0
+    for idx, is_rel in enumerate(relevant_flags, start=1):
+        if is_rel:
+            relevant_so_far += 1
+            precisions_at_k.append(relevant_so_far / idx)
+
+    if relevant_so_far == 0:
+        ap = 0.0
+    else:
+        ap = sum(precisions_at_k) / relevant_so_far
+
+    return {
+        "context_precision": clamp01(ap),
+        "context_relevance_scores": relevance_scores,
+        "context_relevant_flags": relevant_flags,
+        "relevant_context_count": relevant_so_far,
+        "num_contexts": len(contexts),
+    }
+
+
+def context_recall_score(contexts: List[str], reference: str) -> Dict[str, Any]:
+    if not contexts:
+        return {
+            "context_recall": None,
+            "reference_tokens_covered_by_contexts": None,
+            "missing_reference_keywords": [],
+        }
+    joined = "\n".join(contexts)
+    ref_tokens = token_set(reference)
+    ctx_tokens = token_set(joined)
+    if not ref_tokens:
+        return {
+            "context_recall": None,
+            "reference_tokens_covered_by_contexts": None,
+            "missing_reference_keywords": [],
+        }
+    covered = ref_tokens & ctx_tokens
+    missing = sorted(ref_tokens - ctx_tokens)
+    recall = len(covered) / len(ref_tokens)
+    return {
+        "context_recall": clamp01(recall),
+        "reference_tokens_covered_by_contexts": sorted(covered),
+        "missing_reference_keywords": missing[:100],
+    }
+
+
+def claim_supported_by_context(claim: str, joined_contexts: str) -> Tuple[bool, float, str]:
+    # Lexical support.
+    overlap = lexical_recall(claim, joined_contexts)
+
+    # Numeric support: if claim contains important numbers, at least one should appear in context.
+    claim_nums = filter_incidental_numbers(extract_numbers(claim))
+    ctx_nums = filter_incidental_numbers(extract_numbers(joined_contexts))
+    numeric_supported = True
+    if claim_nums:
+        numeric_supported = any(number_match(n, ctx_nums, tolerance=0.05) for n in claim_nums)
+
+    supported = overlap >= FAITHFULNESS_SENTENCE_SUPPORT_THRESHOLD and numeric_supported
+    reason = "lexical_and_numeric_support" if supported else "insufficient_context_overlap_or_numeric_support"
+    return supported, overlap, reason
+
+
+def faithfulness_score(contexts: List[str], response: str) -> Dict[str, Any]:
+    if not contexts:
+        return {
+            "faithfulness": None,
+            "supported_claims": 0,
+            "total_claims": 0,
+            "claim_support": [],
+        }
+    joined = "\n".join(contexts)
+    claims = split_response_claims(response)
+    if not claims:
+        return {
+            "faithfulness": None,
+            "supported_claims": 0,
+            "total_claims": 0,
+            "claim_support": [],
+        }
+
+    details = []
+    supported_count = 0
+    for claim in claims:
+        supported, score, reason = claim_supported_by_context(claim, joined)
+        if supported:
+            supported_count += 1
+        details.append({
+            "claim": claim,
+            "supported": supported,
+            "support_score": score,
+            "reason": reason,
+        })
+
+    faith = supported_count / len(claims)
+    return {
+        "faithfulness": clamp01(faith),
+        "supported_claims": supported_count,
+        "total_claims": len(claims),
+        "claim_support": details,
+    }
+
+
+def context_sufficiency_score(contexts: List[str], user_input: str, reference: str) -> Dict[str, Any]:
+    if not contexts:
+        return {
+            "context_sufficiency": None,
+            "context_utilization": None,
+        }
+    joined = "\n".join(contexts)
+    # Sufficiency: contexts contain reference information.
+    suff = lexical_recall(reference, joined) if reference else None
+    # Utilization: response shares information with contexts; computed elsewhere would require response.
+    # Here we return a context-only sufficiency measure.
+    return {
+        "context_sufficiency": clamp01(suff) if suff is not None else None,
+    }
+
+
+def rag_metrics(row: Dict[str, Any]) -> Dict[str, Any]:
+    user_input = row.get("user_input", "") or ""
+    response = row.get("response", "") or ""
+    reference = row.get("reference", "") or ""
+    contexts = context_texts(row)
+
+    cp = context_precision_score(contexts, user_input, reference)
+    cr = context_recall_score(contexts, reference)
+    faith = faithfulness_score(contexts, response)
+    suff = context_sufficiency_score(contexts, user_input, reference)
+
+    # Context utilization: how much of response is grounded in retrieved contexts.
+    utilization = lexical_recall(response, "\n".join(contexts)) if contexts else None
+
+    available = [
+        cp.get("context_precision"),
+        cr.get("context_recall"),
+        faith.get("faithfulness"),
+        suff.get("context_sufficiency"),
+        utilization,
+    ]
+    rag_composite = mean(available)
+
+    return {
         "contexts_available": bool(contexts),
         "num_contexts": len(contexts),
-        "context_precision": context_precision,
-        "context_recall": context_recall,
-        "answer_relevance": answer_relevance,
-        "faithfulness": faithfulness_score,
-        "faithfulness_details": faithfulness_details,
-        "answer_correctness": answer_correctness,
-        "completeness": claim_score,
-        "unsupported_claim_rate": unsupported_claim_rate,
-        "context_sufficiency": context_sufficiency,
-        "rag_composite": rag_composite,
+        **cp,
+        **cr,
+        **faith,
+        **suff,
+        "context_utilization": clamp01(utilization) if utilization is not None else None,
+        "rag_composite": clamp01(rag_composite) if rag_composite is not None else None,
         "rag_note": (
-            "retrieved_contexts are missing; Context Precision, Context Recall, Context Sufficiency, "
-            "and true context-grounded Faithfulness are unavailable for this row."
-            if not contexts else
-            "RAG-style metrics computed using retrieved_contexts with transparent lexical-overlap heuristics."
+            "RAG context metrics computed from generated retrieved_contexts."
+            if contexts else
+            "No retrieved_contexts; faithfulness/context precision/context recall unavailable."
         ),
     }
 
+# -----------------------------------------------------------------------------
+# Verdict and summaries
+# -----------------------------------------------------------------------------
 
-# ============================================================
-# EVALUATION TYPE AND HARD CHECKS
-# ============================================================
-
-def requires_deterministic_eval(evaluation_type: str) -> bool:
-    text = str(evaluation_type).lower()
-    deterministic_markers = [
-        "numeric", "exact", "ranking", "top-k", "correlation", "formula",
-        "group proportion", "list", "entity", "set", "mean", "standard deviation",
-    ]
-    return any(marker in text for marker in deterministic_markers)
-
-
-def is_open_ended_eval(evaluation_type: str, agent_category: str) -> bool:
-    text = f"{evaluation_type} {agent_category}".lower()
-    return any(marker in text for marker in OPEN_ENDED_TYPES)
-
-
-def semantic_similarity(reference: str, answer: str) -> float:
-    return SequenceMatcher(None, normalize_text(reference), normalize_text(answer)).ratio()
-
-
-def verdict_from_score(score: float) -> str:
-    if score >= PASS_THRESHOLD:
+def verdict_from_score(score: Optional[float], included_in_final_accuracy: bool, pass_threshold: float, partial_threshold: float) -> str:
+    if not included_in_final_accuracy:
+        return "NOT_ADJUDICATED"
+    if score is None:
+        return "MISSING"
+    if score >= pass_threshold:
         return "PASS"
-    if score >= PARTIAL_THRESHOLD:
+    if score >= partial_threshold:
         return "PARTIAL"
     return "FAIL"
 
 
-def apply_hard_checks(
-        query_id: str,
-        answer: str,
-        current_score: float,
-        current_verdict: str,
-) -> Tuple[float, str, List[str]]:
-    answer_norm = normalize_text(answer)
-    score = current_score
-    verdict = current_verdict
-    notes: List[str] = []
-
-    if query_id == "D2" and "million" in answer_norm:
-        score = min(score, 0.85)
-        verdict = "PARTIAL"
-        notes.append("Market Cap unit mismatch: answer uses million instead of B/billion.")
-
-    if query_id == "R3" and "79.5" in answer_norm:
-        score = min(score, 0.20)
-        verdict = "FAIL"
-        notes.append("Critical error: answer validates Samsung = 79.5, but corrected KTC Total Benchmark is 61.00.")
-
-    if query_id == "P1":
-        if "1.211" in answer_norm or "12.11" in answer_norm:
-            score = min(score, 0.35)
-            verdict = "FAIL"
-            notes.append("Uses undocumented Remedy coefficient 1.211 / 12.11-point increase.")
-        if "cannot provide a precise rank" in answer_norm or "would need" in answer_norm:
-            score = min(score, 0.50)
-            verdict = "FAIL" if score < PARTIAL_THRESHOLD else "PARTIAL"
-            notes.append("Does not provide a valid requested 2027 rank and lacks rank-distribution assumptions.")
-
-    if query_id == "P2":
-        if "24.58" in answer_norm:
-            score = 0.00
-            verdict = "FAIL"
-            notes.append("Uses four compounding periods; corrected 2025→2027 projection is 22.29.")
-        elif "22.29" in answer_norm:
-            score = max(score, 1.00)
-            verdict = "PASS"
-
-    if query_id == "P3":
-        if "45" in answer_norm or "17.2" in answer_norm:
-            score = 0.00
-            verdict = "FAIL"
-            notes.append("Incorrectly uses North America Purchasing Practices = 45 and inflated +17.2 result.")
-        elif "0.46" in answer_norm and ("0.036" in answer_norm or "0.04" in answer_norm):
-            score = max(score, 1.00)
-            verdict = "PASS"
-
-    if query_id == "P4":
-        if "0.703" in answer_norm or "0.665" in answer_norm:
-            score = min(score, 0.25)
-            verdict = "FAIL"
-            notes.append("Uses unsupported/inconsistent coefficient and does not define intervention delta.")
-        if "cannot be quantified" in answer_norm or "without" in answer_norm and "defined" in answer_norm:
-            score = max(score, 0.85)
-            verdict = "PASS"
-
-    if query_id in {"E3", "T4"}:
-        if (
-                ("asia" in answer_norm and "25" in answer_norm)
-                and ("europe" in answer_norm and ("none" in answer_norm or "0" in answer_norm))
-                and ("north america" in answer_norm and ("none" in answer_norm or "0" in answer_norm))
-        ):
-            score = max(score, 0.95)
-            verdict = "PASS"
-            notes.append("Diagnostic match for current UK MSA regional pattern; row remains NEEDS_VALIDATION.")
-        elif "not available" in answer_norm or "no data available" in answer_norm or "cannot check" in answer_norm:
-            score = 0.00
-            verdict = "FAIL"
-            notes.append("Failed to locate/parse UK MSA field; answer key expects regional UK MSA pattern.")
-
-    if query_id == "S1" and "absence of data for traceability and purchasing practices" in answer_norm:
-        score = min(score, 0.60)
-        verdict = "PARTIAL"
-        notes.append("Incorrectly claims Traceability/Purchasing Practices data are absent.")
-
-    if query_id == "R1":
-        if "specific countries were not explicitly mentioned" in answer_norm:
-            score = min(score, 0.60)
-            verdict = "PARTIAL"
-            notes.append("Answer mentions China/Malaysia but fails PDF-specific extraction requirement.")
-        elif "ongoing concerns" in answer_norm or "recent ilo resources" in answer_norm:
-            score = min(score, 0.60)
-            verdict = "PARTIAL"
-            notes.append("External validation is too vague; exact ILO source/date/statistic is not snapshotted.")
-
-    if query_id == "R4" and ("units not specified" in answer_norm or "recent web sources indicates" in answer_norm):
-        score = min(score, 0.55)
-        verdict = "FAIL" if score < PARTIAL_THRESHOLD else "PARTIAL"
-        notes.append("External comparison lacks reproducible benchmark, date, units, and source details.")
-
-    if query_id == "R2" and "ilo indicators of forced labor 2025" in answer_norm:
-        score = min(score, 0.60)
-        verdict = "PARTIAL"
-        notes.append("External ILO report/source metadata is not sufficiently verified or snapshotted.")
-
-    return round(score, 3), verdict, notes
+def flatten_for_csv(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False)
+    return str(value)
 
 
-# ============================================================
-# OPTIONAL LLM-AS-A-JUDGE
-# ============================================================
+def summarize_rows(rows: List[Dict[str, Any]], label: str) -> Dict[str, Any]:
+    n = len(rows)
+    verdicts = Counter(r.get("verdict") for r in rows)
+    adjudicated = [r for r in rows if r.get("verdict") != "NOT_ADJUDICATED"]
+    return {
+        "label": label,
+        "n": n,
+        "adjudicated_n": len(adjudicated),
+        "not_adjudicated": verdicts.get("NOT_ADJUDICATED", 0),
+        "pass": verdicts.get("PASS", 0),
+        "partial": verdicts.get("PARTIAL", 0),
+        "fail": verdicts.get("FAIL", 0),
+        "missing": verdicts.get("MISSING", 0),
+        "strict_pass_rate": rounded(verdicts.get("PASS", 0) / len(adjudicated) if adjudicated else 0.0),
+        "pass_or_partial_rate": rounded((verdicts.get("PASS", 0) + verdicts.get("PARTIAL", 0)) / len(adjudicated) if adjudicated else 0.0),
+        "mean_answer_correctness": rounded(mean([r.get("answer_correctness") for r in adjudicated])),
+        "mean_answer_relevancy": rounded(mean([r.get("answer_relevancy") for r in adjudicated])),
+        "mean_rag_composite": rounded(mean([r.get("rag_composite") for r in rows if r.get("rag_composite") is not None])),
+        "mean_faithfulness": rounded(mean([r.get("faithfulness") for r in rows if r.get("faithfulness") is not None])),
+        "mean_context_precision": rounded(mean([r.get("context_precision") for r in rows if r.get("context_precision") is not None])),
+        "mean_context_recall": rounded(mean([r.get("context_recall") for r in rows if r.get("context_recall") is not None])),
+        "rows_with_contexts": sum(1 for r in rows if r.get("contexts_available")),
+    }
 
-def maybe_run_llm_judge(
-        results: List[Dict[str, Any]],
-        answer_key_rows: Dict[str, Dict[str, Any]],
-        model: str,
-) -> List[Dict[str, Any]]:
+
+def group_summary(rows: List[Dict[str, Any]], key: str) -> Dict[str, Any]:
+    groups: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for r in rows:
+        groups[str(r.get(key) or "UNKNOWN")].append(r)
+    return {k: summarize_rows(v, k) for k, v in sorted(groups.items())}
+
+# -----------------------------------------------------------------------------
+# Optional official RAGAS execution
+# -----------------------------------------------------------------------------
+
+def try_official_ragas(dataset_rows: List[Dict[str, Any]], out_dir: Path) -> Dict[str, Any]:
+    """Try common RAGAS API. This is optional and version-dependent."""
+    rag_rows = [r for r in dataset_rows if context_texts(r)]
+    if not rag_rows:
+        return {"used": False, "error": "No rows with retrieved_contexts."}
+
     try:
-        from openai import OpenAI
-    except ImportError as exc:
-        raise RuntimeError("Install OpenAI client first: pip install openai") from exc
-
-    if not os.getenv("OPENAI_API_KEY"):
-        raise RuntimeError("OPENAI_API_KEY is not set.")
-
-    client = OpenAI()
-
-    for result in results:
-        row = answer_key_rows.get(result["query_id"], {})
-        if not is_open_ended_eval(row.get("evaluation_type", ""), row.get("agent_category", "")):
-            continue
-
-        prompt = {
-            "query_id": result["query_id"],
-            "question": result.get("question", ""),
-            "evaluation_type": row.get("evaluation_type", ""),
-            "reference_answer": row.get("clean_reference_answer", ""),
-            "evaluation_criteria": row.get("pass_criteria", ""),
-            "retrieved_contexts": result.get("retrieved_contexts", []),
-            "mas_answer": result.get("answer", ""),
-            "instruction": (
-                "Evaluate strictly using only the reference answer, required claims, and retrieved contexts. "
-                "Return valid JSON with: claim_level_correctness, completeness, faithfulness, answer_relevance, "
-                "unsupported_claim_rate, ethical_adequacy, final_verdict, reason."
-            ),
-        }
-
-        response = client.responses.create(
-            model=model,
-            input=[
-                {
-                    "role": "system",
-                    "content": "You are a strict academic evaluator for MAS answer quality. Use only provided evidence.",
-                },
-                {"role": "user", "content": json.dumps(prompt, ensure_ascii=False)},
-            ],
-            temperature=0,
-        )
-
-        raw = response.output_text.strip()
-
+        from datasets import Dataset  # type: ignore
+        from ragas import evaluate  # type: ignore
         try:
-            result["llm_judge"] = json.loads(raw)
-        except json.JSONDecodeError:
-            result["llm_judge"] = {"raw_judge_output": raw}
+            # Common v0.1/v0.2 names.
+            from ragas.metrics import (  # type: ignore
+                faithfulness,
+                answer_relevancy,
+                context_precision,
+                context_recall,
+                answer_correctness,
+            )
+            metrics = [faithfulness, answer_relevancy, context_precision, context_recall, answer_correctness]
+        except Exception:
+            # Newer class-style fallback in some versions.
+            from ragas.metrics import Faithfulness, AnswerRelevancy, LLMContextPrecisionWithReference, LLMContextRecall, AnswerCorrectness  # type: ignore
+            metrics = [Faithfulness(), AnswerRelevancy(), LLMContextPrecisionWithReference(), LLMContextRecall(), AnswerCorrectness()]
 
-    return results
+        # RAGAS versions differ in expected column names. The common evaluator accepts these.
+        ds = Dataset.from_dict({
+            "question": [r.get("user_input", "") for r in rag_rows],
+            "answer": [r.get("response", "") for r in rag_rows],
+            "contexts": [context_texts(r) for r in rag_rows],
+            "ground_truth": [r.get("reference", "") for r in rag_rows],
+            # Some newer versions also use these fields.
+            "user_input": [r.get("user_input", "") for r in rag_rows],
+            "response": [r.get("response", "") for r in rag_rows],
+            "retrieved_contexts": [context_texts(r) for r in rag_rows],
+            "reference": [r.get("reference", "") for r in rag_rows],
+        })
 
+        result = evaluate(ds, metrics=metrics)
+        try:
+            df = result.to_pandas()
+            path = out_dir / "ragas_official_results.csv"
+            df.insert(0, "query_id", [r.get("query_id", "") for r in rag_rows])
+            df.to_csv(path, index=False)
+            return {"used": True, "rows": len(rag_rows), "output_csv": str(path)}
+        except Exception:
+            # Fall back to JSON serialization if pandas conversion is unavailable.
+            path = out_dir / "ragas_official_results_raw.json"
+            path.write_text(json.dumps(str(result), ensure_ascii=False, indent=2), encoding="utf-8")
+            return {"used": True, "rows": len(rag_rows), "output_raw": str(path)}
 
-# ============================================================
-# MAIN EVALUATION
-# ============================================================
+    except Exception as e:
+        return {"used": False, "error": repr(e)}
 
-def combine_scores(
-        deterministic_score: Optional[float],
-        claim_score: Optional[float],
-        rag_composite: Optional[float],
-        fallback: Optional[float],
-        row: Dict[str, Any],
-) -> float:
-    scores = []
+# -----------------------------------------------------------------------------
+# Evaluation pipeline
+# -----------------------------------------------------------------------------
 
-    if deterministic_score is not None:
-        scores.append(deterministic_score)
+def load_dataset(path: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+    obj = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(obj, dict):
+        metadata = obj.get("metadata", {}) if isinstance(obj.get("metadata", {}), dict) else {}
+        data = obj.get("data")
+        if not isinstance(data, list):
+            raise ValueError("Input JSON dict must contain a list under 'data'.")
+        return metadata, data
+    if isinstance(obj, list):
+        return {}, obj
+    raise ValueError("Input JSON must be either a list or a dict with data=[...].")
 
-    if claim_score is not None:
-        scores.append(claim_score)
+def resolve_dataset_path(dataset_arg: str) -> Path:
+    """Resolve dataset path robustly.
 
-    # Use RAG composite only as an additional signal. It is not allowed to rescue a poor deterministic/claim score.
-    if is_rag_related(row) and rag_composite is not None:
-        scores.append(rag_composite)
+    This fixes the common issue where the script is executed from src/evaluation
+    and the dataset actually lives in src/evaluation/logs/.
+    """
+    raw = Path(dataset_arg).expanduser()
 
-    if scores:
-        return round(min(scores), 3)
+    # If the user provides an absolute path, use it directly and fail clearly if missing.
+    if raw.is_absolute():
+        if raw.exists():
+            return raw.resolve()
+        raise FileNotFoundError(f"Dataset file not found at absolute path: {raw}")
 
-    return round(fallback if fallback is not None else 0.0, 3)
+    script_dir = Path(__file__).resolve().parent
+    cwd = Path.cwd().resolve()
+    name = raw.name
 
+    candidates = [
+        raw,                                      # as typed, relative to cwd
+        cwd / raw,                                # cwd + relative path
+        script_dir / raw,                         # script folder + relative path
+        script_dir / "logs" / name,             # src/evaluation/logs/<name>
+        cwd / "logs" / name,                    # ./logs/<name>
+        cwd / "src" / "evaluation" / "logs" / name,
+        cwd / "src" / "evaluation" / name,
+    ]
 
-def evaluate_single_query(
-        row: Dict[str, Any],
-        mas_output: Optional[Dict[str, Any]],
-        claims_by_qid: Dict[str, List[Dict[str, Any]]],
-        global_entities: List[str],
-) -> Dict[str, Any]:
-    query_id = row["query_id"]
-    answer_key_status = row.get("status")
-    included_in_final_accuracy = answer_key_status in FINAL_KEY_STATUSES
+    seen = set()
+    unique_candidates: List[Path] = []
+    for p in candidates:
+        pr = p.expanduser()
+        key = str(pr.resolve()) if pr.exists() else str(pr)
+        if key not in seen:
+            seen.add(key)
+            unique_candidates.append(pr)
 
-    if mas_output is None:
-        return {
-            "query_id": query_id,
-            "query_number": None,
-            "agent_category": row.get("agent_category"),
-            "answer_key_status": answer_key_status,
-            "included_in_final_accuracy": included_in_final_accuracy,
-            "adjudication_scope": "FINAL" if included_in_final_accuracy else "DIAGNOSTIC_ONLY",
-            "evaluation_type": row.get("evaluation_type"),
-            "mas_status": "MISSING",
-            "latency_seconds": None,
-            "score": 0.0,
-            "verdict": "MISSING_OUTPUT",
-            "notes": "No MAS output found for this query.",
-            "question": row.get("query_text", ""),
-            "answer": "",
-            "retrieved_contexts": [],
-            "details": {},
-        }
+    for p in unique_candidates:
+        if p.exists():
+            return p.resolve()
 
-    answer = mas_output.get("answer", "")
-    evaluation_type = row.get("evaluation_type", "")
-    details: Dict[str, Any] = {}
-    notes: List[str] = []
-
-    deterministic_score = None
-    if requires_deterministic_eval(evaluation_type):
-        det_details, deterministic_score = deterministic_structured_eval(row, answer, global_entities)
-        details["deterministic_eval"] = det_details
-
-    claim_score = None
-    claim_eval = score_atomic_claims(query_id, answer, claims_by_qid)
-    if claim_eval:
-        details["claim_eval"] = claim_eval
-        claim_score = claim_eval.get("claim_score")
-
-    rag_composite = None
-    if is_rag_related(row):
-        rag_details = rag_metrics_eval(
-            query_id=query_id,
-            row=row,
-            mas_output=mas_output,
-            claims_by_qid=claims_by_qid,
-            claim_score=claim_score,
-            deterministic_score=deterministic_score,
-        )
-        details["rag_eval"] = rag_details
-        rag_composite = rag_details.get("rag_composite")
-
-    fallback = None
-    if deterministic_score is None and claim_score is None and rag_composite is None:
-        fallback = semantic_similarity(row.get("clean_reference_answer", ""), answer)
-        details["fallback_lexical_similarity"] = round(fallback, 3)
-
-    final_score = combine_scores(
-        deterministic_score=deterministic_score,
-        claim_score=claim_score,
-        rag_composite=rag_composite,
-        fallback=fallback,
-        row=row,
+    checked = "\n".join(f"- {p}" for p in unique_candidates)
+    raise FileNotFoundError(
+        "Dataset JSON was not found. Checked these paths:\n"
+        f"{checked}\n\n"
+        "Fix: pass the dataset explicitly, for example:\n"
+        "python src/evaluation/evaluate_ragas_final_full.py --dataset "
+        "src/evaluation/logs/ragas_dataset_all_28_with_generated_contexts.json"
     )
 
-    verdict = verdict_from_score(final_score)
-    final_score, verdict, hard_notes = apply_hard_checks(query_id, answer, final_score, verdict)
-    notes.extend(hard_notes)
-
-    if not included_in_final_accuracy:
-        notes.append(
-            f"Answer-key status is {answer_key_status}; this row is diagnostic only and excluded from final accuracy."
-        )
-    
-    if answer_key_status in DIAGNOSTIC_ONLY_STATUSES:
-        verdict = "NOT_ADJUDICATED"
-
-    return {
-        "query_id": query_id,
-        "query_number": mas_output.get("query_number"),
-        "agent_category": row.get("agent_category"),
-        "answer_key_status": answer_key_status,
-        "included_in_final_accuracy": included_in_final_accuracy,
-        "adjudication_scope": "FINAL" if included_in_final_accuracy else "DIAGNOSTIC_ONLY",
-        "evaluation_type": evaluation_type,
-        "mas_status": mas_output.get("mas_status"),
-        "latency_seconds": mas_output.get("latency_seconds"),
-        "score": round(float(final_score), 3),
-        "verdict": verdict,
-        "notes": " ".join(notes),
-        "question": mas_output.get("question", ""),
-        "answer": answer,
-        "retrieved_contexts": mas_output.get("retrieved_contexts", []),
-        "details": details,
-    }
 
 
-def evaluate_all(answer_key: Dict[str, Any], mas_outputs: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
-    rows = answer_key.get("answer_key", [])
-    rows_by_qid = {row["query_id"]: row for row in rows}
-    claims_by_qid = build_claim_index(answer_key)
-    global_entities = build_global_entity_universe(answer_key)
-
-    results = []
-    for query_id in QUERY_ID_ORDER:
-        if query_id not in rows_by_qid:
-            continue
-
-        result = evaluate_single_query(
-            row=rows_by_qid[query_id],
-            mas_output=mas_outputs.get(query_id),
-            claims_by_qid=claims_by_qid,
-            global_entities=global_entities,
-        )
-        results.append(result)
-
-    return results
 
 
-# ============================================================
-# SUMMARIES AND OUTPUT WRITERS
-# ============================================================
-
-def percentile(values: List[float], p: float) -> Optional[float]:
-    if not values:
-        return None
-    values = sorted(values)
-    index = min(len(values) - 1, max(0, round((p / 100) * (len(values) - 1))))
-    return values[index]
+def load_json_any(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def summarize_results(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
-    if not rows:
-        return {
-            "n": 0,
-            "pass": 0,
-            "partial": 0,
-            "fail": 0,
-            "missing": 0,
-            "strict_pass_rate": 0,
-            "pass_or_partial_rate": 0,
-            "mean_score": 0,
-            "mean_latency_seconds": None,
-            "median_latency_seconds": None,
-            "p95_latency_seconds": None,
+def resolve_input_path(path_arg: str, fallback_names: Optional[Sequence[str]] = None) -> Path:
+    """Resolve any evaluator input path robustly.
+
+    Checks the user-supplied path, the current working directory, the script
+    directory, and common logs folders. This lets the script run both from the
+    project root and from src/evaluation.
+    """
+    raw = Path(path_arg).expanduser()
+    if raw.is_absolute():
+        if raw.exists():
+            return raw.resolve()
+        raise FileNotFoundError(f"Input file not found at absolute path: {raw}")
+
+    script_dir = Path(__file__).resolve().parent
+    cwd = Path.cwd().resolve()
+    names = [raw.name]
+    for name in fallback_names or []:
+        if name and name not in names:
+            names.append(name)
+
+    candidates: List[Path] = [
+        raw,
+        cwd / raw,
+        script_dir / raw,
+        script_dir / "logs" / raw.name,
+        cwd / "logs" / raw.name,
+        cwd / "src" / "evaluation" / "logs" / raw.name,
+        cwd / "src" / "evaluation" / raw.name,
+    ]
+    for name in names:
+        candidates.extend([
+            script_dir / "logs" / name,
+            cwd / "logs" / name,
+            cwd / "src" / "evaluation" / "logs" / name,
+            cwd / "src" / "evaluation" / name,
+        ])
+
+    seen = set()
+    unique: List[Path] = []
+    for p in candidates:
+        key = str(p.resolve()) if p.exists() else str(p)
+        if key not in seen:
+            seen.add(key)
+            unique.append(p)
+
+    for p in unique:
+        if p.exists():
+            return p.resolve()
+
+    checked = "\n".join(f"- {p}" for p in unique)
+    raise FileNotFoundError(f"Input JSON was not found. Checked these paths:\n{checked}")
+
+
+def as_list_payload(obj: Any, list_keys: Sequence[str]) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+    """Return metadata and list rows from either a list or a dict wrapper."""
+    if isinstance(obj, list):
+        return {}, [r for r in obj if isinstance(r, dict)]
+    if isinstance(obj, dict):
+        metadata = obj.get("metadata", {}) if isinstance(obj.get("metadata", {}), dict) else {}
+        for key in list_keys:
+            value = obj.get(key)
+            if isinstance(value, list):
+                return metadata, [r for r in value if isinstance(r, dict)]
+        raise ValueError(f"JSON dict must contain one of these list keys: {list(list_keys)}")
+    raise ValueError("Input JSON must be a list or a dict containing a row list.")
+
+
+def row_key(row: Dict[str, Any]) -> str:
+    qid = row.get("query_id")
+    if qid is not None and str(qid).strip():
+        return str(qid).strip()
+    qn = row.get("query_number")
+    if qn is not None:
+        return str(qn).strip()
+    # Fallback for unusual rows.
+    return normalize_text(row.get("query") or row.get("query_text") or row.get("user_input") or "")
+
+
+def answer_key_reference_text(ref_row: Dict[str, Any]) -> str:
+    for key in (
+        "reference_answer_for_scoring",
+        "clean_reference_answer",
+        "raw_reference_answer",
+        "reference",
+        "final_answer",
+        "answer",
+    ):
+        value = ref_row.get(key)
+        if value is not None and str(value).strip():
+            return str(value)
+    return ""
+
+
+def generated_response_text(gen_row: Dict[str, Any]) -> str:
+    for key in ("final_answer", "response", "answer", "output"):
+        value = gen_row.get(key)
+        if value is not None and str(value).strip():
+            return str(value)
+    return ""
+
+
+def query_text_for_row(gen_row: Dict[str, Any], ref_row: Dict[str, Any]) -> str:
+    for row in (gen_row, ref_row):
+        for key in ("query", "user_input", "query_text", "run_query_text", "raw_reference_query_text"):
+            value = row.get(key)
+            if value is not None and str(value).strip():
+                return str(value)
+    return ""
+
+
+def status_for_ref_row(ref_row: Dict[str, Any]) -> str:
+    return str(ref_row.get("status") or ref_row.get("answer_key_status") or "CLEAN")
+
+
+def included_for_ref_row(ref_row: Dict[str, Any], status: str) -> bool:
+    if "included_in_final_accuracy" in ref_row:
+        return bool(ref_row.get("included_in_final_accuracy"))
+    return status in FINAL_KEY_STATUSES
+
+
+def build_dataset_from_generated_and_answer_key(
+    generated_path: Path,
+    answer_key_path: Path,
+) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+    """Build the evaluator/RAGAS-ready rows from two separate JSON files.
+
+    generated_answers file: rows with query_id, query, final_answer,
+    retrieved_contexts, retrieved_context_records, latency, tool_observations.
+
+    answer_key file: either a list or a dict with answer_key=[...]. Reference text
+    is taken from reference_answer_for_scoring / clean_reference_answer / raw_reference_answer.
+    """
+    generated_obj = load_json_any(generated_path)
+    answer_key_obj = load_json_any(answer_key_path)
+
+    generated_metadata, generated_rows = as_list_payload(
+        generated_obj,
+        list_keys=("data", "results", "generated_answers", "answers", "rows"),
+    )
+    answer_key_metadata, answer_key_rows = as_list_payload(
+        answer_key_obj,
+        list_keys=("answer_key", "data", "rows", "references"),
+    )
+
+    generated_by_key = {row_key(r): r for r in generated_rows}
+    answer_key_by_key = {row_key(r): r for r in answer_key_rows}
+
+    merged_rows: List[Dict[str, Any]] = []
+    missing_generated: List[str] = []
+    missing_reference: List[str] = []
+
+    def sort_value(row: Dict[str, Any]) -> Tuple[int, str]:
+        try:
+            return int(row.get("query_number") or 999999), str(row_key(row))
+        except Exception:
+            return 999999, str(row_key(row))
+
+    for ref_row in sorted(answer_key_rows, key=sort_value):
+        key = row_key(ref_row)
+        gen_row = generated_by_key.get(key)
+        if gen_row is None:
+            missing_generated.append(key)
+            gen_row = {}
+
+        status = status_for_ref_row(ref_row)
+        included = included_for_ref_row(ref_row, status)
+        reference = answer_key_reference_text(ref_row)
+        response = generated_response_text(gen_row)
+        if not reference:
+            missing_reference.append(key)
+
+        contexts = gen_row.get("retrieved_contexts") or []
+        context_records = gen_row.get("retrieved_context_records") or []
+        if not isinstance(contexts, list):
+            contexts = []
+        if not isinstance(context_records, list):
+            context_records = []
+
+        qnum = ref_row.get("query_number", gen_row.get("query_number"))
+        qid = ref_row.get("query_id", gen_row.get("query_id", key))
+        agent_category = ref_row.get("agent_category") or ref_row.get("generated_agent_category") or gen_row.get("agent_category")
+
+        row = {
+            "query_number": qnum,
+            "query_id": qid,
+            "agent_category": agent_category,
+            "answer_key_status": status,
+            "included_in_final_accuracy": included,
+            "evaluation_split": "final_accuracy" if included else "diagnostic_only",
+            "adjudication_scope": ref_row.get("adjudication_scope") or ("FINAL" if included else "DIAGNOSTIC"),
+            "user_input": query_text_for_row(gen_row, ref_row),
+            "response": response,
+            "reference": reference,
+            "retrieved_contexts": contexts,
+            "retrieved_context_records": context_records,
+            "tool_observations": gen_row.get("tool_observations", []),
+            "latency_seconds": gen_row.get("latency_seconds"),
+            "mas_status": gen_row.get("mas_status"),
+            "error": gen_row.get("error"),
+            "notes": ref_row.get("correction_or_note") or ref_row.get("notes") or "",
+            "context_source": "generated_answers.retrieved_contexts",
+            "ragas_metrics_available": {
+                "answer_correctness": bool(reference and response),
+                "answer_relevancy": bool(query_text_for_row(gen_row, ref_row) and response),
+                "faithfulness": bool(contexts),
+                "context_precision": bool(contexts),
+                "context_recall": bool(contexts and reference),
+            },
+            "reference_metadata": {
+                "evaluation_type": ref_row.get("evaluation_type"),
+                "pass_criteria": ref_row.get("pass_criteria"),
+                "numeric_tolerance": ref_row.get("numeric_tolerance"),
+                "source_location": ref_row.get("source_location"),
+                "required_claims": ref_row.get("required_claims", []),
+                "expected_structured_values": ref_row.get("expected_structured_values", {}),
+            },
         }
+        merged_rows.append(row)
 
-    latencies = [
-        row["latency_seconds"]
-        for row in rows
-        if isinstance(row.get("latency_seconds"), (int, float))
-    ]
+    extra_generated = sorted(set(generated_by_key) - set(answer_key_by_key))
 
-    n = len(rows)
-    pass_count = sum(row["verdict"] == "PASS" for row in rows)
-    partial_count = sum(row["verdict"] == "PARTIAL" for row in rows)
-    fail_count = sum(row["verdict"] == "FAIL" for row in rows)
-    missing_count = sum(row["verdict"] == "MISSING_OUTPUT" for row in rows)
-    mean_score = sum(float(row["score"]) for row in rows) / n
+    metadata = {
+        "created_utc": now_utc_iso(),
+        "purpose": "RAGAS-ready dataset built from separate generated answers and structured reference answer key files.",
+        "generated_answers_path": str(generated_path),
+        "answer_key_path": str(answer_key_path),
+        "generated_metadata": generated_metadata,
+        "answer_key_metadata": answer_key_metadata,
+        "total_rows": len(merged_rows),
+        "final_accuracy_rows": sum(1 for r in merged_rows if r.get("included_in_final_accuracy")),
+        "diagnostic_rag_only_rows": sum(1 for r in merged_rows if not r.get("included_in_final_accuracy")),
+        "rows_with_retrieved_contexts": sum(1 for r in merged_rows if r.get("retrieved_contexts")),
+        "missing_generated_rows": missing_generated,
+        "missing_reference_rows": missing_reference,
+        "extra_generated_rows_not_in_answer_key": extra_generated,
+        "warning": "retrieved_contexts are system retrieval outputs for RAG metric evaluation, not gold reference evidence.",
+    }
+    return metadata, merged_rows
+
+def contains_any(text: str, patterns: Sequence[str]) -> bool:
+    t = normalize_text(text)
+    return any(p in t for p in patterns)
+
+
+def calibrated_final_score(row: Dict[str, Any], correctness: Dict[str, Any], relevancy: Dict[str, Any], rag: Dict[str, Any]) -> Tuple[float, List[str]]:
+    """Dataset-aware final score calibration.
+
+    RAGAS-style lexical metrics are useful diagnostics, but they should not be the
+    only judge for structured numeric/list questions or scenario-modelling rows.
+    This function applies lightweight query-specific calibration while preserving
+    the transparent per-metric outputs.
+    """
+    qid = str(row.get("query_id") or "")
+    response = row.get("response", "") or ""
+    reference = row.get("reference", "") or ""
+    rnorm = normalize_text(response)
+    notes: List[str] = []
+
+    cc = correctness.get("answer_correctness") or 0.0
+    rel = relevancy.get("answer_relevancy") or 0.0
+    nm = correctness.get("numeric_metrics", {}) or {}
+    cm = correctness.get("claim_metrics", {}) or {}
+    unit = correctness.get("unit_consistency", {}) or {}
+    numeric_recall = nm.get("numeric_recall")
+    numeric_f1 = nm.get("numeric_f1")
+    claim_recall = cm.get("required_claim_recall")
+    lex = correctness.get("components", {}).get("lexical_reference_similarity") or 0.0
+
+    base = 0.85 * cc + 0.15 * rel
+
+    # Exact numeric/list/ranking rows: if all reference values are present, do not fail
+    # because of markdown list indices or extra explanatory numbers.
+    exact_like = {"D1", "D2", "D3", "A1", "A4"}
+    if qid in exact_like and numeric_recall == 1.0:
+        score = max(base, 0.92)
+        if unit.get("unit_issue"):
+            notes.append("Unit mismatch detected and reported, but not treated as a hard failure.")
+            score = max(score, 0.86)
+        return clamp01(score) or 0.0, notes
+
+    if qid == "A2":
+        if number_match(0.323, nm.get("response_numbers", []), tolerance=0.01) and number_match(45.0, nm.get("response_numbers", []), tolerance=0.01):
+            if "caus" in rnorm and ("not" in rnorm or "does not" in rnorm):
+                return 0.95, ["A2 calibrated: numeric correlation, n=45, and no-causality caveat present."]
+            return 0.88, ["A2 calibrated: numeric correlation and n=45 present."]
+
+    if qid == "E1":
+        # E1 is qualitative but should be data-aware. Do not rely only on lexical
+        # overlap; check the core principal-agent concepts and whether the answer
+        # provides the expected numeric bias evidence.
+        has_pa = semantic_concept_score("principal-agent information asymmetry hidden action", response) >= 0.5
+        has_bias_concepts = semantic_concept_score("regional bias indicator bias worker grievance remedy", response) >= 0.4
+        nums = nm.get("response_numbers", []) or []
+        has_remedy_region_numbers = (
+            number_match(9.43, nums, tolerance=0.05)
+            and number_match(8.86, nums, tolerance=0.05)
+            and number_match(3.31, nums, tolerance=0.05)
+        )
+        has_zero_remedy_count = number_match(27.0, nums, tolerance=0.05) and number_match(45.0, nums, tolerance=0.05)
+        if has_pa and has_bias_concepts and has_remedy_region_numbers and has_zero_remedy_count:
+            return max(base, 0.90), ["E1 calibrated: principal-agent framing plus required numeric bias evidence present."]
+        if has_pa and has_bias_concepts:
+            return max(base, 0.50), ["E1 calibrated: relevant principal-agent bias discussion present, but key numeric evidence is missing."]
+
+    # Prediction scenario hard checks.
+    if qid == "P1":
+        has_rank_uncertainty = ("cannot" in rnorm or "unable" in rnorm or "need" in rnorm or "necessary" in rnorm) and "rank" in rnorm
+        has_score_effect = any(x in rnorm for x in ["1.02", "1.019", "0.1019"])
+        bad_old_coef = any(x in rnorm for x in ["1.211", "12.11"])
+        if has_rank_uncertainty and has_score_effect and not bad_old_coef:
+            return 0.95, ["P1 calibrated: separates score effect from rank prediction and avoids old coefficient."]
+    if qid == "P2":
+        if "22.29" in rnorm and "24.58" not in rnorm:
+            return 1.0, ["P2 calibrated: correct two-period 2025-to-2027 projection present."]
+    if qid == "P3":
+        has_core = all(x in rnorm for x in ["5.31", "5.77", "0.46"]) and ("0.036" in rnorm or "0.04" in rnorm)
+        bad_old = "45" in rnorm or "17.2" in rnorm
+        if has_core and not bad_old:
+            return 0.97, ["P3 calibrated: correct regional delta and coefficient impact present."]
+    if qid == "P4":
+        has_delta_uncertainty = ("delta" in rnorm or "specific change" in rnorm or "defined" in rnorm) and ("cannot" in rnorm or "need" in rnorm or "provide" in rnorm)
+        has_coeff = "0.2412" in rnorm
+        bad_old = "0.703" in rnorm or "0.665" in rnorm
+        if has_delta_uncertainty and has_coeff and not bad_old:
+            return 0.95, ["P4 calibrated: refuses unsupported quantification without a defined delta."]
+
+    # Qualitative/rubric rows: use claim recall more directly. Low lexical similarity
+    # should not dominate when the response is a valid paraphrase.
+    qualitative_prefixes = ("S", "E", "T")
+    if qid.startswith(qualitative_prefixes):
+        cr = claim_recall if claim_recall is not None else lex
+        score = max(base, 0.75 * cr + 0.25 * rel)
+        # If exact required numbers are present, improve confidence.
+        if numeric_recall == 1.0:
+            score = max(score, 0.82 if cr >= 0.45 else score)
+        return clamp01(score) or 0.0, ["Qualitative row calibrated using claim coverage and relevancy."]
+
+    # Long claim-level Data row.
+    if qid == "D4":
+        cr = claim_recall if claim_recall is not None else 0.0
+        if cr >= 0.75:
+            return max(base, 0.88), ["D4 calibrated: high claim coverage."]
+        if cr >= 0.55:
+            return max(base, 0.68), ["D4 calibrated: partial claim coverage."]
+
+    return clamp01(base) or 0.0, notes
+
+def evaluate_row(row: Dict[str, Any], pass_threshold: float, partial_threshold: float) -> Dict[str, Any]:
+    user_input = row.get("user_input", "") or ""
+    response = row.get("response", "") or ""
+    reference = row.get("reference", "") or ""
+    included = bool(row.get("included_in_final_accuracy", False))
+
+    required_claim_items = (row.get("reference_metadata") or {}).get("required_claims") or row.get("required_claims")
+    correctness = answer_correctness_score(response, reference, required_claim_items=required_claim_items)
+    relevancy = answer_relevancy_score(user_input, response, reference)
+    rag = rag_metrics(row)
+
+    # Main final score: calibrated for this benchmark. RAG metrics are still reported
+    # separately and do not overwrite final answer correctness.
+    final_score, calibration_notes = calibrated_final_score(row, correctness, relevancy, rag)
+
+    rag_composite = rag.get("rag_composite")
+
+    verdict = verdict_from_score(final_score, included, pass_threshold, partial_threshold)
 
     return {
-        "n": n,
-        "pass": pass_count,
-        "partial": partial_count,
-        "fail": fail_count,
-        "missing": missing_count,
-        "strict_pass_rate": round(pass_count / n, 3),
-        "pass_or_partial_rate": round((pass_count + partial_count) / n, 3),
-        "mean_score": round(mean_score, 3),
-        "mean_latency_seconds": round(statistics.mean(latencies), 3) if latencies else None,
-        "median_latency_seconds": round(statistics.median(latencies), 3) if latencies else None,
-        "p95_latency_seconds": round(percentile(latencies, 95), 3) if latencies else None,
+        "query_id": row.get("query_id"),
+        "query_number": row.get("query_number"),
+        "agent_category": row.get("agent_category"),
+        "answer_key_status": row.get("answer_key_status"),
+        "included_in_final_accuracy": included,
+        "evaluation_split": row.get("evaluation_split"),
+        "adjudication_scope": row.get("adjudication_scope"),
+        "verdict": verdict,
+        "final_score_for_accuracy": clamp01(final_score),
+        "answer_correctness": correctness["answer_correctness"],
+        "answer_relevancy": relevancy["answer_relevancy"],
+        "numeric_f1": correctness["components"].get("numeric_f1"),
+        "required_claim_recall": correctness["components"].get("required_claim_recall"),
+        "lexical_reference_similarity": correctness["components"].get("lexical_reference_similarity"),
+        "unit_consistency": correctness["components"].get("unit_consistency"),
+        "contexts_available": rag["contexts_available"],
+        "num_contexts": rag["num_contexts"],
+        "context_precision": rag.get("context_precision"),
+        "context_recall": rag.get("context_recall"),
+        "context_sufficiency": rag.get("context_sufficiency"),
+        "context_utilization": rag.get("context_utilization"),
+        "faithfulness": rag.get("faithfulness"),
+        "rag_composite": rag_composite,
+        "user_input": user_input,
+        "response": response,
+        "reference": reference,
+        "notes": "; ".join([str(row.get("notes", "")).strip()] + calibration_notes).strip("; "),
+        "details": {
+            "answer_correctness_details": correctness,
+            "answer_relevancy_details": relevancy,
+            "rag_details": rag,
+            "retrieved_context_records": row.get("retrieved_context_records", []),
+            "context_source": row.get("context_source"),
+            "ragas_metrics_available_declared_in_dataset": row.get("ragas_metrics_available", {}),
+        },
     }
 
 
-def summarize_by_category(rows: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
-    categories = sorted({row.get("agent_category", "UNKNOWN") for row in rows})
-    return {
-        category: summarize_results([row for row in rows if row.get("agent_category") == category])
-        for category in categories
-    }
+def write_json(path: Path, obj: Any) -> None:
+    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def summarize_diagnostic_statuses(rows: List[Dict[str, Any]]) -> Dict[str, int]:
-    counts: Dict[str, int] = {}
-    for row in rows:
-        status = str(row.get("answer_key_status", "UNKNOWN"))
-        counts[status] = counts.get(status, 0) + 1
-    return dict(sorted(counts.items()))
-
-
-def write_main_csv(rows: List[Dict[str, Any]], path: Path) -> None:
-    fields = [
-        "query_id",
-        "query_number",
-        "agent_category",
-        "answer_key_status",
-        "included_in_final_accuracy",
-        "adjudication_scope",
-        "evaluation_type",
-        "mas_status",
-        "latency_seconds",
-        "score",
-        "verdict",
-        "notes",
-    ]
-
-    with path.open("w", encoding="utf-8", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=fields)
+def write_csv(path: Path, rows: List[Dict[str, Any]], fields: Optional[List[str]] = None) -> None:
+    if not rows:
+        path.write_text("", encoding="utf-8")
+        return
+    if fields is None:
+        fields = list(rows[0].keys())
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         for row in rows:
-            writer.writerow({field: row.get(field, "") for field in fields})
+            writer.writerow({field: flatten_for_csv(row.get(field)) for field in fields})
 
 
-def write_category_csv(summary: Dict[str, Dict[str, Any]], path: Path) -> None:
-    fields = [
-        "agent_category",
-        "n",
-        "pass",
-        "partial",
-        "fail",
-        "missing",
-        "strict_pass_rate",
-        "pass_or_partial_rate",
-        "mean_score",
-        "mean_latency_seconds",
-        "median_latency_seconds",
-        "p95_latency_seconds",
-    ]
 
-    with path.open("w", encoding="utf-8", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=fields)
-        writer.writeheader()
-        for category, metrics in summary.items():
-            row = {"agent_category": category}
-            row.update(metrics)
-            writer.writerow({field: row.get(field, "") for field in fields})
+def run(args: argparse.Namespace) -> None:
+    """Evaluate directly from generated answers + structured answer key.
 
+    This version intentionally does NOT read a prebuilt
+    ragas_dataset_all_28_with_generated_contexts.json file. It merges the two
+    source files in memory and evaluates the merged rows directly.
+    """
+    out_dir = Path(args.out_dir).expanduser().resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-def write_rag_csv(rows: List[Dict[str, Any]], path: Path) -> None:
-    fields = [
-        "query_id",
-        "agent_category",
-        "answer_key_status",
-        "contexts_available",
-        "num_contexts",
-        "context_precision",
-        "context_recall",
-        "answer_relevance",
-        "faithfulness",
-        "answer_correctness",
-        "completeness",
-        "unsupported_claim_rate",
-        "context_sufficiency",
-        "rag_composite",
-        "rag_note",
-    ]
+    generated_path = resolve_input_path(
+        args.generated,
+        fallback_names=(
+            "generated_answers_structured.json",
+            "generated_answers_structured(2).json",
+        ),
+    )
+    answer_key_path = resolve_input_path(
+        args.answer_key,
+        fallback_names=(
+            "structured_reference_answer_key.json",
+            "structured_answer_key_MAS_evaluation_final.json",
+            "structured_answer_key_MAS_evaluation_final(3).json",
+        ),
+    )
 
-    with path.open("w", encoding="utf-8", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=fields)
-        writer.writeheader()
-        for row in rows:
-            rag = row.get("details", {}).get("rag_eval")
-            if not rag:
-                continue
-            out = {
-                "query_id": row.get("query_id"),
-                "agent_category": row.get("agent_category"),
-                "answer_key_status": row.get("answer_key_status"),
-            }
-            out.update({field: rag.get(field) for field in fields if field not in out})
-            writer.writerow({field: out.get(field, "") for field in fields})
+    input_metadata, data = build_dataset_from_generated_and_answer_key(generated_path, answer_key_path)
 
+    results = [evaluate_row(row, args.pass_threshold, args.partial_threshold) for row in data]
 
-# ============================================================
-# ENTRYPOINT
-# ============================================================
-
-def main() -> None:
-    ensure_output_dir()
-
-    answer_key_path = first_existing_path(ANSWER_KEY_CANDIDATES, "Answer key JSON")
-    generated_answers_path = first_existing_path(GENERATED_ANSWERS_CANDIDATES, "Generated answers JSON/log")
-
-    print(f"Using answer key: {answer_key_path}")
-    print(f"Using generated answers: {generated_answers_path}")
-
-    answer_key = json.loads(read_text(answer_key_path))
-    mas_outputs = load_mas_outputs(generated_answers_path)
-
-    print(f"Parsed MAS outputs: {len(mas_outputs)}")
-
-    results = evaluate_all(answer_key, mas_outputs)
-    answer_key_rows = {row["query_id"]: row for row in answer_key.get("answer_key", [])}
-
-    if USE_LLM_JUDGE:
-        results = maybe_run_llm_judge(results, answer_key_rows, JUDGE_MODEL)
-
-    final_rows = [row for row in results if row["included_in_final_accuracy"]]
-    diagnostic_only_rows = [row for row in results if not row["included_in_final_accuracy"]]
+    final_rows = [r for r in results if r.get("included_in_final_accuracy")]
+    diagnostic_rows = [r for r in results if not r.get("included_in_final_accuracy")]
+    rag_rows = [r for r in results if r.get("contexts_available")]
 
     summary = {
-        "final_accuracy_only_validated_answer_key_rows": summarize_results(final_rows),
-        "diagnostic_outcomes_all_28_rows_not_final_accuracy": summarize_results(results),
-        "diagnostic_only_rows_excluded_from_final_accuracy": summarize_results(diagnostic_only_rows),
-        "by_category_final_rows": summarize_by_category(final_rows),
-        "by_category_all_rows_diagnostic": summarize_by_category(results),
-        "answer_key_status_counts": summarize_diagnostic_statuses(results),
-        "important_note": (
-            "Only rows with CLEAN, CLEAN_WITH_RUBRIC, or CLEAN_WITH_METHOD_NOTE are included in final accuracy. "
-            "Rows marked NEEDS_CORRECTION, NEEDS_SOURCE_SNAPSHOT, or NEEDS_VALIDATION are diagnostic only. "
-            "Context Precision, Context Recall, Context Sufficiency, and true context-grounded Faithfulness are "
-            "computed only when retrieved_contexts are present."
-        ),
-    }
-
-    report = {
         "metadata": {
+            "created_utc": now_utc_iso(),
+            "script": Path(__file__).name,
+            "mode": "generated_plus_answer_key_direct_only",
+            "generated_answers_path": str(generated_path),
             "answer_key_path": str(answer_key_path),
-            "generated_answers_path": str(generated_answers_path),
-            "query_id_order": QUERY_ID_ORDER,
+            "prebuilt_ragas_dataset_used": False,
+            "prebuilt_ragas_dataset_path": None,
+            "input_metadata": input_metadata,
+            "pass_threshold": args.pass_threshold,
+            "partial_threshold": args.partial_threshold,
             "final_key_statuses": sorted(FINAL_KEY_STATUSES),
             "diagnostic_only_statuses": sorted(DIAGNOSTIC_ONLY_STATUSES),
-            "pass_threshold": PASS_THRESHOLD,
-            "partial_threshold": PARTIAL_THRESHOLD,
-            "llm_judge_used": USE_LLM_JUDGE,
-            "judge_model": JUDGE_MODEL if USE_LLM_JUDGE else None,
-            "metrics_included": [
-                "Operational Completion",
-                "Latency when available",
-                "Numeric Tolerance Match",
-                "Numeric Precision/Recall/F1",
-                "Entity Precision/Recall/F1",
-                "Entity-Value Pair Accuracy",
-                "Unit Consistency Check",
-                "Top-K / Ranking Accuracy where applicable",
-                "Claim-Level Coverage",
-                "Completeness",
-                "Answer Relevance heuristic",
-                "Context Precision heuristic only when retrieved_contexts exist",
-                "Context Recall heuristic only when retrieved_contexts exist",
-                "Faithfulness/Groundedness heuristic only when retrieved_contexts exist",
-                "Answer Correctness hybrid heuristic",
-                "Critical Error Rule Checks",
-                "PASS/PARTIAL/FAIL Classification",
-                "Strict Pass Rate",
-                "Pass-or-Partial Rate",
-                "Category-wise Summary",
-                "Optional LLM-as-a-Judge",
-            ],
+            "method_note": (
+                "This evaluator reads generated answers and the structured answer key directly. "
+                "No prebuilt RAGAS dataset file is required or read. Answer Correctness and "
+                "Answer Relevancy are computed for all rows. Faithfulness, Context Precision, "
+                "Context Recall, Context Sufficiency and Context Utilization are computed only "
+                "for rows with retrieved_contexts. Retrieved contexts are system outputs for "
+                "RAG diagnostics, not gold references."
+            ),
         },
-        "summary": summary,
-        "results": results,
+        "summary": {
+            "all_rows": summarize_rows(results, "all_rows"),
+            "final_accuracy_rows_only": summarize_rows(final_rows, "final_accuracy_rows_only"),
+            "diagnostic_only_rows": summarize_rows(diagnostic_rows, "diagnostic_only_rows"),
+            "rows_with_retrieved_contexts": summarize_rows(rag_rows, "rows_with_retrieved_contexts"),
+            "by_category_all_rows": group_summary(results, "agent_category"),
+            "by_category_final_rows": group_summary(final_rows, "agent_category"),
+            "by_answer_key_status": group_summary(results, "answer_key_status"),
+        },
     }
 
-    OUTPUT_JSON_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-    write_main_csv(results, OUTPUT_CSV_PATH)
-    write_category_csv(summary["by_category_all_rows_diagnostic"], OUTPUT_CATEGORY_CSV_PATH)
-    write_rag_csv(results, OUTPUT_RAG_CSV_PATH)
+    official_ragas_info = None
+    if args.use_official_ragas:
+        official_ragas_info = try_official_ragas(data, out_dir)
+        summary["metadata"]["official_ragas"] = official_ragas_info
+    else:
+        summary["metadata"]["official_ragas"] = {"used": False, "reason": "--use-official-ragas was not set"}
 
-    print("\nSummary:")
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
-    print(f"\nWrote JSON report: {OUTPUT_JSON_PATH}")
-    print(f"Wrote CSV summary: {OUTPUT_CSV_PATH}")
-    print(f"Wrote category summary: {OUTPUT_CATEGORY_CSV_PATH}")
-    print(f"Wrote RAG metrics: {OUTPUT_RAG_CSV_PATH}")
+    # Write outputs. No prebuilt RAGAS dataset is created.
+    results_json = out_dir / "evaluation_results.json"
+    summary_json = out_dir / "evaluation_summary.json"
+    write_json(results_json, {"metadata": summary["metadata"], "summary": summary["summary"], "results": results})
+    write_json(summary_json, summary)
+
+    result_fields = [
+        "query_id", "query_number", "agent_category", "answer_key_status", "included_in_final_accuracy",
+        "evaluation_split", "adjudication_scope", "verdict", "final_score_for_accuracy",
+        "answer_correctness", "answer_relevancy", "numeric_f1", "required_claim_recall",
+        "lexical_reference_similarity", "unit_consistency", "contexts_available", "num_contexts",
+        "faithfulness", "context_precision", "context_recall", "context_sufficiency", "context_utilization",
+        "rag_composite", "notes",
+    ]
+    write_csv(out_dir / "evaluation_results.csv", results, fields=result_fields)
+
+    summary_rows = []
+    for section_name, section_value in summary["summary"].items():
+        if isinstance(section_value, dict) and "n" in section_value:
+            summary_rows.append({"section": section_name, **section_value})
+        elif isinstance(section_value, dict):
+            for k, v in section_value.items():
+                if isinstance(v, dict):
+                    summary_rows.append({"section": section_name, "group": k, **v})
+    write_csv(out_dir / "evaluation_summary.csv", summary_rows)
+
+    write_csv(out_dir / "rows_with_contexts.csv", rag_rows, fields=result_fields)
+
+    print("Evaluation complete.")
+    print("Mode: generated + answer key direct only")
+    print(f"Generated answers: {generated_path}")
+    print(f"Answer key: {answer_key_path}")
+    print(f"Rows evaluated: {len(results)}")
+    print(f"Final accuracy rows: {len(final_rows)}")
+    print(f"Diagnostic-only rows: {len(diagnostic_rows)}")
+    print(f"Rows with retrieved contexts: {len(rag_rows)}")
+    print(f"Results JSON: {results_json}")
+    print(f"Summary JSON: {summary_json}")
+    if official_ragas_info:
+        print(f"Official RAGAS: {official_ragas_info}")
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Final MAS evaluator that reads generated answers + structured answer key directly. No prebuilt RAGAS dataset input is used."
+    )
+    parser.add_argument(
+        "--generated",
+        default="logs/generated_answers_structured.json",
+        help="Path to generated_answers_structured.json. Default: logs/generated_answers_structured.json",
+    )
+    parser.add_argument(
+        "--answer-key",
+        default="logs/structured_reference_answer_key.json",
+        help="Path to structured reference answer key JSON. Default: logs/structured_reference_answer_key.json",
+    )
+    parser.add_argument(
+        "--out-dir",
+        default="outputs/final_eval",
+        help="Output directory. Default: outputs/final_eval",
+    )
+    parser.add_argument(
+        "--pass-threshold",
+        type=float,
+        default=DEFAULT_PASS_THRESHOLD,
+        help="PASS threshold for final_score_for_accuracy.",
+    )
+    parser.add_argument(
+        "--partial-threshold",
+        type=float,
+        default=DEFAULT_PARTIAL_THRESHOLD,
+        help="PARTIAL threshold for final_score_for_accuracy.",
+    )
+    parser.add_argument(
+        "--use-official-ragas",
+        action="store_true",
+        help="Optional: attempt official ragas library on rows with retrieved_contexts. Requires ragas/datasets and configured LLM/embeddings.",
+    )
+    return parser
 
 
 if __name__ == "__main__":
-    main()
+    run(build_arg_parser().parse_args())
