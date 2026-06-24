@@ -1,0 +1,23 @@
+{
+  "variant": "full_mas",
+  "variant_config": {
+    "name": "full_mas",
+    "description": "Full MAS: structured tools, ethics layer, PDF RAG and web retrieval.",
+    "mode": "mas",
+    "use_tools": true,
+    "include_ethics_layer": true,
+    "include_rag_tools": true
+  },
+  "run_started_utc": "2026-06-24T18:16:31+00:00",
+  "run_finished_utc": "2026-06-24T18:19:44+00:00",
+  "total_queries": 28,
+  "project_root": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code",
+  "script_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/run_ablations.py",
+  "json_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/full_mas/generated_answers_structured.json",
+  "notes": [
+    "generated_answers_structured.json is a JSON list for evaluator compatibility.",
+    "retrieved_contexts are extracted from tool intermediate_steps when available."
+  ],
+  "completed_queries": 28,
+  "failed_queries": 0
+}

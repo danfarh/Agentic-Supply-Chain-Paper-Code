@@ -1,0 +1,23 @@
+{
+  "variant": "mas_without_rag",
+  "variant_config": {
+    "name": "mas_without_rag",
+    "description": "MAS without RAG: removes PDF/vector retrieval and web-search retrieval tools.",
+    "mode": "mas",
+    "use_tools": true,
+    "include_ethics_layer": true,
+    "include_rag_tools": false
+  },
+  "run_started_utc": "2026-06-24T18:25:14+00:00",
+  "run_finished_utc": "2026-06-24T18:27:23+00:00",
+  "total_queries": 28,
+  "project_root": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code",
+  "script_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/run_ablations.py",
+  "json_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_rag/generated_answers_structured.json",
+  "notes": [
+    "generated_answers_structured.json is a JSON list for evaluator compatibility.",
+    "retrieved_contexts are extracted from tool intermediate_steps when available."
+  ],
+  "completed_queries": 28,
+  "failed_queries": 0
+}

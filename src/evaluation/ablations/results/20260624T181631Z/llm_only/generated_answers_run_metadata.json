@@ -1,0 +1,23 @@
+{
+  "variant": "llm_only",
+  "variant_config": {
+    "name": "llm_only",
+    "description": "LLM-only baseline: no structured tools, no RAG, no MAS routing.",
+    "mode": "llm_only",
+    "use_tools": false,
+    "include_ethics_layer": false,
+    "include_rag_tools": false
+  },
+  "run_started_utc": "2026-06-24T18:19:44+00:00",
+  "run_finished_utc": "2026-06-24T18:21:23+00:00",
+  "total_queries": 28,
+  "project_root": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code",
+  "script_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/run_ablations.py",
+  "json_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/llm_only/generated_answers_structured.json",
+  "notes": [
+    "generated_answers_structured.json is a JSON list for evaluator compatibility.",
+    "retrieved_contexts are extracted from tool intermediate_steps when available."
+  ],
+  "completed_queries": 28,
+  "failed_queries": 0
+}

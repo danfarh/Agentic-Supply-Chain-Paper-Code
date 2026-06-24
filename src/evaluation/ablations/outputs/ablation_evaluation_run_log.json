@@ -1,0 +1,100 @@
+{
+  "created_utc": "2026-06-24T18:51:00+00:00",
+  "ablation_dir": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations",
+  "evaluator_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/run_evaluation_full.py",
+  "answer_key_path": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/logs/structured_reference_answer_key.json",
+  "variants_requested": [
+    "llm_only",
+    "without_ethics",
+    "without_rag"
+  ],
+  "variants_evaluated": [
+    "llm_only",
+    "without_ethics",
+    "without_rag"
+  ],
+  "skipped": [],
+  "dry_run": false,
+  "pass_threshold": 0.75,
+  "partial_threshold": 0.5,
+  "runs": [
+    {
+      "variant": "llm_only",
+      "variant_folder": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/llm_only",
+      "generated_json": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/llm_only/generated_answers_structured.json",
+      "output_dir": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/llm_only/outputs",
+      "command": [
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/venv/bin/python",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/run_evaluation_full.py",
+        "--generated",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/llm_only/generated_answers_structured.json",
+        "--answer-key",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/logs/structured_reference_answer_key.json",
+        "--out-dir",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/llm_only/outputs",
+        "--pass-threshold",
+        "0.75",
+        "--partial-threshold",
+        "0.5"
+      ],
+      "started_utc": "2026-06-24T18:50:59+00:00",
+      "finished_utc": "2026-06-24T18:50:59+00:00",
+      "returncode": 0,
+      "success": true,
+      "stdout": "Evaluation complete.\nMode: generated + answer key direct only\nGenerated answers: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/llm_only/generated_answers_structured.json\nAnswer key: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/logs/structured_reference_answer_key.json\nRows evaluated: 28\nFinal accuracy rows: 28\nDiagnostic-only rows: 0\nRows with retrieved contexts: 0\nResults JSON: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/llm_only/outputs/evaluation_results.json\nSummary JSON: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/llm_only/outputs/evaluation_summary.json\n",
+      "stderr": ""
+    },
+    {
+      "variant": "without_ethics",
+      "variant_folder": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_ethics",
+      "generated_json": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_ethics/generated_answers_structured.json",
+      "output_dir": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_ethics/outputs",
+      "command": [
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/venv/bin/python",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/run_evaluation_full.py",
+        "--generated",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_ethics/generated_answers_structured.json",
+        "--answer-key",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/logs/structured_reference_answer_key.json",
+        "--out-dir",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_ethics/outputs",
+        "--pass-threshold",
+        "0.75",
+        "--partial-threshold",
+        "0.5"
+      ],
+      "started_utc": "2026-06-24T18:50:59+00:00",
+      "finished_utc": "2026-06-24T18:51:00+00:00",
+      "returncode": 0,
+      "success": true,
+      "stdout": "Evaluation complete.\nMode: generated + answer key direct only\nGenerated answers: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_ethics/generated_answers_structured.json\nAnswer key: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/logs/structured_reference_answer_key.json\nRows evaluated: 28\nFinal accuracy rows: 28\nDiagnostic-only rows: 0\nRows with retrieved contexts: 7\nResults JSON: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_ethics/outputs/evaluation_results.json\nSummary JSON: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_ethics/outputs/evaluation_summary.json\n",
+      "stderr": ""
+    },
+    {
+      "variant": "without_rag",
+      "variant_folder": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_rag",
+      "generated_json": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_rag/generated_answers_structured.json",
+      "output_dir": "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_rag/outputs",
+      "command": [
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/venv/bin/python",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/run_evaluation_full.py",
+        "--generated",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_rag/generated_answers_structured.json",
+        "--answer-key",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/logs/structured_reference_answer_key.json",
+        "--out-dir",
+        "/home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_rag/outputs",
+        "--pass-threshold",
+        "0.75",
+        "--partial-threshold",
+        "0.5"
+      ],
+      "started_utc": "2026-06-24T18:51:00+00:00",
+      "finished_utc": "2026-06-24T18:51:00+00:00",
+      "returncode": 0,
+      "success": true,
+      "stdout": "Evaluation complete.\nMode: generated + answer key direct only\nGenerated answers: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_rag/generated_answers_structured.json\nAnswer key: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/logs/structured_reference_answer_key.json\nRows evaluated: 28\nFinal accuracy rows: 28\nDiagnostic-only rows: 0\nRows with retrieved contexts: 0\nResults JSON: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_rag/outputs/evaluation_results.json\nSummary JSON: /home/daniyal/Documents/Agentic-Supply-Chain-Paper-Code/src/evaluation/ablations/results/20260624T181631Z/mas_without_rag/outputs/evaluation_summary.json\n",
+      "stderr": ""
+    }
+  ]
+}

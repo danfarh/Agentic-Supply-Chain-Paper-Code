@@ -1,0 +1,22 @@
+section,label,n,adjudicated_n,not_adjudicated,pass,partial,fail,missing,strict_pass_rate,pass_or_partial_rate,mean_answer_correctness,mean_answer_relevancy,mean_rag_composite,mean_faithfulness,mean_context_precision,mean_context_recall,rows_with_contexts
+all_rows,all_rows,28,28,0,19,5,4,0,0.679,0.857,0.66,0.558,0.586,0.813,0.97,0.366,7
+final_accuracy_rows_only,final_accuracy_rows_only,28,28,0,19,5,4,0,0.679,0.857,0.66,0.558,0.586,0.813,0.97,0.366,7
+diagnostic_only_rows,diagnostic_only_rows,0,0,0,0,0,0,0,0.0,0.0,,,,,,,0
+rows_with_retrieved_contexts,rows_with_retrieved_contexts,7,7,0,3,2,2,0,0.429,0.714,0.584,0.53,0.586,0.813,0.97,0.366,7
+by_category_all_rows,Analysis Agent,4,4,0,3,1,0,0,0.75,1.0,0.824,0.658,,,,,0
+by_category_all_rows,Data Agent,4,4,0,4,0,0,0,1.0,1.0,0.924,0.487,,,,,0
+by_category_all_rows,Ethics Agent,4,4,0,1,2,1,0,0.25,0.75,0.476,0.518,,,,,0
+by_category_all_rows,Prediction Agent,4,4,0,3,0,1,0,0.75,0.75,0.519,0.597,,,,,0
+by_category_all_rows,Research Agent,4,4,0,0,2,2,0,0.0,0.5,0.501,0.559,0.448,0.673,0.948,0.15,4
+by_category_all_rows,Synthesis Agent,4,4,0,4,0,0,0,1.0,1.0,0.59,0.509,0.692,1.0,1.0,0.505,1
+by_category_all_rows,Text Mining Agent,4,4,0,4,0,0,0,1.0,1.0,0.787,0.579,0.809,1.0,1.0,0.728,2
+by_category_final_rows,Analysis Agent,4,4,0,3,1,0,0,0.75,1.0,0.824,0.658,,,,,0
+by_category_final_rows,Data Agent,4,4,0,4,0,0,0,1.0,1.0,0.924,0.487,,,,,0
+by_category_final_rows,Ethics Agent,4,4,0,1,2,1,0,0.25,0.75,0.476,0.518,,,,,0
+by_category_final_rows,Prediction Agent,4,4,0,3,0,1,0,0.75,0.75,0.519,0.597,,,,,0
+by_category_final_rows,Research Agent,4,4,0,0,2,2,0,0.0,0.5,0.501,0.559,0.448,0.673,0.948,0.15,4
+by_category_final_rows,Synthesis Agent,4,4,0,4,0,0,0,1.0,1.0,0.59,0.509,0.692,1.0,1.0,0.505,1
+by_category_final_rows,Text Mining Agent,4,4,0,4,0,0,0,1.0,1.0,0.787,0.579,0.809,1.0,1.0,0.728,2
+by_answer_key_status,CLEAN,10,10,0,8,2,0,0,0.8,1.0,0.765,0.565,,,,,0
+by_answer_key_status,CLEAN_WITH_METHOD_NOTE,9,9,0,6,0,3,0,0.667,0.667,0.545,0.573,0.391,0.561,0.958,0.095,2
+by_answer_key_status,CLEAN_WITH_RUBRIC,9,9,0,5,3,1,0,0.556,0.889,0.659,0.536,0.664,0.914,0.975,0.474,5
