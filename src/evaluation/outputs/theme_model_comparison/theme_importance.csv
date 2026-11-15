@@ -1,0 +1,15 @@
+model,theme,mean_delta_mae,mean_rank,top3_fraction
+OLS,Traceability_Risk,4.167612786927067,1.0,1.0
+OLS,Commitment_Governance,3.5303254363851715,2.0,1.0
+OLS,Recruitment,2.8908711422795332,3.0,1.0
+OLS,Monitoring,1.0944424797647336,4.0,0.0
+OLS,Enabling_Workers,0.9648014255153379,5.0,0.0
+OLS,Remedy,0.7354114037175404,6.0,0.0
+OLS,Purchasing_Practices,0.512505266586669,7.0,0.0
+Tree,Recruitment,4.155198536648537,1.3,1.0
+Tree,Commitment_Governance,3.38376600457156,1.7,1.0
+Tree,Traceability_Risk,0.905577796483352,3.2,0.8
+Tree,Monitoring,0.18039175145841818,5.0,0.1
+Tree,Enabling_Workers,0.11690864197530866,5.05,0.1
+Tree,Purchasing_Practices,0.0,5.7,0.0
+Tree,Remedy,-0.003157495590828918,6.05,0.0
